@@ -30,7 +30,7 @@ class EdgeApplicationManagementInterface(ABC):
         pass
 
     @abstractmethod
-    def get_onboarded_apps(self) -> List[Dict]:
+    def get_all_onboarded_apps(self) -> List[Dict]:
         """
         Retrieves a list of onboarded applications.
         
@@ -58,7 +58,7 @@ class EdgeApplicationManagementInterface(ABC):
         pass
 
     @abstractmethod
-    def create_app_instance(self, app_id: str, app_zones: List[Dict]) -> Dict:
+    def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
         """
         Requests the instantiation of an application instance.
         
@@ -69,7 +69,7 @@ class EdgeApplicationManagementInterface(ABC):
         pass
 
     @abstractmethod
-    def get_app_instances(
+    def get_all_deployed_apps(
         self, app_id: Optional[str] = None, app_instance_id: Optional[str] = None, region: Optional[str] = None
     ) -> List[Dict]:
         """
@@ -83,7 +83,7 @@ class EdgeApplicationManagementInterface(ABC):
         pass
 
     @abstractmethod
-    def delete_app_instance(self, app_instance_id: str) -> None:
+    def undeploy_app(self, app_instance_id: str) -> None:
         """
         Terminates a specific application instance.
 
