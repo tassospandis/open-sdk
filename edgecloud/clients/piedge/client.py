@@ -1,6 +1,6 @@
 # Mocked API for testing purposes
 from typing import Dict, List, Optional
-from edgecloud_interface import EdgeApplicationManagementInterface
+from edgecloud.core.edgecloud_interface import EdgeApplicationManagementInterface
 
 class EdgeApplicationManager(EdgeApplicationManagementInterface):
     def onboard_app(self, app_manifest: Dict) -> Dict:
