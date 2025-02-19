@@ -1,8 +1,8 @@
 # Mocked API for testing purposes
 from typing import Dict, List, Optional
-from edgecloud.core.edgecloud_interface import EdgeApplicationManagementInterface
+from edgecloud.core.edgecloud_interface import EdgeCloudManagementInterface
 
-class EdgeApplicationManager(EdgeApplicationManagementInterface):
+class EdgeApplicationManager(EdgeCloudManagementInterface):
     def onboard_app(self, app_manifest: Dict) -> Dict:
         print(f"Submitting application: {app_manifest}")
         return {"appId": "1234-5678"}

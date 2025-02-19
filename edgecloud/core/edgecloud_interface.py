@@ -14,7 +14,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Optional
 
-class EdgeApplicationManagementInterface(ABC):
+class EdgeCloudManagementInterface(ABC):
     """
     Abstract Base Class for Edge Application Management.
     """
