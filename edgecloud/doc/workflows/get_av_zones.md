@@ -10,6 +10,7 @@ end
 participant i2Edge
 participant PiEdge
 
+note over AP,CE: CAMARA EdgeCloud API
 AP ->> CE: GET /edge-cloud-zones
 CE ->> API: GET /av. zones
 API ->> SDK: sdk.i2edge.get_zones()
