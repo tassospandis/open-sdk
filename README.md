@@ -1,3 +1,3 @@
-# Federation-SDK
+# SUNRISE-6G Open-SDK
 
 WIP
