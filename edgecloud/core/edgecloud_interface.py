@@ -1,16 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-##
-# Copyright 2025-present by Software Networks Area, i2CAT.
-# All rights reserved.
-#
-# This file is part of the Federation SDK
-# Unauthorized copying of this file, via any medium is strictly prohibited.
-#
-# Contributors:
-#   - Adrián Pino (adrian.pino@i2cat.net)
-##
-
 from abc import ABC, abstractmethod
 from typing import List, Dict, Optional
 
