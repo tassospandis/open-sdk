@@ -36,6 +36,3 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
 
     def undeploy_app(self, app_instance_id: str) -> None:
         print(f"Deleting app instance: {app_instance_id}")
-
-    def get_edge_cloud_zones(self, region: Optional[str] = None, status: Optional[str] = None) -> List[Dict]:
-        return [{"edgeCloudZoneId": "zone-1", "status": "active"}]
