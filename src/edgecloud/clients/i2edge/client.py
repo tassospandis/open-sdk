@@ -1,3 +1,16 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+##
+# Copyright 2025-present by Software Networks Area, i2CAT.
+# All rights reserved.
+#
+# This file is part of the Federation SDK
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+#
+# Contributors:
+#   - Adrián Pino Martínez (adrian.pino@i2cat.net)
+#   - Sergio Giménez (sergio.gimenez@i2cat.net)
+##
 from typing import Optional
 from src.edgecloud.core.edgecloud_interface import EdgeCloudManagementInterface
 from typing import Dict, List, Optional
