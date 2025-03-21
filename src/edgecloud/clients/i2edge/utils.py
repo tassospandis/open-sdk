@@ -11,7 +11,6 @@
 #   - Sergio Giménez (sergio.gimenez@i2cat.net)
 #   - César Cajas (cesar.cajas@i2cat.net)
 ##
- 
 import uuid
 from typing import Optional, Union
 from uuid import UUID
