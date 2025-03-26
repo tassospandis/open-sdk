@@ -15,9 +15,9 @@ import uuid
 from typing import Optional, Union
 from uuid import UUID
 
-from edgecloud import logger
-from edgecloud.api.routers.lcm.schemas import RequiredResources
-from edgecloud.core import utils as core_utils
+from src.edgecloud import logger
+from src.edgecloud.api.routers.lcm.schemas import RequiredResources
+from src.edgecloud.core import utils as core_utils
 
 from .client import I2EdgeClient
 from .common import I2EdgeError
