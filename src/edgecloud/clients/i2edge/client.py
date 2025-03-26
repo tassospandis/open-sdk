@@ -45,9 +45,54 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         except I2EdgeError as e:
             raise e
 
+    def _create_artefact(
+        self,
+        artefact_id: str,
+        artefact_name: str,
+        repo_name: str,
+        repo_type: str,
+        repo_url: str,
+        password: Optional[str] = None,
+        token: Optional[str] = None,
+        user_name: Optional[str] = None,
+    ):
+        repo_type = schemas.RepoType(repo_type)
+        url = "{}/artefact".format(self.base_url)
+        payload = schemas.ArtefactOnboarding(
+            artefact_id=artefact_id,
+            name=artefact_name,
+            repo_password=password,
+            repo_name=repo_name,
+            repo_type=repo_type,
+            repo_url=repo_url,
+            repo_token=token,
+            repo_user_name=user_name,
+        )
         try:
-            response = i2edge_get(url, params=None)
+            i2edge_post_multiform_data(url, payload)
+        except I2EdgeError as e:
+            raise e
+
+    def _get_artefact(self, artefact_id: str) -> Dict:
+        url = "{}/artefact/{}".format(self.base_url, artefact_id)
+        try:
+            response = i2edge_get(url, artefact_id)
             return response
+        except I2EdgeError as e:
+            raise e
+
+    def _get_all_artefacts(self) -> List[Dict]:
+        url = "{}/artefact".format(self.base_url)
+        try:
+            response = i2edge_get(url, {})
+            return response
+        except I2EdgeError as e:
+            raise
+
+    def _delete_artefact(self, artefact_id: str):
+        url = "{}/artefact".format(self.base_url)
+        try:
+            i2edge_delete(url, artefact_id)
         except I2EdgeError as e:
             raise e
 
