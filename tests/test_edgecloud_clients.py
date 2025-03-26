@@ -1,10 +1,14 @@
 import pytest
 
+from src.edgecloud.clients.aeros.client import \
+    EdgeApplicationManager as AerosClient
+from src.edgecloud.clients.dmo.client import \
+    EdgeApplicationManager as DmoClient
+from src.edgecloud.clients.i2edge.client import \
+    EdgeApplicationManager as I2EdgeClient
+from src.edgecloud.clients.piedge.client import \
+    EdgeApplicationManager as PiEdgeClient
 from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
-from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
-from src.edgecloud.clients.aeros.client import EdgeApplicationManager as AerosClient
-from src.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
-from src.edgecloud.clients.dmo.client import EdgeApplicationManager as DmoClient
 
 # Define common test cases for all tests
 test_cases = [

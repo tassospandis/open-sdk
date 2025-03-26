@@ -12,13 +12,18 @@
 #   - Sergio Giménez (sergio.gimenez@i2cat.net)
 ##
 from __future__ import annotations
+
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
-from src.edgecloud.clients.aeros.client import EdgeApplicationManager as AerosClient
-from src.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
-from src.edgecloud.clients.dmo.client import EdgeApplicationManager as DmoClient
+from src.edgecloud.clients.aeros.client import \
+    EdgeApplicationManager as AerosClient
+from src.edgecloud.clients.dmo.client import \
+    EdgeApplicationManager as DmoClient
+from src.edgecloud.clients.i2edge.client import \
+    EdgeApplicationManager as I2EdgeClient
+from src.edgecloud.clients.piedge.client import \
+    EdgeApplicationManager as PiEdgeClient
 
 if TYPE_CHECKING:
     from .edgecloud_interface import EdgeCloudInterface
