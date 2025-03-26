@@ -24,6 +24,8 @@ from .common import (
     i2edge_post_multiform_data,
 )
 
+log = logger.get_logger(__name__)
+
 
 class EdgeApplicationManager(EdgeCloudManagementInterface):
     def __init__(self, base_url: str):
@@ -33,7 +35,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         self, region: Optional[str] = None, status: Optional[str] = None
     ) -> list[dict]:
         # Note: status is not supported by i2Edge; won't be used
-        # Up to now; region == av_zone (so if region is specified, that zone will be returned)
+        # XXX Currently coded: region == av_zone. Is this correct?
         try:
             params = {}
             if region is not None:
@@ -46,7 +48,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
                 if status is not None:
                     params["status"] = status
                 response = i2edge_get(url, params=params)
-
+            log.info("Availability zones retrieved successfully")
             return response
         except I2EdgeError as e:
             raise e
@@ -76,6 +78,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         )
         try:
             i2edge_post_multiform_data(url, payload)
+            log.info("Artifact added successfully")
         except I2EdgeError as e:
             raise e
 
@@ -83,6 +86,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         url = "{}/artefact/{}".format(self.base_url, artefact_id)
         try:
             response = i2edge_get(url, artefact_id)
+            log.info("Artifact retrieved successfully")
             return response
         except I2EdgeError as e:
             raise e
@@ -91,14 +95,16 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         url = "{}/artefact".format(self.base_url)
         try:
             response = i2edge_get(url, {})
+            log.info("Artifacts retrieved successfully")
             return response
         except I2EdgeError as e:
-            raise
+            raise e
 
     def _delete_artefact(self, artefact_id: str):
         url = "{}/artefact".format(self.base_url)
         try:
             i2edge_delete(url, artefact_id)
+            log.info("Artifact deleted successfully")
         except I2EdgeError as e:
             raise e
 
