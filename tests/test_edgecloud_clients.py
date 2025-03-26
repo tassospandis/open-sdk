@@ -14,10 +14,10 @@ test_cases = [
     # ("dmo", "http://dmo.example.com/")
 ]
 
-# Add an invalid client test case
-invalid_test_case = [("invalid_client", "http://invalid.url/")]
 
-
+#######################################
+# EDGECLOUD CLIENT'S INSTANTIATION
+#######################################
 @pytest.mark.parametrize("client_name, base_url", test_cases)
 def test_factory_edgecloud(client_name, base_url):
     """
@@ -38,6 +38,9 @@ def test_factory_edgecloud(client_name, base_url):
     assert isinstance(edgecloud_platform, expected_client_class)
 
 
+#######################################
+# GET EDGE CLOUD ZONES
+#######################################
 @pytest.mark.parametrize("client_name, base_url", test_cases)
 def test_get_edge_cloud_zones(client_name, base_url):
     """
@@ -62,7 +65,12 @@ def test_get_edge_cloud_zones(client_name, base_url):
     zones = edgecloud_platform.get_edge_cloud_zones(region="Omega")
     assert isinstance(
         zones, dict
-    ), f"Expected a dict for {client_name} when region is specified, but got {type(zones)}"
+    ), (
+        (
+            f"Expected a dict for {client_name} when region is specified, "
+            f"but got {type(zones)}"
+        )
+    )
 
     # Case 3: status specified
     zones = edgecloud_platform.get_edge_cloud_zones(status="active")
@@ -81,3 +89,20 @@ def test_get_edge_cloud_zones(client_name, base_url):
     assert isinstance(
         zones, dict
     ), f"Expected a dict for {client_name} when region & status is specified, but got {type(zones)}"
+
+
+#######################################
+# ARTIFACT MANAGEMENT (only for i2Edge)
+#######################################
+
+
+#######################################
+# APP ONBOARDING
+#######################################
+# TODO
+
+
+#######################################
+# APP MANAGEMENT
+#######################################
+# TODO
