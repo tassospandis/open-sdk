@@ -1,13 +1,9 @@
 import pytest
 
-from src.edgecloud.clients.aeros.client import \
-    EdgeApplicationManager as AerosClient
-from src.edgecloud.clients.dmo.client import \
-    EdgeApplicationManager as DmoClient
-from src.edgecloud.clients.i2edge.client import \
-    EdgeApplicationManager as I2EdgeClient
-from src.edgecloud.clients.piedge.client import \
-    EdgeApplicationManager as PiEdgeClient
+from src.edgecloud.clients.aeros.client import EdgeApplicationManager as AerosClient
+from src.edgecloud.clients.dmo.client import EdgeApplicationManager as DmoClient
+from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
+from src.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
 from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
 
 # Define common test cases for all tests
@@ -50,20 +46,32 @@ def test_get_edge_cloud_zones(client_name, base_url):
 
     # Case 1: status & region (which are optional) not specified
     zones = edgecloud_platform.get_edge_cloud_zones()
-    assert isinstance(zones, list), f"Expected a list of zones for {client_name}, but got {type(zones)}"
+    assert isinstance(
+        zones, list
+    ), f"Expected a list of zones for {client_name}, but got {type(zones)}"
     if zones:  # Check content if the list is not empty
-        assert all(isinstance(zone, dict) for zone in zones), "Each zone should be a dictionary"
+        assert all(
+            isinstance(zone, dict) for zone in zones
+        ), "Each zone should be a dictionary"
 
     # Case 2: region specified
     zones = edgecloud_platform.get_edge_cloud_zones(region="Omega")
-    assert isinstance(zones, dict), f"Expected a dict for {client_name} when region is specified, but got {type(zones)}"
+    assert isinstance(
+        zones, dict
+    ), f"Expected a dict for {client_name} when region is specified, but got {type(zones)}"
 
     # Case 3: status specified
     zones = edgecloud_platform.get_edge_cloud_zones(status="active")
-    assert isinstance(zones, list), f"Expected a list of zones for {client_name}, but got {type(zones)}"
+    assert isinstance(
+        zones, list
+    ), f"Expected a list of zones for {client_name}, but got {type(zones)}"
     if zones:  # Check content if the list is not empty
-        assert all(isinstance(zone, dict) for zone in zones), "Each zone should be a dictionary"
+        assert all(
+            isinstance(zone, dict) for zone in zones
+        ), "Each zone should be a dictionary"
 
     # Case 4: status & region specified
     zones = edgecloud_platform.get_edge_cloud_zones(region="Omega", status="active")
-    assert isinstance(zones, dict), f"Expected a dict for {client_name} when region & status is specified, but got {type(zones)}"
+    assert isinstance(
+        zones, dict
+    ), f"Expected a dict for {client_name} when region & status is specified, but got {type(zones)}"

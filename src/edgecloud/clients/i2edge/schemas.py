@@ -4,8 +4,7 @@
 # Copyright 2025-present by Software Networks Area, i2CAT.
 # All rights reserved.
 #
-# This file is part of the Federation SDK
-# Unauthorized copying of this file, via any medium is strictly prohibited.
+# This file is part of the Open SDK
 #
 # Contributors:
 #   - Sergio Giménez (sergio.gimenez@i2cat.net)
@@ -108,7 +107,9 @@ class ApplicationOnboardingRequest(BaseModel):
 class GPU(BaseModel):
     gpuMemory: int = Field(default=0, description="GPU memory in MB")
     gpuModeName: str = Field(default="", description="GPU mode name")
-    gpuVendorType: str = Field(default="GPU_PROVIDER_NVIDIA", description="GPU vendor type")
+    gpuVendorType: str = Field(
+        default="GPU_PROVIDER_NVIDIA", description="GPU vendor type"
+    )
     numGPU: int = Field(..., description="Number of GPUs")
 
 

@@ -21,8 +21,9 @@ class EdgeCloudManagementInterface(ABC):
     @abstractmethod
     def onboard_app(self, app_manifest: Dict) -> Dict:
         """
-        Onboards an app, submitting application metadata to the Edge Cloud Provider.
-        
+        Onboards an app, submitting application metadata
+        to the Edge Cloud Provider.
+
         :param app_manifest: Application metadata in dictionary format.
         :return: Dictionary containing created application details.
         """
@@ -32,7 +33,7 @@ class EdgeCloudManagementInterface(ABC):
     def get_all_onboarded_apps(self) -> List[Dict]:
         """
         Retrieves a list of onboarded applications.
-        
+
         :return: List of application metadata dictionaries.
         """
         pass
@@ -41,7 +42,7 @@ class EdgeCloudManagementInterface(ABC):
     def get_onboarded_app(self, app_id: str) -> Dict:
         """
         Retrieves information of a specific onboarded application.
-        
+
         :param app_id: Unique identifier of the application.
         :return: Dictionary with application details.
         """
@@ -51,7 +52,7 @@ class EdgeCloudManagementInterface(ABC):
     def delete_onboarded_app(self, app_id: str) -> None:
         """
         Deletes an application onboarded from the Edge Cloud Provider.
-        
+
         :param app_id: Unique identifier of the application.
         """
         pass
@@ -60,16 +61,20 @@ class EdgeCloudManagementInterface(ABC):
     def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
         """
         Requests the instantiation of an application instance.
-        
+
         :param app_id: Unique identifier of the application.
-        :param app_zones: List of Edge Cloud Zones where the app should be instantiated.
+        :param app_zones: List of Edge Cloud Zones where the app should be
+        instantiated.
         :return: Dictionary with instance details.
         """
         pass
 
     @abstractmethod
     def get_all_deployed_apps(
-        self, app_id: Optional[str] = None, app_instance_id: Optional[str] = None, region: Optional[str] = None
+        self,
+        app_id: Optional[str] = None,
+        app_instance_id: Optional[str] = None,
+        region: Optional[str] = None,
     ) -> List[Dict]:
         """
         Retrieves information of application instances.
@@ -91,7 +96,9 @@ class EdgeCloudManagementInterface(ABC):
         pass
 
     @abstractmethod
-    def get_edge_cloud_zones(self, region: Optional[str] = None, status: Optional[str] = None) -> List[Dict]:
+    def get_edge_cloud_zones(
+        self, region: Optional[str] = None, status: Optional[str] = None
+    ) -> List[Dict]:
         """
         Retrieves a list of available Edge Cloud Zones.
 
