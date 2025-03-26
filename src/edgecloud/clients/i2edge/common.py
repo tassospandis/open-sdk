@@ -4,8 +4,7 @@
 # Copyright 2025-present by Software Networks Area, i2CAT.
 # All rights reserved.
 #
-# This file is part of the Federation SDK
-# Unauthorized copying of this file, via any medium is strictly prohibited.
+# This file is part of the Open SDK
 #
 # Contributors:
 #   - Sergio Giménez (sergio.gimenez@i2cat.net)
