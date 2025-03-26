@@ -11,11 +11,15 @@
 #   - Adrián Pino Martínez (adrian.pino@i2cat.net)
 #   - Sergio Giménez (sergio.gimenez@i2cat.net)
 ##
-from typing import Optional
-from src.edgecloud.core.edgecloud_interface import EdgeCloudManagementInterface
 from typing import Dict, List, Optional
+
+from src import logger
+from src.edgecloud.core.edgecloud_interface import EdgeCloudManagementInterface
+
 from . import schemas
-from .common import I2EdgeError, i2edge_delete, i2edge_get, i2edge_post, i2edge_post_multiform_data
+from .common import (I2EdgeError, i2edge_delete, i2edge_get, i2edge_post,
+                     i2edge_post_multiform_data)
+
 
 class EdgeApplicationManager(EdgeCloudManagementInterface):
     def __init__(self, base_url: str):
@@ -23,16 +27,15 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
 
     def get_edge_cloud_zones(self, region: Optional[str] = None, status: Optional[str] = None) -> list[dict]:
         # Note: status is not supported by i2Edge; won't be used
+        # Up to now; region == av_zone (so if region is specified, that zone will be returned)
         try:
             params = {}
             if region is not None:
-                # Use the /zone/{region} endpoint
                 url = "{}/zone/{}".format(self.base_url, region)
                 if status is not None:
                     params['status'] = status
                 response = i2edge_get(url, params=params)
             else:
-                # Use the /zones/list endpoint
                 url = "{}/zones/list".format(self.base_url)
                 if status is not None:
                     params['status'] = status
