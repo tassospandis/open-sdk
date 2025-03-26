@@ -39,7 +39,10 @@ def get_error_message_from(response: requests.Response) -> str:
 
 
 def i2edge_post(url: str, model_payload: BaseModel) -> dict:
-    headers = {"Content-Type": "application/json", "accept": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        "accept": "application/json",
+    }
     json_payload = json.dumps(model_payload.model_dump(mode="json"))
     try:
         response = requests.post(url, data=json_payload, headers=headers)
@@ -47,7 +50,9 @@ def i2edge_post(url: str, model_payload: BaseModel) -> dict:
         return response.json()
     except requests.exceptions.HTTPError as e:
         i2edge_err_msg = get_error_message_from(response)
-        err_msg = "Failed to deploy app: {}. Detail: {}".format(i2edge_err_msg, e)
+        err_msg = "Failed to deploy app: {}. Detail: {}".format(
+            i2edge_err_msg, e
+        )
         log.error(err_msg)
         raise I2EdgeError(err_msg)
 
@@ -64,7 +69,9 @@ def i2edge_post_multiform_data(url: str, model_payload: BaseModel) -> dict:
         return response.json()
     except requests.exceptions.HTTPError as e:
         i2edge_err_msg = get_error_message_from(response)
-        err_msg = "Failed to deploy app: {}. Detail: {}".format(i2edge_err_msg, e)
+        err_msg = "Failed to deploy app: {}. Detail: {}".format(
+            i2edge_err_msg, e
+        )
         log.error(err_msg)
         raise I2EdgeError(err_msg)
 
@@ -78,7 +85,9 @@ def i2edge_delete(url: str, id: str) -> dict:
         return response.json()
     except requests.exceptions.HTTPError as e:
         i2edge_err_msg = get_error_message_from(response)
-        err_msg = "Failed to undeploy app: {}. Detail: {}".format(i2edge_err_msg, e)
+        err_msg = "Failed to undeploy app: {}. Detail: {}".format(
+            i2edge_err_msg, e
+        )
         log.error(err_msg)
         raise I2EdgeError(err_msg)
 
@@ -91,6 +100,8 @@ def i2edge_get(url: str, params: Optional[dict]):
         return response.json()
     except requests.exceptions.HTTPError as e:
         i2edge_err_msg = get_error_message_from(response)
-        err_msg = "Failed to get apps: {}. Detail: {}".format(i2edge_err_msg, e)
+        err_msg = "Failed to get apps: {}. Detail: {}".format(
+            i2edge_err_msg, e
+        )
         log.error(err_msg)
         raise I2EdgeError(err_msg)

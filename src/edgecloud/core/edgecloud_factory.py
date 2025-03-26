@@ -29,7 +29,9 @@ class EdgeCloudFactory:
     """
 
     @staticmethod
-    def create_edgecloud_client(client_name: str, base_url: str) -> EdgeCloudInterface:
+    def create_edgecloud_client(
+        client_name: str, base_url: str
+    ) -> EdgeCloudInterface:
         try:
             return EdgeCloudTypes.edgecloud_types[client_name](base_url)
         except KeyError:

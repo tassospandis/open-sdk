@@ -63,7 +63,9 @@ def instantiate_app_with(
         )
         return flavour_id, application_k8s_namespace
     except I2EdgeError as e:
-        err_msg = "Error instantiating app {} in zone {}".format(camara_app_id, zone_id)
+        err_msg = "Error instantiating app {} in zone {}".format(
+            camara_app_id, zone_id
+        )
         log.error("{}. Detailed error: {}".format(err_msg, e))
         raise e
 
@@ -93,7 +95,9 @@ def onboard_app_with(
             token=token,
         )
 
-        i2edge.onboard_app(app_id=str(application_id), artefact_id=str(application_id))
+        i2edge.onboard_app(
+            app_id=str(application_id), artefact_id=str(application_id)
+        )
     except I2EdgeError as e:
         err_msg = "Error onboarding app {} in i2edge".format(app_name)
         log.error("{}. Detailed error: {}".format(err_msg, e))
@@ -112,7 +116,9 @@ def delete_app_instance_by(
     i2edge.delete_flavour(flavour_id=str(flavour_id), zone_id=zone_id)
 
 
-def get_app_name_from(namespace: str, i2edge: I2EdgeClient) -> Union[str, None]:
+def get_app_name_from(
+    namespace: str, i2edge: I2EdgeClient
+) -> Union[str, None]:
     try:
         response = i2edge.get_all_deployed_apps()
         for deployment in response:

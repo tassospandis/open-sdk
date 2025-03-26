@@ -32,7 +32,9 @@ def test_factory_edgecloud(client_name, base_url):
     }
 
     expected_client_class = client_class_map[client_name]
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(client_name, base_url)
+    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+        client_name, base_url
+    )
     assert isinstance(edgecloud_platform, expected_client_class)
 
 
@@ -42,7 +44,9 @@ def test_get_edge_cloud_zones(client_name, base_url):
     Test the format of the response from get_edge_cloud_zones for each client.
     """
     # Create the edgecloud client
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(client_name, base_url)
+    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+        client_name, base_url
+    )
 
     # Case 1: status & region (which are optional) not specified
     zones = edgecloud_platform.get_edge_cloud_zones()
@@ -71,7 +75,9 @@ def test_get_edge_cloud_zones(client_name, base_url):
         ), "Each zone should be a dictionary"
 
     # Case 4: status & region specified
-    zones = edgecloud_platform.get_edge_cloud_zones(region="Omega", status="active")
+    zones = edgecloud_platform.get_edge_cloud_zones(
+        region="Omega", status="active"
+    )
     assert isinstance(
         zones, dict
     ), f"Expected a dict for {client_name} when region & status is specified, but got {type(zones)}"
