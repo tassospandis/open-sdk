@@ -133,6 +133,18 @@ def test_get_artefact_failure(client_name, base_url):
 
 
 @pytest.mark.parametrize("client_name, base_url", test_cases)
+def test_get_all_artefacts_success(client_name, base_url):
+    if client_name == "i2edge":
+        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+            client_name, base_url
+        )
+
+        try:
+            edgecloud_platform._get_all_artefacts()
+        except I2EdgeError as e:
+            pytest.fail(f"Artefact retrieval failed unexpectedly: {e}")
+
+@pytest.mark.parametrize("client_name, base_url", test_cases)
 def test_delete_artefact_success(client_name, base_url):
     if client_name == "i2edge":
         edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
