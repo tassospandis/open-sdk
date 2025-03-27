@@ -13,8 +13,10 @@ participant PiEdge
 note over AP,CE: CAMARA EdgeCloud API
 AP ->> CE: GET /edge-cloud-zones
 CE ->> API: GET /av. zones
-API ->> SDK: sdk.i2edge.get_zones()
+API ->> SDK: sbi = EdgeCloudFactory.create_edgecloud_client(i2Edge)
+API ->> SDK: sbi.get_edge_cloud_zones()
 SDK ->> i2Edge: GET /zones/list
-API ->> SDK: sdk.piedge.get_zones()
+API ->> SDK: sbi = EdgeCloudFactory.create_edgecloud_client(PiEdge)
+API ->> SDK: sbi.get_edge_cloud_zones()
 SDK ->> PiEdge: GET /nodes
 ```
