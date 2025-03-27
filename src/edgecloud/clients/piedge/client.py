@@ -2,6 +2,7 @@
 from typing import Dict, List, Optional
 from src.edgecloud.core.edgecloud_interface import EdgeCloudManagementInterface
 
+
 class EdgeApplicationManager(EdgeCloudManagementInterface):
     def __init__(self, base_url: str):
         self.base_url = base_url
