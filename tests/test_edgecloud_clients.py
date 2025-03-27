@@ -101,7 +101,6 @@ def test_get_edge_cloud_zones(client_name, base_url):
 artefact_id = "hello-world-from-sdk"
 
 
-# Test create artefact success
 @pytest.mark.parametrize("client_name, base_url", test_cases)
 def test_create_artefact_success(client_name, base_url):
     if client_name == "i2edge":
@@ -124,7 +123,6 @@ def test_create_artefact_success(client_name, base_url):
             pytest.fail(f"Artefact creation failed unexpectedly: {e}")
 
 
-# Test create artefact failure
 @pytest.mark.parametrize("client_name, base_url", test_cases)
 def test_create_artefact_failure(client_name, base_url):
     if client_name == "i2edge":
@@ -145,7 +143,30 @@ def test_create_artefact_failure(client_name, base_url):
             )
 
 
-# Test artefact deletion success
+@pytest.mark.parametrize("client_name, base_url", test_cases)
+def test_get_artefact_success(client_name, base_url):
+    if client_name == "i2edge":
+        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+            client_name, base_url
+        )
+
+        try:
+            edgecloud_platform._get_artefact(artefact_id=artefact_id)
+        except I2EdgeError as e:
+            pytest.fail(f"Artefact retrieval failed unexpectedly: {e}")
+
+
+@pytest.mark.parametrize("client_name, base_url", test_cases)
+def test_get_artefact_failure(client_name, base_url):
+    if client_name == "i2edge":
+        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+            client_name, base_url
+        )
+
+        with pytest.raises(I2EdgeError):
+            edgecloud_platform._get_artefact(artefact_id="non-existent-artefact")
+
+
 @pytest.mark.parametrize("client_name, base_url", test_cases)
 def test_delete_artefact_success(client_name, base_url):
     if client_name == "i2edge":
@@ -157,6 +178,17 @@ def test_delete_artefact_success(client_name, base_url):
             edgecloud_platform._delete_artefact(artefact_id=artefact_id)
         except I2EdgeError as e:
             pytest.fail(f"Artefact deletion failed unexpectedly: {e}")
+
+
+@pytest.mark.parametrize("client_name, base_url", test_cases)
+def test_delete_artefact_failure(client_name, base_url):
+    if client_name == "i2edge":
+        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+            client_name, base_url
+        )
+
+        with pytest.raises(I2EdgeError):
+            edgecloud_platform._delete_artefact(artefact_id="non-existent-artefact")
 
 
 #######################################
