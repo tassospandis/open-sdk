@@ -3,6 +3,7 @@ import pytest
 from src.edgecloud.clients.aeros.client import EdgeApplicationManager as AerosClient
 from src.edgecloud.clients.dmo.client import EdgeApplicationManager as DmoClient
 from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
+from src.edgecloud.clients.i2edge.client import I2EdgeError
 from src.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
 from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
 
@@ -88,12 +89,74 @@ def test_get_edge_cloud_zones(client_name, base_url):
     )
     assert isinstance(
         zones, dict
-    ), f"Expected a dict for {client_name} when region & status is specified, but got {type(zones)}"
+    ), (
+        f"Expected a dict for {client_name} when region & status is specified, "
+        f"but got {type(zones)}"
+    )
 
 
 #######################################
 # ARTIFACT MANAGEMENT (only for i2Edge)
 #######################################
+artefact_id = "hello-world-from-sdk"
+
+
+# Test create artefact success
+@pytest.mark.parametrize("client_name, base_url", test_cases)
+def test_create_artefact_success(client_name, base_url):
+    if client_name == "i2edge":
+        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+            client_name, base_url
+        )
+
+        try:
+            edgecloud_platform._create_artefact(
+                artefact_id=artefact_id,
+                artefact_name="hello-world",
+                repo_name="dummy-repo",
+                repo_type="PUBLICREPO",
+                repo_url="https://helm.github.io/examples",
+                password=None,
+                token=None,
+                user_name=None
+            )
+        except I2EdgeError as e:
+            pytest.fail(f"Artefact creation failed unexpectedly: {e}")
+
+
+# Test create artefact failure
+@pytest.mark.parametrize("client_name, base_url", test_cases)
+def test_create_artefact_failure(client_name, base_url):
+    if client_name == "i2edge":
+        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+            client_name, base_url
+        )
+
+        with pytest.raises(I2EdgeError):
+            edgecloud_platform._create_artefact(
+                artefact_id=artefact_id,
+                artefact_name="test-artefact",
+                repo_name="test-repo",
+                repo_type="PUBLICREPO",
+                repo_url="http://invalid.url",
+                password=None,
+                token=None,
+                user_name=None
+            )
+
+
+# Test artefact deletion success
+@pytest.mark.parametrize("client_name, base_url", test_cases)
+def test_delete_artefact_success(client_name, base_url):
+    if client_name == "i2edge":
+        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+            client_name, base_url
+        )
+
+        try:
+            edgecloud_platform._delete_artefact(artefact_id=artefact_id)
+        except I2EdgeError as e:
+            pytest.fail(f"Artefact deletion failed unexpectedly: {e}")
 
 
 #######################################
