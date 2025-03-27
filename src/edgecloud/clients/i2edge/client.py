@@ -109,17 +109,45 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
             raise e
 
     def onboard_app(self, app_manifest: Dict) -> Dict:
-        print(f"Submitting application: {app_manifest}")
-        return {"appId": "1234-5678"}
+        try:
+            app_id = app_manifest["appId"]
+            artefact_id = app_id
 
-    def get_all_onboarded_apps(self) -> List[Dict]:
-        return [{"appId": "1234-5678", "name": "TestApp"}]
-
-    def get_onboarded_app(self, app_id: str) -> Dict:
-        return {"appId": app_id, "name": "TestApp"}
+            app_component_spec = schemas.AppComponentSpec(artefactId=artefact_id)
+            data = schemas.ApplicationOnboardingData(
+                app_id=app_id, appComponentSpecs=[app_component_spec]
+            )
+            payload = schemas.ApplicationOnboardingRequest(profile_data=data)
+            url = "{}/application/onboarding".format(self.base_url)
+            i2edge_post(url, payload)
+        except I2EdgeError as e:
+            raise e
+        except KeyError as e:
+            raise I2EdgeError("Missing required field in app_manifest: {}".format(e))
 
     def delete_onboarded_app(self, app_id: str) -> None:
-        print(f"Deleting application: {app_id}")
+        url = "{}/application/onboarding".format(self.base_url)
+        try:
+            i2edge_delete(url, app_id)
+        except I2EdgeError as e:
+            raise e
+
+    def get_onboarded_app(self, app_id: str) -> Dict:
+        url = "{}/application/onboarding/{}".format(self.base_url, app_id)
+        try:
+            response = i2edge_get(url, app_id)
+            return response
+        except I2EdgeError as e:
+            raise e
+
+    def get_all_onboarded_apps(self) -> List[Dict]:
+        url = "{}/applications/onboarding".format(self.base_url)
+        params = {}
+        try:
+            response = i2edge_get(url, params)
+            return response
+        except I2EdgeError as e:
+            raise e
 
     def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
         return {"appInstanceId": "abcd-efgh"}
