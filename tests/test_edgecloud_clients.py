@@ -24,7 +24,6 @@ def test_factory_edgecloud(client_name, base_url):
     """
     Test the factory pattern for the edgecloud client.
     """
-    # Map client names to their corresponding client classes
     client_class_map = {
         "i2edge": I2EdgeClient,
         "aeros": AerosClient,
@@ -47,52 +46,18 @@ def test_get_edge_cloud_zones(client_name, base_url):
     """
     Test the format of the response from get_edge_cloud_zones for each client.
     """
-    # Create the edgecloud client
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
 
-    # Case 1: status & region (which are optional) not specified
-    zones = edgecloud_platform.get_edge_cloud_zones()
-    assert isinstance(
-        zones, list
-    ), f"Expected a list of zones for {client_name}, but got {type(zones)}"
-    if zones:  # Check content if the list is not empty
-        assert all(
-            isinstance(zone, dict) for zone in zones
-        ), "Each zone should be a dictionary"
-
-    # Case 2: region specified
-    zones = edgecloud_platform.get_edge_cloud_zones(region="Omega")
-    assert isinstance(
-        zones, dict
-    ), (
-        (
-            f"Expected a dict for {client_name} when region is specified, "
-            f"but got {type(zones)}"
-        )
-    )
-
-    # Case 3: status specified
-    zones = edgecloud_platform.get_edge_cloud_zones(status="active")
-    assert isinstance(
-        zones, list
-    ), f"Expected a list of zones for {client_name}, but got {type(zones)}"
-    if zones:  # Check content if the list is not empty
-        assert all(
-            isinstance(zone, dict) for zone in zones
-        ), "Each zone should be a dictionary"
-
-    # Case 4: status & region specified
-    zones = edgecloud_platform.get_edge_cloud_zones(
-        region="Omega", status="active"
-    )
-    assert isinstance(
-        zones, dict
-    ), (
-        f"Expected a dict for {client_name} when region & status is specified, "
-        f"but got {type(zones)}"
-    )
+    try:
+        zones = edgecloud_platform.get_edge_cloud_zones()
+        assert isinstance(zones, list)
+        for zone in zones:
+            assert "zoneId" in zone
+            assert "geographyDetails" in zone
+    except I2EdgeError as e:
+        pytest.fail(f"Failed to retrieve zones: {e}")
 
 
 #######################################

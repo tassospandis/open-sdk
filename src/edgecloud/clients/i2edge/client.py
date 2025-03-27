@@ -34,20 +34,10 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
     def get_edge_cloud_zones(
         self, region: Optional[str] = None, status: Optional[str] = None
     ) -> list[dict]:
-        # Note: status is not supported by i2Edge; won't be used
-        # XXX Currently coded: region == av_zone. Is this correct?
+        url = "{}/zones/list".format(self.base_url)
+        params = {}
         try:
-            params = {}
-            if region is not None:
-                url = "{}/zone/{}".format(self.base_url, region)
-                if status is not None:
-                    params["status"] = status
-                response = i2edge_get(url, params=params)
-            else:
-                url = "{}/zones/list".format(self.base_url)
-                if status is not None:
-                    params["status"] = status
-                response = i2edge_get(url, params=params)
+            response = i2edge_get(url, params=params)
             log.info("Availability zones retrieved successfully")
             return response
         except I2EdgeError as e:
