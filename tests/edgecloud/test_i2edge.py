@@ -63,7 +63,9 @@ def test_get_edge_cloud_zones(client_name, base_url):
 #######################################
 # ARTIFACT MANAGEMENT (only for i2Edge)
 #######################################
-artefact_id = "hello-world-from-sdk"
+artefact_id = "hello-world-from-sdk-2"
+artefact_name = "hello-word-2"
+repo_name = "dummy-repo-2"
 
 
 @pytest.mark.parametrize("client_name, base_url", test_cases)
@@ -76,8 +78,8 @@ def test_create_artefact_success(client_name, base_url):
         try:
             edgecloud_platform._create_artefact(
                 artefact_id=artefact_id,
-                artefact_name="hello-world",
-                repo_name="dummy-repo",
+                artefact_name=artefact_name,
+                repo_name=repo_name,
                 repo_type="PUBLICREPO",
                 repo_url="https://helm.github.io/examples",
                 password=None,
@@ -98,8 +100,8 @@ def test_create_artefact_failure(client_name, base_url):
         with pytest.raises(I2EdgeError):
             edgecloud_platform._create_artefact(
                 artefact_id=artefact_id,
-                artefact_name="test-artefact",
-                repo_name="test-repo",
+                artefact_name=artefact_name,
+                repo_name=repo_name,
                 repo_type="PUBLICREPO",
                 repo_url="http://invalid.url",
                 password=None,
