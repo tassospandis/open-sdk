@@ -10,7 +10,7 @@ def create_edgecloud_client(client_name: str, base_url: str):
 
     Args:
         client_name (str): Name of the edge cloud platform. Must be one of:
-                          'i2edge', 'aeros', 'dmo', 'piedge'
+                          'i2edge', 'aeros', 'piedge'
         base_url (str): The base URL for the client.
 
     Returns:
