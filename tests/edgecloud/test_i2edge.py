@@ -1,34 +1,24 @@
 import pytest
 
-from src.edgecloud.clients.aeros.client import EdgeApplicationManager as AerosClient
-from src.edgecloud.clients.dmo.client import EdgeApplicationManager as DmoClient
 from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
 from src.edgecloud.clients.i2edge.client import I2EdgeError
-from src.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
 from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
 
-# Define common test cases for all tests
-test_cases = [
-    ("i2edge", "http://192.168.123.237:30769/"),
-    # ("aeros", "http://aeros.example.com/"),
-    # ("piedge", "http://piedge.example.com/"),
-    # ("dmo", "http://dmo.example.com/")
+i2edge_testbed = [
+    ("i2edge", "http://192.168.123.237:30769/")
 ]
 
 
 #######################################
 # EDGECLOUD CLIENT'S INSTANTIATION
 #######################################
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_factory_edgecloud(client_name, base_url):
     """
     Test the factory pattern for the edgecloud client.
     """
     client_class_map = {
         "i2edge": I2EdgeClient,
-        "aeros": AerosClient,
-        "piedge": PiEdgeClient,
-        "dmo": DmoClient,
     }
 
     expected_client_class = client_class_map[client_name]
@@ -41,7 +31,7 @@ def test_factory_edgecloud(client_name, base_url):
 #######################################
 # GET EDGE CLOUD ZONES
 #######################################
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_get_edge_cloud_zones(client_name, base_url):
     """
     Test the format of the response from get_edge_cloud_zones for each client.
@@ -68,7 +58,7 @@ artefact_name = "hello-word-2"
 repo_name = "dummy-repo-2"
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_create_artefact_success(client_name, base_url):
     if client_name == "i2edge":
         edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
@@ -90,7 +80,7 @@ def test_create_artefact_success(client_name, base_url):
             pytest.fail(f"Artefact creation failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_create_artefact_failure(client_name, base_url):
     if client_name == "i2edge":
         edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
@@ -110,64 +100,59 @@ def test_create_artefact_failure(client_name, base_url):
             )
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_get_artefact_success(client_name, base_url):
-    if client_name == "i2edge":
-        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-            client_name, base_url
-        )
+    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+        client_name, base_url
+    )
 
-        try:
-            edgecloud_platform._get_artefact(artefact_id=artefact_id)
-        except I2EdgeError as e:
-            pytest.fail(f"Artefact retrieval failed unexpectedly: {e}")
+    try:
+        edgecloud_platform._get_artefact(artefact_id=artefact_id)
+    except I2EdgeError as e:
+        pytest.fail(f"Artefact retrieval failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_get_artefact_failure(client_name, base_url):
-    if client_name == "i2edge":
-        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-            client_name, base_url
-        )
+    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+        client_name, base_url
+    )
 
-        with pytest.raises(I2EdgeError):
-            edgecloud_platform._get_artefact(artefact_id="non-existent-artefact")
+    with pytest.raises(I2EdgeError):
+        edgecloud_platform._get_artefact(artefact_id="non-existent-artefact")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_get_all_artefacts_success(client_name, base_url):
-    if client_name == "i2edge":
-        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-            client_name, base_url
-        )
+    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+        client_name, base_url
+    )
 
-        try:
-            edgecloud_platform._get_all_artefacts()
-        except I2EdgeError as e:
-            pytest.fail(f"Artefact retrieval failed unexpectedly: {e}")
+    try:
+        edgecloud_platform._get_all_artefacts()
+    except I2EdgeError as e:
+        pytest.fail(f"Artefact retrieval failed unexpectedly: {e}")
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_delete_artefact_success(client_name, base_url):
-    if client_name == "i2edge":
-        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-            client_name, base_url
-        )
+    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+        client_name, base_url
+    )
 
-        try:
-            edgecloud_platform._delete_artefact(artefact_id=artefact_id)
-        except I2EdgeError as e:
-            pytest.fail(f"Artefact deletion failed unexpectedly: {e}")
+    try:
+        edgecloud_platform._delete_artefact(artefact_id=artefact_id)
+    except I2EdgeError as e:
+        pytest.fail(f"Artefact deletion failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_delete_artefact_failure(client_name, base_url):
-    if client_name == "i2edge":
-        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-            client_name, base_url
-        )
+    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
+        client_name, base_url
+    )
 
-        with pytest.raises(I2EdgeError):
-            edgecloud_platform._delete_artefact(artefact_id="non-existent-artefact")
+    with pytest.raises(I2EdgeError):
+        edgecloud_platform._delete_artefact(artefact_id="non-existent-artefact")
 
 
 #######################################
@@ -218,7 +203,7 @@ app_manifest = {
 app_manifest.update({"artefactId": app_manifest["appId"]})
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_onboard_app_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
@@ -230,7 +215,7 @@ def test_onboard_app_success(client_name, base_url):
         pytest.fail(f"App onboarding failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_onboard_app_failure(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
@@ -240,7 +225,7 @@ def test_onboard_app_failure(client_name, base_url):
         edgecloud_platform.onboard_app({})
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_onboard_app_failure_artefact_id_missing(client_name, base_url):
     app_manifest.pop("artefactId")
 
@@ -252,7 +237,7 @@ def test_onboard_app_failure_artefact_id_missing(client_name, base_url):
         edgecloud_platform.onboard_app({})
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_get_onboarded_app_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
@@ -264,7 +249,7 @@ def test_get_onboarded_app_success(client_name, base_url):
         pytest.fail(f"App onboarding failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_get_onboarded_app_failure(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
@@ -274,7 +259,7 @@ def test_get_onboarded_app_failure(client_name, base_url):
         edgecloud_platform.get_onboarded_app(app_id="non-existent-app")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_get_all_onboarded_app_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
@@ -286,7 +271,7 @@ def test_get_all_onboarded_app_success(client_name, base_url):
         pytest.fail(f"App onboarding failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_delete_onboarded_app_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
@@ -298,7 +283,7 @@ def test_delete_onboarded_app_success(client_name, base_url):
         pytest.fail(f"App onboarding deletion failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
+@pytest.mark.parametrize("client_name, base_url", i2edge_testbed)
 def test_delete_onboarded_app_failure(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
