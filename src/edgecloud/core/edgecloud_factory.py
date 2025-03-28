@@ -15,7 +15,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from src.edgecloud.clients.aeros.client import EdgeApplicationManager as AerosClient
-from src.edgecloud.clients.dmo.client import EdgeApplicationManager as DmoClient
 from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
 from src.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
 
@@ -50,12 +49,10 @@ class EdgeCloudTypes:
 
     I2EDGE = "i2edge"
     AEROS = "aeros"
-    DMO = "dmo"
     PIEDGE = "piedge"
 
     edgecloud_types = {
         I2EDGE: lambda url: I2EdgeClient(base_url=url),
         AEROS: lambda url: AerosClient(base_url=url),
-        DMO: lambda url: DmoClient(base_url=url),
         PIEDGE: lambda url: PiEdgeClient(base_url=url),
     }
