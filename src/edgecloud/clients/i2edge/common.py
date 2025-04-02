@@ -13,6 +13,7 @@ import json
 from typing import Optional
 
 import requests
+from src.edgecloud.clients.errors import EdgeCloudPlatformError
 from pydantic import BaseModel
 
 from src import logger
@@ -20,7 +21,7 @@ from src import logger
 log = logger.get_logger(__name__)
 
 
-class I2EdgeError(Exception):
+class I2EdgeError(EdgeCloudPlatformError):
     pass
 
 
