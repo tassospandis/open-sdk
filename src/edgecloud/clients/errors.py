@@ -1,0 +1,3 @@
+
+class EdgeCloudPlatformError(Exception):
+    pass
