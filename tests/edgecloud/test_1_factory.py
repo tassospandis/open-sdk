@@ -17,9 +17,9 @@ def test_factory_edgecloud(client_name, base_url):
         "aeros": AerosClient,
         "piedge": PiEdgeClient,
     }
-
     expected_client_class = client_class_map[client_name]
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-        client_name, base_url
+        client_name,
+        base_url
     )
     assert isinstance(edgecloud_platform, expected_client_class)

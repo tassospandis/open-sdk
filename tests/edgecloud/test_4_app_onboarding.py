@@ -52,7 +52,6 @@ def test_onboard_app_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     try:
         edgecloud_platform.onboard_app(app_manifest)
     except EdgeCloudPlatformError as e:
@@ -64,7 +63,6 @@ def test_onboard_app_failure(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     with pytest.raises(EdgeCloudPlatformError):
         edgecloud_platform.onboard_app({})
 
@@ -74,7 +72,6 @@ def test_get_onboarded_app_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     try:
         edgecloud_platform.get_onboarded_app(app_id=app_manifest["appId"])
     except EdgeCloudPlatformError as e:
@@ -86,7 +83,6 @@ def test_get_onboarded_app_failure(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     with pytest.raises(EdgeCloudPlatformError):
         edgecloud_platform.get_onboarded_app(app_id="non-existent-app")
 
@@ -96,7 +92,6 @@ def test_get_all_onboarded_app_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     try:
         edgecloud_platform.get_all_onboarded_apps()
     except EdgeCloudPlatformError as e:
@@ -108,7 +103,6 @@ def test_delete_onboarded_app_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     try:
         edgecloud_platform.delete_onboarded_app(app_id=app_manifest["appId"])
     except EdgeCloudPlatformError as e:
@@ -120,7 +114,5 @@ def test_delete_onboarded_app_failure(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     with pytest.raises(EdgeCloudPlatformError):
         edgecloud_platform.delete_onboarded_app(app_id="non-existent-app")
-
