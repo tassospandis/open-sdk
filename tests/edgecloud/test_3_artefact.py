@@ -20,7 +20,6 @@ def test_create_artefact_success(client_name, base_url):
         edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
             client_name, base_url
         )
-
         try:
             edgecloud_platform._create_artefact(
                 artefact_id=artefact_id,
@@ -42,7 +41,6 @@ def test_create_artefact_failure(client_name, base_url):
         edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
             client_name, base_url
         )
-
         with pytest.raises(EdgeCloudPlatformError):
             edgecloud_platform._create_artefact(
                 artefact_id=artefact_id,
@@ -61,7 +59,6 @@ def test_get_artefact_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     try:
         edgecloud_platform._get_artefact(artefact_id=artefact_id)
     except EdgeCloudPlatformError as e:
@@ -73,7 +70,6 @@ def test_get_artefact_failure(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     with pytest.raises(EdgeCloudPlatformError):
         edgecloud_platform._get_artefact(artefact_id="non-existent-artefact")
 
@@ -83,18 +79,17 @@ def test_get_all_artefacts_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     try:
         edgecloud_platform._get_all_artefacts()
     except EdgeCloudPlatformError as e:
         pytest.fail(f"Artefact retrieval failed unexpectedly: {e}")
+
 
 @pytest.mark.parametrize("client_name, base_url", test_cases)
 def test_delete_artefact_success(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     try:
         edgecloud_platform._delete_artefact(artefact_id=artefact_id)
     except EdgeCloudPlatformError as e:
@@ -106,6 +101,5 @@ def test_delete_artefact_failure(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     with pytest.raises(EdgeCloudPlatformError):
         edgecloud_platform._delete_artefact(artefact_id="non-existent-artefact")

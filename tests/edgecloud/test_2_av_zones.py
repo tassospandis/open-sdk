@@ -13,7 +13,6 @@ def test_get_edge_cloud_zones(client_name, base_url):
     edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
         client_name, base_url
     )
-
     try:
         zones = edgecloud_platform.get_edge_cloud_zones()
         assert isinstance(zones, list)
