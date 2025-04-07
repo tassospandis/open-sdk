@@ -18,7 +18,7 @@ class NetworkManagementInterface(ABC):
     Abstract Base Class for Network Resource Management.
 
     This interface defines the standard methods that all
-    Network Clients (Open5GS, OAI, Open5GCoe) must implement.
+    Network Clients (Open5GS, OAI, Open5GCore) must implement.
 
     Partners implementing a new network client should inherit from this class
     and provide concrete implementations for all abstract methods relevant
