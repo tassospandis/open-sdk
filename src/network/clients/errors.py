@@ -1,0 +1,2 @@
+class NetworkPlatformError(Exception):
+    pass
