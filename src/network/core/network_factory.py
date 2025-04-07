@@ -14,11 +14,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from src.network.clients.open5gs.client import Open5GSClient
-from src.network.clients.oai.client import OaiNefClient 
+from src.network.clients.oai.client import OaiNefClient
 from src.network.clients.open5gcore.client import Open5GCoreClient
 
 if TYPE_CHECKING:
     from .network_interface import NetworkManagementInterface
+
 
 class NetworkClientFactory:
     """
@@ -26,7 +27,9 @@ class NetworkClientFactory:
     """
 
     @staticmethod
-    def create_network_client(client_name: str, base_url: str) -> NetworkManagementInterface:
+    def create_network_client(
+        client_name: str, base_url: str
+    ) -> NetworkManagementInterface:
         """
         Creates and returns an instance of the specified Network Client.
         """
@@ -36,11 +39,15 @@ class NetworkClientFactory:
             return network_client_instance
         except KeyError:
             # Get the list of supported client names
-            supported_clients = list(NetworkClientFactory.network_client_constructors.keys())
+            supported_clients = list(
+                NetworkClientFactory.network_client_constructors.keys()
+            )
             raise ValueError(
                 f"Invalid network client name: '{client_name}'. "
-                f"Supported clients are: {', '.join(supported_clients)}"
+                "Supported clients are: "
+                f"{', '.join(supported_clients)}"
             )
+
 
 class NetworkClientTypes:
     """
@@ -48,7 +55,7 @@ class NetworkClientTypes:
     """
 
     OPEN5GS = "open5gs"
-    OAI = "oai"  
+    OAI = "oai"
     OPEN5GCORE = "open5gcore"
 
     # --- Dictionary mapping type constants to constructors ---

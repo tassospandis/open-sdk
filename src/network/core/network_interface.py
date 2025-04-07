@@ -12,11 +12,12 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
+
 class NetworkManagementInterface(ABC):
     """
     Abstract Base Class for Network Resource Management.
 
-    This interface defines the standard methods that all 
+    This interface defines the standard methods that all
     Network Clients (Open5GS, OAI, Open5GCoe) must implement.
 
     Partners implementing a new network client should inherit from this class
@@ -29,14 +30,14 @@ class NetworkManagementInterface(ABC):
         """
         Creates a QoS session based on CAMARA QoD API input.
 
-        args: 
-            session_info: Dictionary containing session details conforming to the CAMARA QoD session creation parameters.
+        args:
+            session_info: Dictionary containing session details conforming to
+                          the CAMARA QoD session creation parameters.
 
         returns:
             dictionary containing the created session details, including its ID.
         """
         pass
-
 
     @abstractmethod
     def get_qod_session(self, session_id: str) -> Dict:
@@ -51,7 +52,6 @@ class NetworkManagementInterface(ABC):
         """
         pass
 
-
     @abstractmethod
     def delete_qod_session(self, session_id: str) -> None:
         """
@@ -65,5 +65,5 @@ class NetworkManagementInterface(ABC):
         """
         pass
 
-    # Placeholder for other CAMARA APIs (e.g., Traffic Influence, Location-retrieval, etc.)
-
+    # Placeholder for other CAMARA APIs (e.g., Traffic Influence,
+    # Location-retrieval, etc.)
