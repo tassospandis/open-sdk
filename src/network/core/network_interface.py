@@ -65,5 +65,46 @@ class NetworkManagementInterface(ABC):
         """
         pass
 
+    @abstractmethod
+    def create_traffic_influence_resource(self, traffic_influence_info: Dict) -> Dict:
+        """
+        Creates a Traffic Influence resource based on CAMARA TI API input.
+
+        args:
+            traffic_influence_info: Dictionary containing traffic influence details conforming to
+                                    the CAMARA TI resource creation parameters.
+
+        returns:
+            dictionary containing the created traffic influence resource details, including its ID.
+        """
+        pass
+
+
+    @abstractmethod
+    def get_traffic_influence_resource(self, resource_id: str) -> Dict:
+        """
+        Retrieves details of a specific Traffic Influence resource.
+
+        args:
+            resource_id: The unique identifier of the Traffic Influence resource.
+
+        returns:
+            Dictionary containing the details of the requested Traffic Influence resource.
+        """
+        pass
+
+    @abstractmethod
+    def delete_traffic_influence_resource(self, resource_id: str) -> None:
+        """
+        Deletes a specific Traffic Influence resource.
+
+        args:
+            resource_id: The unique identifier of the Traffic Influence resource to delete.
+
+        returns:
+            None
+        """
+        pass
+
     # Placeholder for other CAMARA APIs (e.g., Traffic Influence,
     # Location-retrieval, etc.)
