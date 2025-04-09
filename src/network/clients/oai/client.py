@@ -1,3 +1,13 @@
+##
+# Copyright (c) 2025 Netsoft Group, EURECOM.
+# All rights reserved.
+#
+# This file is part of the Open SDK
+#
+# Contributors:
+#   - Giulio Carota (giulio.carota@eurecom.fr)
+##
+
 from typing import Dict
 from src import logger
 import shortuuid
