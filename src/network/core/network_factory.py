@@ -34,13 +34,13 @@ class NetworkClientFactory:
         Creates and returns an instance of the specified Network Client.
         """
         try:
-            constructor = NetworkClientFactory.network_client_constructors[client_name]
+            constructor = NetworkClientTypes.network_types[client_name]
             network_client_instance = constructor(base_url)
             return network_client_instance
         except KeyError:
             # Get the list of supported client names
             supported_clients = list(
-                NetworkClientFactory.network_client_constructors.keys()
+                NetworkClientTypes.network_types.keys()
             )
             raise ValueError(
                 f"Invalid network client name: '{client_name}'. "
