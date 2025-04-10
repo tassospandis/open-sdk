@@ -15,7 +15,12 @@ class FlowDirection(Enum):
     DOWNLINK: The corresponding filter applies for traffic to the UE.
     UPLINK: The corresponding filter applies for traffic from the UE.
     BIDIRECTIONAL: The corresponding filter applies for traffic both to and from the UE.
-    UNSPECIFIED: The corresponding filter applies for traffic to the UE (downlink), but has no specific direction declared. The service data flow detection shall apply the filter for uplink traffic as if the filter was bidirectional. The PCF shall not use the value UNSPECIFIED in filters created by the network in NW-initiated procedures. The PCF shall only include the value UNSPECIFIED in filters in UE-initiated procedures if the same value is received from the SMF.
+    UNSPECIFIED: The corresponding filter applies for traffic to the UE (downlink), but
+    has no specific direction declared. The service data flow detection shall apply the
+    filter for uplink traffic as if the filter was bidirectional. The PCF shall not use
+    the value UNSPECIFIED in filters created by the network in NW-initiated procedures.
+    The PCF shall only include the value UNSPECIFIED in filters in UE-initiated
+    procedures if the same value is received from the SMF.
     """
 
     DOWNLINK = "DOWNLINK"
@@ -42,7 +47,8 @@ Uinteger = Annotated[int, Field(ge=0)]
 class DurationSec(RootModel[NonNegativeInt]):
     root: NonNegativeInt = Field(
         ...,
-        description="Unsigned integer identifying a period of time in units of seconds.",
+        description="Unsigned integer identifying a period of time in units of \
+        seconds.",
     )
 
 
@@ -63,7 +69,8 @@ class SupportedFeatures(RootModel[str]):
 class Link(RootModel[str]):
     root: str = Field(
         ...,
-        description="String formatted according to IETF RFC 3986 identifying a referenced resource.",
+        description="String formatted according to IETF RFC 3986 identifying a \
+                     referenced resource.",
     )
 
 
@@ -98,7 +105,8 @@ class WebsockNotifConfig(BaseModel):
     websocketUri: Link | None = None
     requestWebsocketUri: bool | None = Field(
         None,
-        description="Set by the SCS/AS to indicate that the Websocket delivery is requested.",
+        description="Set by the SCS/AS to indicate that the Websocket delivery is \
+                     requested.",
     )
 
 
@@ -118,7 +126,9 @@ class FlowInfo(BaseModel):
     flowId: int = Field(..., description="Indicates the IP flow.")
     flowDescriptions: list[str] | None = Field(
         None,
-        description="Indicates the packet filters of the IP flow. Refer to subclause 5.3.8 of 3GPP TS 29.214 for encoding. It shall contain UL and/or DL IP flow description.",
+        description="Indicates the packet filters of the IP flow. Refer to subclause \
+            5.3.8 of 3GPP TS 29.214 for encoding. It shall contain UL and/or DL IP \
+            flow description.",
         max_items=2,
         min_items=1,
     )
@@ -140,7 +150,8 @@ class AsSessionWithQoSSubscription(BaseModel):
     )
     altQoSReferences: list[str] | None = Field(
         None,
-        description="Identifies an ordered list of pre-defined QoS information. The lower the index of the array for a given entry, the higher the priority.",
+        description="Identifies an ordered list of pre-defined QoS information. The \
+            lower the index of the array for a given entry, the higher the priority.",
         min_items=1,
     )
     ueIpv4Addr: ipaddress.Ipv4Addr | None = None
@@ -151,7 +162,9 @@ class AsSessionWithQoSSubscription(BaseModel):
     qosMonInfo: QosMonitoringInformationModel | None = None
     requestTestNotification: bool | None = Field(
         None,
-        description="Set to true by the SCS/AS to request the SCEF to send a test notification as defined in subclause 5.2.5.3. Set to false or omitted otherwise.",
+        description="Set to true by the SCS/AS to request the SCEF to send a test \
+            notification as defined in subclause 5.2.5.3. Set to false or omitted \
+            otherwise.",
     )
     websockNotifConfig: WebsockNotifConfig | None = None
 
