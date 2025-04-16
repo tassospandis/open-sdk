@@ -8,6 +8,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, RootModel
 from pydantic_extra_types.mac_address import MacAddress
+from ipaddress import IPv4Address, IPv6Address
 
 
 class FlowDirection(Enum):
@@ -101,15 +102,6 @@ class SponsorInformation(BaseModel):
     aspId: str = Field(..., description="It indicates Application Service Provider ID.")
 
 
-class WebsockNotifConfig(BaseModel):
-    websocketUri: Link | None = None
-    requestWebsocketUri: bool | None = Field(
-        None,
-        description="Set by the SCS/AS to indicate that the Websocket delivery is \
-                     requested.",
-    )
-
-
 class QosMonitoringInformationModel(BaseModel):
     reqQosMonParams: list[RequestedQosMonitoringParameter] | None = Field(
         None, min_items=1
@@ -160,18 +152,149 @@ class AsSessionWithQoSSubscription(BaseModel):
     usageThreshold: UsageThreshold | None = None
     sponsorInfo: SponsorInformation | None = None
     qosMonInfo: QosMonitoringInformationModel | None = None
-    requestTestNotification: bool | None = Field(
-        None,
-        description="Set to true by the SCS/AS to request the SCEF to send a test \
-            notification as defined in subclause 5.2.5.3. Set to false or omitted \
-            otherwise.",
-    )
-    websockNotifConfig: WebsockNotifConfig | None = None
 
 
-class CamaraQoDSessionInfo(BaseModel):
-    """
-    Represents the input data for creating a QoD session.
-    """
+###############################################################
+###############################################################
+# CAMARA Models 
 
-    pass
+class PhoneNumber(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description="A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, prefixed with '+'.",
+            examples=['+123456789'],
+            pattern='^\\+[1-9][0-9]{4,14}$',
+        ),
+    ]
+
+class NetworkAccessIdentifier(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='A public identifier addressing a subscription in a mobile network. In 3GPP terminology, it corresponds to the GPSI formatted with the External Identifier ({Local Identifier}@{Domain Identifier}). Unlike the telephone number, the network access identifier is not subjected to portability ruling in force, and is individually managed by each operator.',
+            examples=['123456789@domain.com'],
+        ),
+    ]
+
+class SingleIpv4Addr(RootModel[IPv4Address]):
+    root: Annotated[
+        IPv4Address,
+        Field(
+            description='A single IPv4 address with no subnet mask',
+            examples=['203.0.113.0'],
+        ),
+    ]
+
+class Port(RootModel[int]):
+    root: Annotated[int, Field(description='TCP or UDP port number', ge=0, le=65535)]
+
+class DeviceIpv4Addr1(BaseModel):
+    publicAddress: SingleIpv4Addr
+    privateAddress: SingleIpv4Addr
+    publicPort: Port | None = None
+
+
+class DeviceIpv4Addr2(BaseModel):
+    publicAddress: SingleIpv4Addr
+    privateAddress: SingleIpv4Addr | None = None
+    publicPort: Port
+
+
+class DeviceIpv4Addr(RootModel[DeviceIpv4Addr1 | DeviceIpv4Addr2]):
+    root: Annotated[
+        DeviceIpv4Addr1 | DeviceIpv4Addr2,
+        Field(
+            description='The device should be identified by either the public (observed) IP address and port as seen by the application server, or the private (local) and any public (observed) IP addresses in use by the device (this information can be obtained by various means, for example from some DNS servers).\n\nIf the allocated and observed IP addresses are the same (i.e. NAT is not in use) then  the same address should be specified for both publicAddress and privateAddress.\n\nIf NAT64 is in use, the device should be identified by its publicAddress and publicPort, or separately by its allocated IPv6 address (field ipv6Address of the Device object)\n\nIn all cases, publicAddress must be specified, along with at least one of either privateAddress or publicPort, dependent upon which is known. In general, mobile devices cannot be identified by their public IPv4 address alone.\n',
+            examples=[{'publicAddress': '203.0.113.0', 'publicPort': 59765}],
+        ),
+    ]
+
+class DeviceIpv6Address(RootModel[IPv6Address]):
+    root: Annotated[
+        IPv6Address,
+        Field(
+            description='The device should be identified by the observed IPv6 address, or by any single IPv6 address from within the subnet allocated to the device (e.g. adding ::0 to the /64 prefix).\n\nThe session shall apply to all IP flows between the device subnet and the specified application server, unless further restricted by the optional parameters devicePorts or applicationServerPorts.\n',
+            examples=['2001:db8:85a3:8d3:1319:8a2e:370:7344'],
+        ),
+    ]
+
+class Device(BaseModel):
+    phoneNumber: PhoneNumber | None = None
+    networkAccessIdentifier: NetworkAccessIdentifier | None = None
+    ipv4Address: DeviceIpv4Addr | None = None
+    ipv6Address: DeviceIpv6Address | None = None
+
+class ApplicationServerIpv4Address(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='IPv4 address may be specified in form <address/mask> as:\n  - address - an IPv4 number in dotted-quad form 1.2.3.4. Only this exact IP number will match the flow control rule.\n  - address/mask - an IP number as above with a mask width of the form 1.2.3.4/24.\n    In this case, all IP numbers from 1.2.3.0 to 1.2.3.255 will match. The bit width MUST be valid for the IP version.\n',
+            examples=['198.51.100.0/24'],
+        ),
+    ]
+
+class ApplicationServerIpv6Address(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='IPv6 address may be specified in form <address/mask> as:\n  - address - The /128 subnet is optional for single addresses:\n    - 2001:db8:85a3:8d3:1319:8a2e:370:7344\n    - 2001:db8:85a3:8d3:1319:8a2e:370:7344/128\n  - address/mask - an IP v6 number with a mask:\n    - 2001:db8:85a3:8d3::0/64\n    - 2001:db8:85a3:8d3::/64\n',
+            examples=['2001:db8:85a3:8d3:1319:8a2e:370:7344'],
+        ),
+    ]
+
+class ApplicationServer(BaseModel):
+    ipv4Address: ApplicationServerIpv4Address | None = None
+    ipv6Address: ApplicationServerIpv6Address | None = None
+
+class Range(BaseModel):
+    from_: Annotated[Port, Field(alias='from')]
+    to: Port
+
+class PortsSpec(BaseModel):
+    ranges: Annotated[
+        list[Range] | None, Field(description='Range of TCP or UDP ports', min_length=1)
+    ] = None
+    ports: Annotated[
+        list[Port] | None, Field(description='Array of TCP or UDP ports', min_length=1)
+    ] = None
+
+class QosProfileName(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='A unique name for identifying a specific QoS profile.\nThis may follow different formats depending on the API provider implementation.\nSome options addresses:\n  - A UUID style string\n  - Support for predefined profiles QOS_S, QOS_M, QOS_L, and QOS_E\n  - A searchable descriptive name\nThe set of QoS Profiles that an API provider is offering may be retrieved by means of the QoS Profile API (qos-profile) or agreed on onboarding time.\n',
+            examples=['voice'],
+            max_length=256,
+            min_length=3,
+            pattern='^[a-zA-Z0-9_.-]+$',
+        ),
+    ]
+
+class BaseSessionInfo(BaseModel):
+    device: Device | None = None
+    applicationServer: ApplicationServer
+    devicePorts: Annotated[
+        PortsSpec | None,
+        Field(
+            description='The ports used locally by the device for flows to which the requested QoS profile should apply. If omitted, then the qosProfile will apply to all flows between the device and the specified application server address and ports'
+        ),
+    ] = None
+    applicationServerPorts: Annotated[
+        PortsSpec | None,
+        Field(
+            description='A list of single ports or port ranges on the application server'
+        ),
+    ] = None
+    qosProfile: QosProfileName
+
+
+class CreateSession(BaseSessionInfo):
+    duration: Annotated[
+        int,
+        Field(
+            description='Requested session duration in seconds. Value may be explicitly limited for the QoS profile, as specified in the Qos Profile (see qos-profile API). Implementations can grant the requested session duration or set a different duration, based on network policies or conditions.\n',
+            examples=[3600],
+            ge=1,
+        ),
+    ]
