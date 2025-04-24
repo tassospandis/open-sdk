@@ -31,14 +31,14 @@ Each contribution should be made in the appropriate directory:
 - **EdgeCloud Adapters** → `src/edgecloud/clients/`
 - **Network Adapters** → `src/network/clients/`
 
-## Unit Tests Requirement
-To merge a feature branch into `main`, the adapter **must pass the unit tests** under the `/tests` directory. Please use `/tests/edgecloud` for edgecloud, and `/tests/network` for the 5G cores)
+## Testing (Mandatory)
+To merge a feature branch into `main`, the adapter **must pass the unit tests** under the `/tests` directory. Please use `/tests/edgecloud` for edgecloud, and `/tests/network` for the 5G cores). Instructions to do so available at [TESTING.md](docs/TESTING.MD)
 
-## Steps to Contribute
-1. **Fork the Repository** (if applicable).
+## Contributing
+1. **Check Guidelines at [CONTRIBUTING.md](docs/CONTRIBUTING.md).**
 2. **Create a New Branch** following the naming convention.
 3. **Develop Your Feature** inside the correct directory.
-4. **Write Unit Tests** under `/tests`.
+4. **Satisfy Unit Tests** located under `/tests`.
 5. **Submit a Merge Request (MR)** to the `main` branch.
 6. **Ensure All Tests Pass** before the merge.
 
