@@ -1,11 +1,11 @@
+# -*- coding: utf-8 -*-
 # Common utilities (errors, HTTP helpers) used by the Open5GS client implementation (client.py).
-import json
 from typing import Optional
 
-import requests
-from pydantic import BaseModel, ValidationError
-from src.network.clients.errors import NetworkPlatformError
+from pydantic import BaseModel
+
 from src import logger
+from src.network.clients.errors import NetworkPlatformError
 
 log = logger.get_logger(__name__)
 

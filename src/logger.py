@@ -20,9 +20,7 @@ COLORED_FORMATERR = (
     "[%(log_color)s%(name)s%(reset)s:%(log_color)s%(lineno)d%(reset)s] "
     "%(log_color)s%(message)s%(reset)s"
 )
-FILE_FORMATTER = (
-    "[%(asctime)s] {%(name)s: %(lineno)d} %(levelname)s - %(message)s"
-)
+FILE_FORMATTER = "[%(asctime)s] {%(name)s: %(lineno)d} %(levelname)s - %(message)s"
 
 
 def setup_logger(logger_name=APP_LOGGER_NAME, is_debug=True, file_name=None):
