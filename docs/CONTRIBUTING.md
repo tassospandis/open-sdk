@@ -10,9 +10,6 @@ Configuration is taken from https://www.pre-commit.com/#2-add-a-pre-commit-confi
 pip3 install pre-commit
 pre-commit install
 
-# Required: install the commit-msg git hook
-cp -p ./dev/hooks/commit-msg .git/hooks/
-
 # Optional: manual trigger (to know how validation will be applied or to force it manually on files before/after commit)
 pre-commit run --all-files
 
