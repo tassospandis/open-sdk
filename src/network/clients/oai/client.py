@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 from typing import Dict
+
 from src import logger
 from src.network.core.network_interface import NetworkManagementInterface
-from . import common
-from . import schemas
 
 log = logger.get_logger(__name__)
 
@@ -20,6 +20,7 @@ class NetworkManager(NetworkManagementInterface):
 
     def delete_qod_session(self, session_id: str) -> None:
         pass
+
 
 # Note:
 # As this class is inheriting from NetworkManagementInterface, it is

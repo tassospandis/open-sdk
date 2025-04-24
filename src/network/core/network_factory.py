@@ -13,9 +13,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from src.network.clients.open5gs.client import Open5GSClient
 from src.network.clients.oai.client import OaiNefClient
 from src.network.clients.open5gcore.client import Open5GCoreClient
+from src.network.clients.open5gs.client import Open5GSClient
 
 if TYPE_CHECKING:
     from .network_interface import NetworkManagementInterface

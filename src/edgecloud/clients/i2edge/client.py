@@ -142,7 +142,12 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
     def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
         return {"appInstanceId": "abcd-efgh"}
 
-    def get_all_deployed_apps(self, app_id: Optional[str] = None, app_instance_id: Optional[str] = None, region: Optional[str] = None) -> List[Dict]:
+    def get_all_deployed_apps(
+        self,
+        app_id: Optional[str] = None,
+        app_instance_id: Optional[str] = None,
+        region: Optional[str] = None,
+    ) -> List[Dict]:
         return [{"appInstanceId": "abcd-efgh", "status": "ready"}]
 
     def undeploy_app(self, app_instance_id: str) -> None:

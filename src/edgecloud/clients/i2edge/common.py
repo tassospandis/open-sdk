@@ -13,10 +13,10 @@ import json
 from typing import Optional
 
 import requests
-from src.edgecloud.clients.errors import EdgeCloudPlatformError
 from pydantic import BaseModel
 
 from src import logger
+from src.edgecloud.clients.errors import EdgeCloudPlatformError
 
 log = logger.get_logger(__name__)
 
@@ -51,9 +51,7 @@ def i2edge_post(url: str, model_payload: BaseModel) -> dict:
         return response.json()
     except requests.exceptions.HTTPError as e:
         i2edge_err_msg = get_error_message_from(response)
-        err_msg = "Failed to deploy app: {}. Detail: {}".format(
-            i2edge_err_msg, e
-        )
+        err_msg = "Failed to deploy app: {}. Detail: {}".format(i2edge_err_msg, e)
         log.error(err_msg)
         raise I2EdgeError(err_msg)
 
@@ -70,9 +68,7 @@ def i2edge_post_multiform_data(url: str, model_payload: BaseModel) -> dict:
         return response.json()
     except requests.exceptions.HTTPError as e:
         i2edge_err_msg = get_error_message_from(response)
-        err_msg = "Failed to deploy app: {}. Detail: {}".format(
-            i2edge_err_msg, e
-        )
+        err_msg = "Failed to deploy app: {}. Detail: {}".format(i2edge_err_msg, e)
         log.error(err_msg)
         raise I2EdgeError(err_msg)
 
@@ -86,9 +82,7 @@ def i2edge_delete(url: str, id: str) -> dict:
         return response.json()
     except requests.exceptions.HTTPError as e:
         i2edge_err_msg = get_error_message_from(response)
-        err_msg = "Failed to undeploy app: {}. Detail: {}".format(
-            i2edge_err_msg, e
-        )
+        err_msg = "Failed to undeploy app: {}. Detail: {}".format(i2edge_err_msg, e)
         log.error(err_msg)
         raise I2EdgeError(err_msg)
 
@@ -101,8 +95,6 @@ def i2edge_get(url: str, params: Optional[dict]):
         return response.json()
     except requests.exceptions.HTTPError as e:
         i2edge_err_msg = get_error_message_from(response)
-        err_msg = "Failed to get apps: {}. Detail: {}".format(
-            i2edge_err_msg, e
-        )
+        err_msg = "Failed to get apps: {}. Detail: {}".format(i2edge_err_msg, e)
         log.error(err_msg)
         raise I2EdgeError(err_msg)
