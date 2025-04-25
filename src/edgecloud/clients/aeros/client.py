@@ -40,3 +40,42 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         self, region: Optional[str] = None, status: Optional[str] = None
     ) -> List[Dict]:
         return [{"edgeCloudZoneId": "zone-1", "status": "active"}]
+
+    def get_edge_cloud_zones_details(
+        self, zone_id: str, flavour_id: Optional[str] = None
+    ) -> Dict:
+        # Minimal mocked response based on required fields of 'ZoneRegisteredData' in GSMA OPG E/WBI API
+        return {
+            "zoneId": zone_id,
+            "reservedComputeResources": [
+                {
+                    "cpuArchType": "ISA_X86_64",
+                    "numCPU": "4",
+                    "memory": 8192,
+                }
+            ],
+            "computeResourceQuotaLimits": [
+                {
+                    "cpuArchType": "ISA_X86_64",
+                    "numCPU": "8",
+                    "memory": 16384,
+                }
+            ],
+            "flavoursSupported": [
+                {
+                    "flavourId": "medium-x86",
+                    "cpuArchType": "ISA_X86_64",
+                    "supportedOSTypes": [
+                        {
+                            "architecture": "x86_64",
+                            "distribution": "UBUNTU",
+                            "version": "OS_VERSION_UBUNTU_2204_LTS",
+                            "license": "OS_LICENSE_TYPE_FREE",
+                        }
+                    ],
+                    "numCPU": 4,
+                    "memorySize": 8192,
+                    "storageSize": 100,
+                }
+            ],
+        }
