@@ -7,7 +7,12 @@
 #   - Andreas Sakellaropoulos (asakellaropoulos@iit.demokritos.gr)
 ##
 """
-aerOS continuum, exposed under CAMARA APIs unit testing
+aerOS continuum, SUNRISE-6G SDK  unit testing.
+Please do not run in the same pass all of:
+  test_onboard_app_success, test_undeploy_app_completes_successfully, test_deploy_app_returns_app_instance_id
+Leave uncommented just one of them each time.
+Also environment variables must be sset in advance, regarding access tokens
+  see also config.py file in aerOS tree
 """
 import unittest
 from typing import Any, Dict

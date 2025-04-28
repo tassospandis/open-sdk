@@ -7,6 +7,7 @@
 ##
 """
 aerOS access configuration
+Access tokens need to be provided in environment variables.
 """
 import os
 
