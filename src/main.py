@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from src import logger
 from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
 
@@ -35,10 +36,12 @@ def create_edgecloud_client(client_name: str, base_url: str):
 
 #     # Print the edgecloud client being used and its URL
 #     print(f"Using edgecloud client: {sbi}")
+#     print(f"Edge Cloud Platform: {client_name}")
 #     print(f"URL: {sbi.base_url}")
 #     print("")
 
 #     # Get all availability zones
+#     print("Running test endpoint: get_edge_cloud_zones:")
 #     zones = sbi.get_edge_cloud_zones()
 #     print(zones)
 # ###########################################

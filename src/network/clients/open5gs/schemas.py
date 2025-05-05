@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # This file defines the Pydantic models that represent the data structures (schemas)
 # for the requests sent to and responses received from the Open5GS NEF API,
 # specifically focusing on the APIs needed to support CAMARA QoD.

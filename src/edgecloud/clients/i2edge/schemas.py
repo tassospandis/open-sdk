@@ -121,27 +121,19 @@ class Hugepages(BaseModel):
 class SupportedOSTypes(BaseModel):
     architecture: str = Field(default="x86_64", description="OS architecture")
     distribution: str = Field(default="RHEL", description="OS distribution")
-    license: str = Field(
-        default="OS_LICENSE_TYPE_FREE", description="OS license type"
-    )
-    version: str = Field(
-        default="OS_VERSION_UBUNTU_2204_LTS", description="OS version"
-    )
+    license: str = Field(default="OS_LICENSE_TYPE_FREE", description="OS license type")
+    version: str = Field(default="OS_VERSION_UBUNTU_2204_LTS", description="OS version")
 
 
 class FlavourSupported(BaseModel):
-    cpuArchType: str = Field(
-        default="ISA_X86", description="CPU architecture type"
-    )
+    cpuArchType: str = Field(default="ISA_X86", description="CPU architecture type")
     cpuExclusivity: bool = Field(default=True, description="CPU exclusivity")
     fpga: int = Field(default=0, description="Number of FPGAs")
     gpu: Optional[List[GPU]] = Field(default=None, description="List of GPUs")
     hugepages: List[Hugepages] = Field(
         default_factory=lambda: [Hugepages()], description="List of hugepages"
     )
-    memorySize: str = Field(
-        ..., description="Memory size (e.g., '1024MB' or '2GB')"
-    )
+    memorySize: str = Field(..., description="Memory size (e.g., '1024MB' or '2GB')")
     numCPU: int = Field(..., description="Number of CPUs")
     storageSize: int = Field(default=0, description="Storage size in GB")
     supportedOSTypes: List[SupportedOSTypes] = Field(
@@ -158,9 +150,7 @@ class FlavourSupported(BaseModel):
         try:
             int(v[:-2])
         except ValueError:
-            raise ValueError(
-                "memorySize must be a number followed by MB or GB"
-            )
+            raise ValueError("memorySize must be a number followed by MB or GB")
         return v
 
 
