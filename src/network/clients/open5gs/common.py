@@ -23,18 +23,21 @@ class Open5GSErrorResponse(BaseModel):
 def open5gs_post(url: str, model_payload: BaseModel) -> dict:
     """
     Placeholder for the POST request function."""
-    pass
+    response = requests.post(url, model_payload)
+    return response.json()
 
 
 def open5gs_get(url: str, params: Optional[dict] = None) -> dict:
     """
     Placeholder for the GET request function.
     """
-    pass
+    response = requests.get(url, params=params)
+    return response.json()
 
 
 def open5gs_delete(url: str) -> None:
     """
     Placeholder for the DELETE request function.
     """
-    pass
+    requests.delete(url)
+
