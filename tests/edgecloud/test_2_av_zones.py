@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 import pytest
 
-from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
 from src.edgecloud.clients.errors import EdgeCloudPlatformError
+from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
 from tests.edgecloud.test_cases import test_cases
 
 
@@ -10,9 +11,7 @@ def test_get_edge_cloud_zones(client_name, base_url):
     """
     Test the format of the response from get_edge_cloud_zones for each client.
     """
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-        client_name, base_url
-    )
+    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(client_name, base_url)
     try:
         zones = edgecloud_platform.get_edge_cloud_zones()
         assert isinstance(zones, list)

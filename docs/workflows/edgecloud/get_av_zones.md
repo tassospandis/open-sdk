@@ -9,6 +9,7 @@ box Service Resource Manager
 end
 participant i2Edge
 participant PiEdge
+participant aerOS
 
 note over AP,CE: CAMARA EdgeCloud API
 AP ->> CE: GET /edge-cloud-zones
@@ -19,4 +20,7 @@ SDK ->> i2Edge: GET /zones/list
 API ->> SDK: sbi = EdgeCloudFactory.create_edgecloud_client(PiEdge)
 API ->> SDK: sbi.get_edge_cloud_zones()
 SDK ->> PiEdge: GET /nodes
+API ->> SDK: sbi = EdgeCloudFactory.create_edgecloud_client(aerOS)
+API ->> SDK: sbi.get_edge_cloud_zones()
+SDK ->> aerOS: GET /entities?type=Domain
 ```
