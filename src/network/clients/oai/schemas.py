@@ -16,7 +16,8 @@ class Snssai(BaseModel):
     sst: int = Field(default=1)
     sd: str = Field(default="FFFFFF")
 
-class FlowInfoItem(BaseModel):
+
+class TrafficFilter(BaseModel):
     flowId: int
     flowDescriptions: List[str]
 
@@ -27,7 +28,7 @@ class OaiAsSessionWithQosSubscription(BaseModel):
     supportedFeatures: str = Field(default="12")
     dnn: str = Field(default="oai")
     snssai: Snssai
-    flowInfo: List[FlowInfoItem]
+    flowInfo: List[TrafficFilter]
     ueIpv4Addr: str
     notificationDestination: str
     qosReference: str
@@ -36,7 +37,7 @@ class OaiAsSessionWithQosSubscription(BaseModel):
 
     def add_flow_descriptor(self, flow_desriptor: str):
         self.flowInfo = list()
-        self.flowInfo.append(FlowInfoItem(
+        self.flowInfo.append(TrafficFilter(
             flowId=len(self.flowInfo)+1,
             flowDescriptions=[flow_desriptor]
         ))
@@ -112,6 +113,76 @@ class CamaraQoDSessionInfo(BaseModel):
     def add_server_ipv4(self, ipv4: str):
         self.applicationServer = ApplicationServer(ipv4Address = ipv4)
 
+
+    def add_ue_ipv4(self, ipv4: str):
+        if self.device is None:
+            self.device = Device()
+        if self.device.ipv4Address is None:
+            self.device.ipv4Address = Ipv4Address(publicAddress=ipv4)
+
+
+## traffic_influence schemas
+
+class SourceTrafficFilters(BaseModel):
+    sourcePort: int
+
+class DestinationTrafficFilters(BaseModel):
+    destinationPort: int
+    destinationProtocol: str
+
+class TrafficRoute(BaseModel):
+    dnai: str
+
+class NotificationSink(BaseModel):
+    sink: Optional[str] = None
+    sinkCredential: Optional[SinkCredential] = None
+
+class TrafficInfluSub(BaseModel):  # Replace with a meaningful name
+    afServiceId: str
+    afAppId: str
+    dnn: str
+    snssai: Snssai
+    trafficFilters: List[TrafficFilter]
+    ipv4Addr: str
+    notificationDestination: str
+    trafficRoutes: List[TrafficRoute]
+    suppFeat: str
+
+    def add_flow_descriptor(self, flow_desriptor: str):
+        self.trafficFilters = list()
+        self.trafficFilters.append(TrafficFilter(
+            flowId=len(self.trafficFilters)+1,
+            flowDescriptions=[flow_desriptor]
+        ))
+
+    def add_traffic_route(self, dnai: str):
+        self.trafficRoutes = list()
+        self.trafficRoutes.append(TrafficRoute(
+            dnai=dnai
+        ))
+
+    def add_snssai(self, sst: int, sd: str = None):
+        self.snssai = Snssai(sst=sst, sd=sd)
+
+class CamaraTrafficInfluence(BaseModel):
+    trafficInfluenceID : Optional[str] = None
+    apiConsumerId: str
+    appId: str
+    appInstanceId: str
+    edgeCloudRegion: Optional[str] = None
+    edgeCloudZoneId: str
+    sourceTrafficFilters: Optional[SourceTrafficFilters] = None
+    destinationTrafficFilters: Optional[DestinationTrafficFilters] = None
+    notificationUri:  Optional[str] =  None
+    notificationAuthToken:  Optional[str] = None
+    device: Device
+    notificationSink: Optional[NotificationSink] = None
+
+    def retrieve_ue_ipv4(self):
+        if self.device is not None and self.device.ipv4Address is not None:
+            return self.device.ipv4Address.publicAddress
+        else:
+            raise KeyError("device.ipv4Address.publicAddress")
 
     def add_ue_ipv4(self, ipv4: str):
         if self.device is None:

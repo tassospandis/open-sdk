@@ -9,7 +9,7 @@
 ##
 
 
-from src.network.clients.oai.schemas import CamaraQoDSessionInfo, OaiAsSessionWithQosSubscription
+from src.network.clients.oai.schemas import CamaraQoDSessionInfo, OaiAsSessionWithQosSubscription, CamaraTrafficInfluence, TrafficInfluSub
 from pydantic import BaseModel
 
 def camara_qod_to_as_session_with_qos(qod_input: CamaraQoDSessionInfo) -> OaiAsSessionWithQosSubscription :
@@ -53,3 +53,25 @@ def as_session_with_qos_to_camara_qod(nef_input: OaiAsSessionWithQosSubscription
 
     return qod_info
 
+
+def camara_ti_to_3gpp_ti(ti_input: CamaraTrafficInfluence) -> TrafficInfluSub:
+
+    device_ip = ti_input.retrieve_ue_ipv4()
+    server_ip = ti_input.appInstanceId #assume that the instance id corresponds to its IPv4 address
+    sink_url = ti_input.notificationSink.sink
+    edge_zone = ti_input.edgeCloudZoneId
+
+    #build flow descriptor in oai format using device ip and server ip
+    flow_descriptor = f"permit out ip from {device_ip}/32 to {server_ip}/32"
+
+    nef_traffic_influence = TrafficInfluSub.model_construct()
+    nef_traffic_influence.afAppId = ti_input.appId
+    nef_traffic_influence.afServiceId = "aa"
+    nef_traffic_influence.ipv4Addr = device_ip
+    nef_traffic_influence.notificationDestination = sink_url
+    nef_traffic_influence.add_flow_descriptor(flow_desriptor=flow_descriptor)
+    nef_traffic_influence.add_traffic_route(dnai=edge_zone)
+    nef_traffic_influence.add_snssai(1, "FFFFFF")
+    nef_traffic_influence.dnn ="oai"
+
+    return nef_traffic_influence

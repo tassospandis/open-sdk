@@ -14,16 +14,19 @@ import shortuuid
 import time
 from pydantic import ValidationError
 from src.network.core.network_interface import NetworkManagementInterface
-from src.network.clients.oai.schemas import CamaraQoDSessionInfo, OaiAsSessionWithQosSubscription
+from src.network.clients.oai.schemas import CamaraQoDSessionInfo, OaiAsSessionWithQosSubscription,CamaraTrafficInfluence, TrafficInfluSub
 from src.network.clients.oai.common import (
     oai_as_session_with_qos_post,
     oai_as_session_with_qos_get,
     oai_as_session_with_qos_delete,
+    oai_traffic_influence_post,
+    oai_traffic_influence_delete,
+    oai_traffic_influence_put,
     OaiHttpError,
     OaiNetworkError
 )
 
-from src.network.clients.oai.utils import camara_qod_to_as_session_with_qos, as_session_with_qos_to_camara_qod
+from src.network.clients.oai.utils import camara_qod_to_as_session_with_qos, as_session_with_qos_to_camara_qod, camara_ti_to_3gpp_ti
 
 log = logger.get_logger(__name__)
 
@@ -121,19 +124,70 @@ class OaiNefClient(NetworkManagementInterface):
 
     #implementation of the NetworkManagementInterface Traffic Influence Methods
     def create_traffic_influence_resource(self, traffic_influence_info):
+        try:
+            ti_input = CamaraTrafficInfluence(**traffic_influence_info)
 
-        log.error(f"create_traffic_influence_resource not implemented yet")
+            #convert CAMARA TI to NEF TrafficInflSub model and do POST
+            nef_req = camara_ti_to_3gpp_ti(ti_input)
+            nef_res = oai_traffic_influence_post(self.base_url, self.scs_as_id, nef_req)
 
-        raise NotImplementedError()
+            #retrieve the NEF resource id
+            if "self" in nef_res.keys():
+                nef_url = nef_res["self"]
+                nef_id = nef_url.split("subscriptions/")[1]
+            else:
+                raise OaiNetworkError("No valid ID for the created resource was returned")
 
-    def delete_traffic_influence_resource(self, resource_id):
+            #create TI session detail and return info with resource Id
+            ti_input.trafficInfluenceID = nef_id
 
-        log.error(f"delete_traffic_influence_resource not implemented yet")
+            log.info(f"Traffic Influence session activated successfully [id={nef_id}]")
 
-        raise NotImplementedError()
+            return ti_input
 
-    def get_traffic_influence_resource(self, resource_id):
+        except ValidationError as e:
+            raise OaiNetworkError("Could not validate Traffic Influence data") from e
+        except KeyError as e:
+            raise OaiNetworkError(f"Missing field in Traffic Influence data: {e}") from e
+        except OaiHttpError as e:
+            raise OaiNetworkError(f"The network could not enable the Traffic Influence Session. It returned {e}") from e
+        except OaiNetworkError as e:
+            raise
 
-        log.error(f"get_traffic_influence_resource not implemented yet")
 
-        raise NotImplementedError()
+    def delete_traffic_influence_resource(self, session_id):
+        """
+        Deletes a specific Traffic Influence (TI) session.
+        It maps CAMARA TI API DELETE /sessions/{sessionId} to
+        OAI NEF DELETE /3gpp-traffic-influence/v1/{scs_as_id}/subscriptions/{subscriptionId}
+        """
+        try:
+            oai_traffic_influence_delete(self.base_url, self.scs_as_id, session_id=session_id)
+
+            log.info(f"TI session deleted successfully [id={session_id}]")
+
+        except OaiHttpError as e:
+            raise OaiNetworkError(f"The network could not delete the TI session. It returned {e}") from e
+        except OaiNetworkError as e:
+            raise
+
+    def put_traffic_influence_resource(self, resource_id, traffic_influence_info):
+        try:
+            qod_input = CamaraTrafficInfluence(**traffic_influence_info)
+
+            #convert CAMARA TI to NEF TrafficInflSub model and do POST
+            nef_req = camara_ti_to_3gpp_ti(qod_input)
+            updated_res = oai_traffic_influence_put(self.base_url, self.scs_as_id, resource_id, nef_req)
+
+            log.info(f"Traffic Influence resource updated successfully [id={resource_id}]")
+
+            return qod_input
+
+        except ValidationError as e:
+            raise OaiNetworkError("Could not validate Traffic Influence data") from e
+        except KeyError as e:
+            raise OaiNetworkError(f"Missing field in Traffic Influence data: {e}") from e
+        except OaiHttpError as e:
+            raise OaiNetworkError(f"The network could not update the Traffic Influence Session. It returned {e}") from e
+        except OaiNetworkError as e:
+            raise

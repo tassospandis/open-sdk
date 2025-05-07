@@ -81,7 +81,7 @@ class NetworkManagementInterface(ABC):
 
 
     @abstractmethod
-    def get_traffic_influence_resource(self, resource_id: str) -> Dict:
+    def put_traffic_influence_resource(self, resource_id: str, traffic_influence_info: Dict) -> Dict:
         """
         Retrieves details of a specific Traffic Influence resource.
 
