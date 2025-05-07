@@ -9,26 +9,35 @@
 ##
 
 from typing import Dict
-from src import logger
-import shortuuid
-import time
-from pydantic import ValidationError
-from src.network.core.network_interface import NetworkManagementInterface
-from src.network.clients.oai.schemas import CamaraQoDSessionInfo, OaiAsSessionWithQosSubscription,CamaraTrafficInfluence, TrafficInfluSub
-from src.network.clients.oai.common import (
-    oai_as_session_with_qos_post,
-    oai_as_session_with_qos_get,
-    oai_as_session_with_qos_delete,
-    oai_traffic_influence_post,
-    oai_traffic_influence_delete,
-    oai_traffic_influence_put,
-    OaiHttpError,
-    OaiNetworkError
-)
 
-from src.network.clients.oai.utils import camara_qod_to_as_session_with_qos, as_session_with_qos_to_camara_qod, camara_ti_to_3gpp_ti
+import shortuuid
+from pydantic import ValidationError
+
+from src import logger
+from src.network.clients.oai.common import (
+    OaiHttpError,
+    OaiNetworkError,
+    oai_as_session_with_qos_delete,
+    oai_as_session_with_qos_get,
+    oai_as_session_with_qos_post,
+    oai_traffic_influence_delete,
+    oai_traffic_influence_post,
+    oai_traffic_influence_put,
+)
+from src.network.clients.oai.schemas import (
+    CamaraQoDSessionInfo,
+    CamaraTrafficInfluence,
+    OaiAsSessionWithQosSubscription,
+)
+from src.network.clients.oai.utils import (
+    as_session_with_qos_to_camara_qod,
+    camara_qod_to_as_session_with_qos,
+    camara_ti_to_3gpp_ti,
+)
+from src.network.core.network_interface import NetworkManagementInterface
 
 log = logger.get_logger(__name__)
+
 
 class OaiNefClient(NetworkManagementInterface):
     def __init__(self, base_url: str, scs_as_id: str = None):
@@ -42,12 +51,14 @@ class OaiNefClient(NetworkManagementInterface):
             super().__init__()
             self.base_url = base_url
             self.scs_as_id = shortuuid.uuid()
-            log.info(f"Initialized OaiNefClient with base_url: {self.base_url} and scs_as_id: {self.scs_as_id}")
+            log.info(
+                f"Initialized OaiNefClient with base_url: {self.base_url} and scs_as_id: {self.scs_as_id}"
+            )
         except Exception as e:
             log.error(f"Failed to initialize OaiNefClient: {e}")
             raise e
 
-    #implementation of the NetworkManagementInterface QoD Methods
+    # implementation of the NetworkManagementInterface QoD Methods
     def create_qod_session(self, session_info: Dict) -> Dict:
         """
         Creates a QoS session based on CAMARA QoD API input.
@@ -57,18 +68,22 @@ class OaiNefClient(NetworkManagementInterface):
         try:
             qod_input = CamaraQoDSessionInfo(**session_info)
 
-            #convert CAMARA QoD to NEF AsSessionWithQos model and do POST
+            # convert CAMARA QoD to NEF AsSessionWithQos model and do POST
             nef_req = camara_qod_to_as_session_with_qos(qod_input)
-            nef_res = oai_as_session_with_qos_post(self.base_url, self.scs_as_id, nef_req)
+            nef_res = oai_as_session_with_qos_post(
+                self.base_url, self.scs_as_id, nef_req
+            )
 
-            #retrieve the NEF resource id
+            # retrieve the NEF resource id
             if "self" in nef_res.keys():
                 nef_url = nef_res["self"]
                 nef_id = nef_url.split("subscriptions/")[1]
             else:
-                raise OaiNetworkError("No valid ID for the created resource was returned")
+                raise OaiNetworkError(
+                    "No valid ID for the created resource was returned"
+                )
 
-            #create QoD session detail and return info with resource Id
+            # create QoD session detail and return info with resource Id
             qod_input.sessionId = nef_id
 
             log.info(f"QoD session activated successfully [id={nef_id}]")
@@ -80,10 +95,11 @@ class OaiNefClient(NetworkManagementInterface):
         except KeyError as e:
             raise OaiNetworkError(f"Missing field in QoD Session Info data: {e}") from e
         except OaiHttpError as e:
-            raise OaiNetworkError(f"The network could not enable the QoD Session. It returned {e}") from e
+            raise OaiNetworkError(
+                f"The network could not enable the QoD Session. It returned {e}"
+            ) from e
         except OaiNetworkError as e:
-            raise
-
+            raise e
 
     def get_qod_session(self, session_id: str) -> Dict:
         """
@@ -92,7 +108,9 @@ class OaiNefClient(NetworkManagementInterface):
         OAI NEF GET /3gpp-as-session-with-qos/v1/{scs_as_id}/subscriptions/{subscriptionId}
         """
         try:
-            res = oai_as_session_with_qos_get(self.base_url, self.scs_as_id, session_id=session_id)
+            res = oai_as_session_with_qos_get(
+                self.base_url, self.scs_as_id, session_id=session_id
+            )
             nef_res = OaiAsSessionWithQosSubscription(**res)
             qod_info = as_session_with_qos_to_camara_qod(nef_res)
 
@@ -102,9 +120,11 @@ class OaiNefClient(NetworkManagementInterface):
         except ValidationError as e:
             raise OaiNetworkError("Could not validate network response data") from e
         except OaiHttpError as e:
-            raise OaiNetworkError(f"The network could not enable the QoD Session. It returned {e}") from e
+            raise OaiNetworkError(
+                f"The network could not enable the QoD Session. It returned {e}"
+            ) from e
         except OaiNetworkError as e:
-            raise
+            raise e
 
     def delete_qod_session(self, session_id: str) -> None:
         """
@@ -113,32 +133,38 @@ class OaiNefClient(NetworkManagementInterface):
         OAI NEF DELETE /3gpp-as-session-with-qos/v1/{scs_as_id}/subscriptions/{subscriptionId}
         """
         try:
-            oai_as_session_with_qos_delete(self.base_url, self.scs_as_id, session_id=session_id)
+            oai_as_session_with_qos_delete(
+                self.base_url, self.scs_as_id, session_id=session_id
+            )
 
             log.info(f"QoD session deleted successfully [id={session_id}]")
 
         except OaiHttpError as e:
-            raise OaiNetworkError(f"The network could not enable the QoD Session. It returned {e}") from e
+            raise OaiNetworkError(
+                f"The network could not enable the QoD Session. It returned {e}"
+            ) from e
         except OaiNetworkError as e:
-            raise
+            raise e
 
-    #implementation of the NetworkManagementInterface Traffic Influence Methods
+    # implementation of the NetworkManagementInterface Traffic Influence Methods
     def create_traffic_influence_resource(self, traffic_influence_info):
         try:
             ti_input = CamaraTrafficInfluence(**traffic_influence_info)
 
-            #convert CAMARA TI to NEF TrafficInflSub model and do POST
+            # convert CAMARA TI to NEF TrafficInflSub model and do POST
             nef_req = camara_ti_to_3gpp_ti(ti_input)
             nef_res = oai_traffic_influence_post(self.base_url, self.scs_as_id, nef_req)
 
-            #retrieve the NEF resource id
+            # retrieve the NEF resource id
             if "self" in nef_res.keys():
                 nef_url = nef_res["self"]
                 nef_id = nef_url.split("subscriptions/")[1]
             else:
-                raise OaiNetworkError("No valid ID for the created resource was returned")
+                raise OaiNetworkError(
+                    "No valid ID for the created resource was returned"
+                )
 
-            #create TI session detail and return info with resource Id
+            # create TI session detail and return info with resource Id
             ti_input.trafficInfluenceID = nef_id
 
             log.info(f"Traffic Influence session activated successfully [id={nef_id}]")
@@ -148,12 +174,15 @@ class OaiNefClient(NetworkManagementInterface):
         except ValidationError as e:
             raise OaiNetworkError("Could not validate Traffic Influence data") from e
         except KeyError as e:
-            raise OaiNetworkError(f"Missing field in Traffic Influence data: {e}") from e
+            raise OaiNetworkError(
+                f"Missing field in Traffic Influence data: {e}"
+            ) from e
         except OaiHttpError as e:
-            raise OaiNetworkError(f"The network could not enable the Traffic Influence Session. It returned {e}") from e
+            raise OaiNetworkError(
+                f"The network could not enable the Traffic Influence Session. It returned {e}"
+            ) from e
         except OaiNetworkError as e:
-            raise
-
+            raise e
 
     def delete_traffic_influence_resource(self, session_id):
         """
@@ -162,32 +191,44 @@ class OaiNefClient(NetworkManagementInterface):
         OAI NEF DELETE /3gpp-traffic-influence/v1/{scs_as_id}/subscriptions/{subscriptionId}
         """
         try:
-            oai_traffic_influence_delete(self.base_url, self.scs_as_id, session_id=session_id)
+            oai_traffic_influence_delete(
+                self.base_url, self.scs_as_id, session_id=session_id
+            )
 
             log.info(f"TI session deleted successfully [id={session_id}]")
 
         except OaiHttpError as e:
-            raise OaiNetworkError(f"The network could not delete the TI session. It returned {e}") from e
+            raise OaiNetworkError(
+                f"The network could not delete the TI session. It returned {e}"
+            ) from e
         except OaiNetworkError as e:
-            raise
+            raise e
 
     def put_traffic_influence_resource(self, resource_id, traffic_influence_info):
         try:
             qod_input = CamaraTrafficInfluence(**traffic_influence_info)
 
-            #convert CAMARA TI to NEF TrafficInflSub model and do POST
+            # convert CAMARA TI to NEF TrafficInflSub model and do POST
             nef_req = camara_ti_to_3gpp_ti(qod_input)
-            updated_res = oai_traffic_influence_put(self.base_url, self.scs_as_id, resource_id, nef_req)
+            updated_res = oai_traffic_influence_put(
+                self.base_url, self.scs_as_id, resource_id, nef_req
+            )
 
-            log.info(f"Traffic Influence resource updated successfully [id={resource_id}]")
+            log.info(
+                f"Traffic Influence resource updated successfully [id={resource_id}]"
+            )
 
-            return qod_input
+            return updated_res
 
         except ValidationError as e:
             raise OaiNetworkError("Could not validate Traffic Influence data") from e
         except KeyError as e:
-            raise OaiNetworkError(f"Missing field in Traffic Influence data: {e}") from e
+            raise OaiNetworkError(
+                f"Missing field in Traffic Influence data: {e}"
+            ) from e
         except OaiHttpError as e:
-            raise OaiNetworkError(f"The network could not update the Traffic Influence Session. It returned {e}") from e
+            raise OaiNetworkError(
+                f"The network could not update the Traffic Influence Session. It returned {e}"
+            ) from e
         except OaiNetworkError as e:
-            raise
+            raise e

@@ -8,8 +8,9 @@
 #   - Giulio Carota (giulio.carota@eurecom.fr)
 ##
 
-from pydantic import BaseModel, Field, AnyHttpUrl
 from typing import List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class Snssai(BaseModel):
@@ -21,10 +22,12 @@ class TrafficFilter(BaseModel):
     flowId: int
     flowDescriptions: List[str]
 
+
 class OaiAsSessionWithQosSubscription(BaseModel):
     """
     Represents the model to create an AsSessionWithQoS resource inside the OAI NEF.
     """
+
     supportedFeatures: str = Field(default="12")
     dnn: str = Field(default="oai")
     snssai: Snssai
@@ -37,13 +40,15 @@ class OaiAsSessionWithQosSubscription(BaseModel):
 
     def add_flow_descriptor(self, flow_desriptor: str):
         self.flowInfo = list()
-        self.flowInfo.append(TrafficFilter(
-            flowId=len(self.flowInfo)+1,
-            flowDescriptions=[flow_desriptor]
-        ))
+        self.flowInfo.append(
+            TrafficFilter(
+                flowId=len(self.flowInfo) + 1, flowDescriptions=[flow_desriptor]
+            )
+        )
 
     def add_snssai(self, sst: int, sd: str = None):
         self.snssai = Snssai(sst=sst, sd=sd)
+
 
 class PortRange(BaseModel):
     from_: int = Field(alias="from")
@@ -52,13 +57,16 @@ class PortRange(BaseModel):
     class Config:
         populate_by_name = True
 
+
 class Ports(BaseModel):
     ranges: Optional[List[PortRange]] = None
     ports: Optional[List[int]] = None
 
+
 class Ipv4Address(BaseModel):
     publicAddress: str
     publicPort: Optional[int] = None
+
 
 class Device(BaseModel):
     phoneNumber: Optional[str] = None
@@ -66,17 +74,21 @@ class Device(BaseModel):
     ipv4Address: Optional[Ipv4Address] = None
     ipv6Address: Optional[str] = None
 
+
 class ApplicationServer(BaseModel):
     ipv4Address: Optional[str] = None
     ipv6Address: Optional[str] = None
 
+
 class SinkCredential(BaseModel):
     credentialType: Optional[str] = None
+
 
 class CamaraQoDSessionInfo(BaseModel):
     """
     Represents the input data for creating a QoD session.
     """
+
     duration: int
     qosProfile: str
     applicationServer: ApplicationServer
@@ -87,13 +99,12 @@ class CamaraQoDSessionInfo(BaseModel):
     sink: Optional[str] = None
     sinkCredential: Optional[SinkCredential] = None
 
-    #fields only applicable to sessionInfo in responses:
+    # fields only applicable to sessionInfo in responses:
     sessionId: Optional[str] = None
     startedAt: Optional[int] = None
     expiresAt: Optional[int] = None
     qosStatus: Optional[str] = None
     statusInfo: Optional[str] = None
-
 
     class Config:
         populate_by_name = True
@@ -111,8 +122,7 @@ class CamaraQoDSessionInfo(BaseModel):
             raise KeyError("applicationServer.ipv4Address")
 
     def add_server_ipv4(self, ipv4: str):
-        self.applicationServer = ApplicationServer(ipv4Address = ipv4)
-
+        self.applicationServer = ApplicationServer(ipv4Address=ipv4)
 
     def add_ue_ipv4(self, ipv4: str):
         if self.device is None:
@@ -123,19 +133,24 @@ class CamaraQoDSessionInfo(BaseModel):
 
 ## traffic_influence schemas
 
+
 class SourceTrafficFilters(BaseModel):
     sourcePort: int
+
 
 class DestinationTrafficFilters(BaseModel):
     destinationPort: int
     destinationProtocol: str
 
+
 class TrafficRoute(BaseModel):
     dnai: str
+
 
 class NotificationSink(BaseModel):
     sink: Optional[str] = None
     sinkCredential: Optional[SinkCredential] = None
+
 
 class TrafficInfluSub(BaseModel):  # Replace with a meaningful name
     afServiceId: str
@@ -150,22 +165,22 @@ class TrafficInfluSub(BaseModel):  # Replace with a meaningful name
 
     def add_flow_descriptor(self, flow_desriptor: str):
         self.trafficFilters = list()
-        self.trafficFilters.append(TrafficFilter(
-            flowId=len(self.trafficFilters)+1,
-            flowDescriptions=[flow_desriptor]
-        ))
+        self.trafficFilters.append(
+            TrafficFilter(
+                flowId=len(self.trafficFilters) + 1, flowDescriptions=[flow_desriptor]
+            )
+        )
 
     def add_traffic_route(self, dnai: str):
         self.trafficRoutes = list()
-        self.trafficRoutes.append(TrafficRoute(
-            dnai=dnai
-        ))
+        self.trafficRoutes.append(TrafficRoute(dnai=dnai))
 
     def add_snssai(self, sst: int, sd: str = None):
         self.snssai = Snssai(sst=sst, sd=sd)
 
+
 class CamaraTrafficInfluence(BaseModel):
-    trafficInfluenceID : Optional[str] = None
+    trafficInfluenceID: Optional[str] = None
     apiConsumerId: str
     appId: str
     appInstanceId: str
@@ -173,8 +188,8 @@ class CamaraTrafficInfluence(BaseModel):
     edgeCloudZoneId: str
     sourceTrafficFilters: Optional[SourceTrafficFilters] = None
     destinationTrafficFilters: Optional[DestinationTrafficFilters] = None
-    notificationUri:  Optional[str] =  None
-    notificationAuthToken:  Optional[str] = None
+    notificationUri: Optional[str] = None
+    notificationAuthToken: Optional[str] = None
     device: Device
     notificationSink: Optional[NotificationSink] = None
 

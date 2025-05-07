@@ -9,10 +9,17 @@
 ##
 
 
-from src.network.clients.oai.schemas import CamaraQoDSessionInfo, OaiAsSessionWithQosSubscription, CamaraTrafficInfluence, TrafficInfluSub
-from pydantic import BaseModel
+from src.network.clients.oai.schemas import (
+    CamaraQoDSessionInfo,
+    CamaraTrafficInfluence,
+    OaiAsSessionWithQosSubscription,
+    TrafficInfluSub,
+)
 
-def camara_qod_to_as_session_with_qos(qod_input: CamaraQoDSessionInfo) -> OaiAsSessionWithQosSubscription :
+
+def camara_qod_to_as_session_with_qos(
+    qod_input: CamaraQoDSessionInfo,
+) -> OaiAsSessionWithQosSubscription:
     device_ip = qod_input.retrieve_ue_ipv4()
     server_ip = qod_input.retrieve_app_ipv4()
 
@@ -20,10 +27,10 @@ def camara_qod_to_as_session_with_qos(qod_input: CamaraQoDSessionInfo) -> OaiAsS
     sink_url = qod_input.sink
     qos_profile = qod_input.qosProfile
 
-    #build flow descriptor in oai format using device ip and server ip
+    # build flow descriptor in oai format using device ip and server ip
     flow_descriptor = f"permit out ip from {device_ip}/32 to {server_ip}/32"
 
-    #create the nef request model
+    # create the nef request model
     nef_req = OaiAsSessionWithQosSubscription.construct()
     nef_req.ueIpv4Addr = device_ip
     nef_req.notificationDestination = sink_url
@@ -31,14 +38,16 @@ def camara_qod_to_as_session_with_qos(qod_input: CamaraQoDSessionInfo) -> OaiAsS
     nef_req.qosReference = qos_profile
     nef_req.add_snssai(1, "FFFFFF")
 
-    #the qos duration feature is not available yet in oai
-    #nef_req.qosDuration = qod_input.duration
+    # the qos duration feature is not available yet in oai
+    # nef_req.qosDuration = qod_input.duration
 
     return nef_req
 
 
-def as_session_with_qos_to_camara_qod(nef_input: OaiAsSessionWithQosSubscription) -> CamaraQoDSessionInfo :
-    #create the camara qod model
+def as_session_with_qos_to_camara_qod(
+    nef_input: OaiAsSessionWithQosSubscription,
+) -> CamaraQoDSessionInfo:
+    # create the camara qod model
 
     qod_info = CamaraQoDSessionInfo.construct()
 
@@ -57,11 +66,13 @@ def as_session_with_qos_to_camara_qod(nef_input: OaiAsSessionWithQosSubscription
 def camara_ti_to_3gpp_ti(ti_input: CamaraTrafficInfluence) -> TrafficInfluSub:
 
     device_ip = ti_input.retrieve_ue_ipv4()
-    server_ip = ti_input.appInstanceId #assume that the instance id corresponds to its IPv4 address
+    server_ip = (
+        ti_input.appInstanceId
+    )  # assume that the instance id corresponds to its IPv4 address
     sink_url = ti_input.notificationSink.sink
     edge_zone = ti_input.edgeCloudZoneId
 
-    #build flow descriptor in oai format using device ip and server ip
+    # build flow descriptor in oai format using device ip and server ip
     flow_descriptor = f"permit out ip from {device_ip}/32 to {server_ip}/32"
 
     nef_traffic_influence = TrafficInfluSub.model_construct()
@@ -72,6 +83,6 @@ def camara_ti_to_3gpp_ti(ti_input: CamaraTrafficInfluence) -> TrafficInfluSub:
     nef_traffic_influence.add_flow_descriptor(flow_desriptor=flow_descriptor)
     nef_traffic_influence.add_traffic_route(dnai=edge_zone)
     nef_traffic_influence.add_snssai(1, "FFFFFF")
-    nef_traffic_influence.dnn ="oai"
+    nef_traffic_influence.dnn = "oai"
 
     return nef_traffic_influence
