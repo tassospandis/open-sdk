@@ -5,11 +5,11 @@
 
 import ipaddress
 from enum import Enum
+from ipaddress import IPv4Address, IPv6Address
 from typing import Annotated
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, NonNegativeInt, RootModel
 from pydantic_extra_types.mac_address import MacAddress
-from ipaddress import IPv4Address, IPv6Address
 
 
 class FlowDirection(Enum):
