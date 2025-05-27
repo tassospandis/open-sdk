@@ -5,11 +5,11 @@
 
 import ipaddress
 from enum import Enum
+from ipaddress import IPv4Address, IPv6Address
 from typing import Annotated
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, NonNegativeInt, RootModel
 from pydantic_extra_types.mac_address import MacAddress
-from ipaddress import IPv4Address, IPv6Address
 
 
 class FlowDirection(Enum):
@@ -86,7 +86,7 @@ class EthFlowDescription(BaseModel):
     fDesc: FlowDescriptionModel | None = None
     fDir: FlowDirection | None = None
     sourceMacAddr: MacAddress | None = None
-    vlanTags: list[str] | None = Field(None, max_items=2, min_items=1)
+    vlanTags: list[str] | None = Field(None, max_length=2, min_length=1)
     srcMacAddrEnd: MacAddress | None = None
     destMacAddrEnd: MacAddress | None = None
 
@@ -105,9 +105,9 @@ class SponsorInformation(BaseModel):
 
 class QosMonitoringInformationModel(BaseModel):
     reqQosMonParams: list[RequestedQosMonitoringParameter] | None = Field(
-        None, min_items=1
+        None, min_length=1
     )
-    repFreqs: list[ReportingFrequency] | None = Field(None, min_items=1)
+    repFreqs: list[ReportingFrequency] | None = Field(None, min_length=1)
     repThreshDl: Uinteger | None = None
     repThreshUl: Uinteger | None = None
     repThreshRp: Uinteger | None = None
@@ -122,8 +122,8 @@ class FlowInfo(BaseModel):
         description="Indicates the packet filters of the IP flow. Refer to subclause \
             5.3.8 of 3GPP TS 29.214 for encoding. It shall contain UL and/or DL IP \
             flow description.",
-        max_items=2,
-        min_items=1,
+        max_length=2,
+        min_length=1,
     )
 
 
@@ -133,10 +133,10 @@ class AsSessionWithQoSSubscription(BaseModel):
     supportedFeatures: SupportedFeatures | None = None
     notificationDestination: Link
     flowInfo: list[FlowInfo] | None = Field(
-        None, description="Describe the data flow which requires QoS.", min_items=1
+        None, description="Describe the data flow which requires QoS.", min_length=1
     )
     ethFlowInfo: list[EthFlowDescription] | None = Field(
-        None, description="Identifies Ethernet packet flows.", min_items=1
+        None, description="Identifies Ethernet packet flows.", min_length=1
     )
     qosReference: str | None = Field(
         None, description="Identifies a pre-defined QoS information"
@@ -145,10 +145,10 @@ class AsSessionWithQoSSubscription(BaseModel):
         None,
         description="Identifies an ordered list of pre-defined QoS information. The \
             lower the index of the array for a given entry, the higher the priority.",
-        min_items=1,
+        min_length=1,
     )
-    ueIpv4Addr: ipaddress.Ipv4Addr | None = None
-    ueIpv6Addr: ipaddress.Ipv6Addr | None = None
+    ueIpv4Addr: ipaddress.IPv4Address | None = None
+    ueIpv6Addr: ipaddress.IPv6Address | None = None
     macAddr: MacAddress | None = None
     usageThreshold: UsageThreshold | None = None
     sponsorInfo: SponsorInformation | None = None
