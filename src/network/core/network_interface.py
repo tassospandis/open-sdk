@@ -35,7 +35,8 @@ def flatten_port_spec(ports_spec: schemas.PortsSpec | None) -> list[str]:
 
 
 def build_flows(
-    flow_id: int, session_info: schemas.CreateSession
+    flow_id: int,
+    session_info: schemas.CreateSession,
 ) -> list[schemas.FlowInfo]:
     device_ports = flatten_port_spec(session_info.devicePorts)
     server_ports = flatten_port_spec(session_info.applicationServerPorts)
@@ -77,7 +78,11 @@ class NetworkManagementInterface(ABC):
     scs_as_id: str
 
     @abstractmethod
-    def add_core_specific_parameters(x):
+    def add_core_specific_parameters(
+        self,
+        session_info: schemas.CreateSession,
+        subscription: schemas.AsSessionWithQoSSubscription,
+    ):
         """
         Placeholder for adding core-specific parameters to the subscription.
         This method should be overridden by subclasses to implement specific logic.
@@ -99,6 +104,23 @@ class NetworkManagementInterface(ABC):
         # This method should be overridden by subclasses if needed
         pass
 
+    def _build_subscription(self, session_info: Dict) -> None:
+        valid_session_info = schemas.CreateSession.model_validate(session_info)
+        device_ipv4 = None
+        if valid_session_info.device.ipv4Address:
+            device_ipv4 = valid_session_info.device.ipv4Address.root.publicAddress.root
+
+        self.core_specific_validation(valid_session_info)
+        subscription = schemas.AsSessionWithQoSSubscription(
+            notificationDestination=str(valid_session_info.sink),
+            qosReference=valid_session_info.qosProfile.root,
+            ueIpv4Addr=device_ipv4,
+            ueIpv6Addr=valid_session_info.device.ipv6Address,
+            usageThreshold=schemas.UsageThreshold(duration=valid_session_info.duration),
+        )
+        self.add_core_specific_parameters(valid_session_info, subscription)
+        return subscription
+
     def create_qod_session(self, session_info: Dict) -> Dict:
         """
         Creates a QoS session based on CAMARA QoD API input.
@@ -110,18 +132,10 @@ class NetworkManagementInterface(ABC):
         returns:
             dictionary containing the created session details, including its ID.
         """
-        valid_session_info = schemas.CreateSession.model_validate(session_info)
-        self.core_specific_validation(valid_session_info)
-        subscription = schemas.AsSessionWithQoSSubscription(
-            notificationDestination=valid_session_info.sink,
-            qosReference=valid_session_info.qosProfile,
-            ueIpv4Addr=valid_session_info.device.ipv4Address,
-            ueIpv6Addr=valid_session_info.device.ipv6Address,
-            usageThreshold=schemas.UsageThreshold(duration=valid_session_info.duration),
+        subscription = self._build_subscription(session_info)
+        return common.as_session_with_qos_post(
+            self.base_url, self.scs_as_id, subscription
         )
-        self.add_core_specific_parameters(subscription)
-        url = f"{self.base_url}/{self.scs_as_id}/subscriptions"
-        common.as_session_with_qos_post(self.base_url, self.scs_as_id, subscription)
 
     def get_qod_session(self, session_id: str) -> Dict:
         """
