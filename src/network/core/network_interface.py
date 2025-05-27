@@ -120,8 +120,9 @@ class NetworkManagementInterface(ABC):
             usageThreshold=schemas.UsageThreshold(duration=valid_session_info.duration),
         )
         self.add_core_specific_parameters(subscription)
-        url = f"{self.base_url}/{self.scs_as_id}/subscriptions"
-        common.as_session_with_qos_post(self.base_url, self.scs_as_id, subscription)
+        return common.as_session_with_qos_post(
+            self.base_url, self.scs_as_id, subscription
+        )
 
     def get_qod_session(self, session_id: str) -> Dict:
         """

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-from typing import Dict
-
 from pydantic import ValidationError
 from src import logger
 from src.network.core.network_interface import NetworkManagementInterface, build_flows
-from ...core import common
 from ...core import schemas
 
 log = logger.get_logger(__name__)
