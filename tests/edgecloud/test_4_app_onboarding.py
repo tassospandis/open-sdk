@@ -10,7 +10,7 @@ app_manifest = {
     "appId": "test_app_from_SDK",
     "name": "my-application",
     "version": "1.0.0",
-    "appProvider": "MyAppProvider",
+    "appProvider": "i2CAT",
     "packageType": "CONTAINER",
     "appRepo": {
         "type": "PUBLICREPO",
