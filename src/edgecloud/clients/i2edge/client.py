@@ -164,7 +164,6 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
 
     def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
         appId = app_id
-        # appProviderId & appVersion are specified in the previous call (onboard_app)
         app = self.get_onboarded_app(appId)
         profile_data = app["profile_data"]
         appProviderId = profile_data["appProviderId"]
@@ -199,20 +198,34 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         except I2EdgeError as e:
             raise e
 
-    # TODO: Partially harcoded
     def get_deployed_app(self, app_id, zone_id) -> List[Dict]:
-        # Idea: Get all onboarded apps and filter the one where release_name == artifact name
-        # Step 1) Extract the app name from the app id
-        app = self.get_onboarded_app(app_id)
-        appName = app["profile_data"]["appMetaData"]["appName"]
+        # Logic: Get all onboarded apps and filter the one where release_name == artifact name
 
-        # Step 2) Retrieve all deployed apps and filter the ones where release_name == app_name
+        # Step 1) Extract "app_name" from the onboarded app using the "app_id"
+        onboarded_app = self.get_onboarded_app(app_id)
+        if not onboarded_app:
+            raise ValueError(f"No onboarded app found with ID: {app_id}")
+
+        try:
+            app_name = onboarded_app["profile_data"]["appMetaData"]["appName"]
+        except KeyError as e:
+            raise ValueError(f"Onboarded app missing required field: {e}")
+
+        # Step 2) Retrieve all deployed apps and filter the one(s) where release_name == app_name
         deployed_apps = self.get_all_deployed_apps()
-        # This logic should be improved
-        deploy_names = [app["deploy_name"] for app in deployed_apps]
-        appName = deploy_names[0]
+        if not deployed_apps:
+            return []
 
-        url = "{}/app/{}/{}".format(self.base_url, zone_id, appName)
+        # Filter apps where release_name matches our app_name and zone matches
+        for app_instance_name in deployed_apps:
+            if (
+                app_instance_name.get("release_name") == app_name
+                and app_instance_name.get("zone_id") == zone_id
+            ):
+                return app_instance_name
+        return None
+
+        url = "{}/app/{}/{}".format(self.base_url, zone_id, app_instance_name)
         params = {}
         try:
             response = i2edge_get(url, params=params)
