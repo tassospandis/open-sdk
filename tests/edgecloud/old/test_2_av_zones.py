@@ -5,7 +5,7 @@ from src.edgecloud.clients.errors import EdgeCloudPlatformError
 from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
 from tests.edgecloud.test_cases import test_cases
 
-zone_id = "Omega"
+zone_id = "Omega12345"
 
 
 @pytest.mark.parametrize("client_name, base_url", test_cases)
@@ -25,7 +25,7 @@ def test_get_edge_cloud_zones(client_name, base_url):
 
 
 @pytest.mark.parametrize("client_name, base_url", test_cases)
-def test_get_edge_cloud_zones_details(client_name, base_url, zone_id="Omega"):
+def test_get_edge_cloud_zones_details(client_name, base_url, zone_id=zone_id):
     """
     Test that get_edge_cloud_zone_details returns valid responses for each client.
     Since each client has different response formats, we only verify basic success criteria.

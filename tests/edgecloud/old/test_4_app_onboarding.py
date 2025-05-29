@@ -7,8 +7,8 @@ from tests.edgecloud.test_cases import test_cases
 
 # CAMARA app payload (only mandatory fields)
 app_manifest = {
-    "appId": "test_app_from_SDK",
-    "name": "my-application",
+    "appId": "i2edgechart-id",
+    "name": "i2edge-app-SDK",
     "version": "1.0.0",
     "appProvider": "i2CAT",
     "packageType": "CONTAINER",
