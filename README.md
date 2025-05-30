@@ -9,6 +9,7 @@ Thank you for contributing to this project. Please follow the guidelines below t
 Each contribution should be made in the appropriate directory:
 - **EdgeCloud Adapters** → `src/edgecloud/clients/`
 - **Network Adapters** → `src/network/clients/`
+- **O-RAN Adapters** → `src/o-ran/clients/`
 
 ### Testing (Mandatory)
 To merge a feature branch into `main`, the adapter **must pass the unit tests**. Instructions to do so available at [TESTING.md](docs/TESTING.md)
@@ -41,6 +42,17 @@ feature/add-network-<5G_CORE_NAME>
 Example:
 ```
 feature/add-network-open5gs
+```
+
+
+#### 📶 O-RAN Adapters
+Branch Name Format:
+```
+feature/add-oran-<SOLUTION_NAME>
+```
+Example:
+```
+feature/add-oran-juniper
 ```
 
 ## Sequence Diagram Example
