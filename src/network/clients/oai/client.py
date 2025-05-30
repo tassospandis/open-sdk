@@ -8,38 +8,23 @@
 #   - Giulio Carota (giulio.carota@eurecom.fr)
 ##
 
-from typing import Dict
-
-import shortuuid
-from pydantic import ValidationError
 
 from src import logger
-from src.network.clients.oai.common import (
-    OaiHttpError,
-    OaiNetworkError,
-    oai_as_session_with_qos_delete,
-    oai_as_session_with_qos_get,
-    oai_as_session_with_qos_post,
-    oai_traffic_influence_delete,
-    oai_traffic_influence_post,
-    oai_traffic_influence_put,
-)
-from src.network.clients.oai.schemas import (
-    CamaraQoDSessionInfo,
-    CamaraTrafficInfluence,
-    OaiAsSessionWithQosSubscription,
-)
-from src.network.clients.oai.utils import (
-    as_session_with_qos_to_camara_qod,
-    camara_qod_to_as_session_with_qos,
-    camara_ti_to_3gpp_ti,
-)
 from src.network.core.network_interface import NetworkManagementInterface
+from src.network.core.schemas import (
+    AsSessionWithQoSSubscription,
+    CreateSession,
+    CreateTrafficInfluence,
+    FlowInfo,
+    Snssai,
+    TrafficInfluSub,
+)
 
 log = logger.get_logger(__name__)
+supportedQos = ["qos-e", "qos-s", "qos-m", "qos-l"]
 
 
-class OaiNefClient(NetworkManagementInterface):
+class NetworkManager(NetworkManagementInterface):
     def __init__(self, base_url: str, scs_as_id: str = None):
         """
         Initialize Network Client for OAI Core Network
@@ -50,185 +35,105 @@ class OaiNefClient(NetworkManagementInterface):
         try:
             super().__init__()
             self.base_url = base_url
-            self.scs_as_id = shortuuid.uuid()
+            self.scs_as_id = scs_as_id
             log.info(
                 f"Initialized OaiNefClient with base_url: {self.base_url} and scs_as_id: {self.scs_as_id}"
             )
+
         except Exception as e:
             log.error(f"Failed to initialize OaiNefClient: {e}")
             raise e
 
-    # implementation of the NetworkManagementInterface QoD Methods
-    def create_qod_session(self, session_info: Dict) -> Dict:
+    def core_specific_qod_validation(self, session_info: CreateSession):
         """
-        Creates a QoS session based on CAMARA QoD API input.
-        It maps CAMARA QoD API POST /sessions to
-        OAI NEF POST /3gpp-as-session-with-qos/v1/{scs_as_id}/subscriptions
-        """
-        try:
-            qod_input = CamaraQoDSessionInfo(**session_info)
+        Validates core-specific parameters for the session creation.
 
-            # convert CAMARA QoD to NEF AsSessionWithQos model and do POST
-            nef_req = camara_qod_to_as_session_with_qos(qod_input)
-            nef_res = oai_as_session_with_qos_post(
-                self.base_url, self.scs_as_id, nef_req
+        args:
+            session_info: The session information to validate.
+
+        raises:
+            ValidationError: If the session information does not meet core-specific requirements.
+        """
+        if session_info.qosProfile.root not in supportedQos:
+            raise OaiValidationError(
+                f"QoS profile {session_info.qosProfile} not supported by OAI, supported profiles are {supportedQos}"
             )
 
-            # retrieve the NEF resource id
-            if "self" in nef_res.keys():
-                nef_url = nef_res["self"]
-                nef_id = nef_url.split("subscriptions/")[1]
-            else:
-                raise OaiNetworkError(
-                    "No valid ID for the created resource was returned"
-                )
+        if session_info.device is None or session_info.device.ipv4Address is None:
+            raise OaiValidationError("OAI requires UE IPv4 Address to activate QoS")
 
-            # create QoD session detail and return info with resource Id
-            qod_input.sessionId = nef_id
+        if session_info.applicationServer.ipv4Address is None:
+            raise OaiValidationError("OAI requires App IPv4 Address to activate QoS")
+        return
 
-            log.info(f"QoD session activated successfully [id={nef_id}]")
+    def add_core_specific_qod_parameters(
+        self,
+        session_info: CreateSession,
+        subscription: AsSessionWithQoSSubscription,
+    ) -> None:
+        device_ip = _retrieve_ue_ipv4(session_info)
+        server_ip = _retrieve_app_ipv4(session_info)
 
-            return qod_input
+        # build flow descriptor in oai format using device ip and server ip
+        flow_descriptor = f"permit out ip from {device_ip}/32 to {server_ip}/32"
+        _add_qod_flow_descriptor(subscription, flow_descriptor)
+        _add_qod_snssai(subscription, 1, "FFFFFF")
+        subscription.dnn = "oai"
 
-        except ValidationError as e:
-            raise OaiNetworkError("Could not validate QoD Session Info data") from e
-        except KeyError as e:
-            raise OaiNetworkError(f"Missing field in QoD Session Info data: {e}") from e
-        except OaiHttpError as e:
-            raise OaiNetworkError(
-                f"The network could not enable the QoD Session. It returned {e}"
-            ) from e
-        except OaiNetworkError as e:
-            raise e
+    def add_core_specific_ti_parameters(
+        self,
+        traffic_influence_info: CreateTrafficInfluence,
+        subscription: TrafficInfluSub,
+    ):
+        # todo oai add dnn, ssnai, afServiceId
+        subscription.dnn = "oai"
+        subscription.add_snssai(1, "FFFFFF")
+        subscription.afServiceId = self.scs_as_id
 
-    def get_qod_session(self, session_id: str) -> Dict:
+    def core_specific_traffic_influence_validation(
+        self, traffic_influence_info: CreateTrafficInfluence
+    ) -> None:
         """
-        Retrieves details of a specific Quality on Demand (QoS) session.
-        It maps CAMARA QoD API GET /sessions/{sessionId} to
-        OAI NEF GET /3gpp-as-session-with-qos/v1/{scs_as_id}/subscriptions/{subscriptionId}
-        """
-        try:
-            res = oai_as_session_with_qos_get(
-                self.base_url, self.scs_as_id, session_id=session_id
-            )
-            nef_res = OaiAsSessionWithQosSubscription(**res)
-            qod_info = as_session_with_qos_to_camara_qod(nef_res)
+        Validates core-specific parameters for the session creation.
 
-            log.info(f"QoD session retrived successfully [id={session_id}]")
+        args:
+            session_info: The session information to validate.
 
-            return qod_info
-        except ValidationError as e:
-            raise OaiNetworkError("Could not validate network response data") from e
-        except OaiHttpError as e:
-            raise OaiNetworkError(
-                f"The network could not enable the QoD Session. It returned {e}"
-            ) from e
-        except OaiNetworkError as e:
-            raise e
+        raises:
+            ValidationError: If the session information does not meet core-specific requirements.
+        """
+        # Placeholder for core-specific validation logic
+        # This method should be overridden by subclasses if needed
 
-    def delete_qod_session(self, session_id: str) -> None:
-        """
-        Deletes a specific Quality on Demand (QoS) session.
-        It maps CAMARA QoD API DELETE /sessions/{sessionId} to
-        OAI NEF DELETE /3gpp-as-session-with-qos/v1/{scs_as_id}/subscriptions/{subscriptionId}
-        """
-        try:
-            oai_as_session_with_qos_delete(
-                self.base_url, self.scs_as_id, session_id=session_id
+        if (
+            traffic_influence_info.device is None
+            or traffic_influence_info.device.ipv4Address is None
+        ):
+            raise OaiValidationError(
+                "OAI requires UE IPv4 Address to activate Traffic Influence"
             )
 
-            log.info(f"QoD session deleted successfully [id={session_id}]")
 
-        except OaiHttpError as e:
-            raise OaiNetworkError(
-                f"The network could not enable the QoD Session. It returned {e}"
-            ) from e
-        except OaiNetworkError as e:
-            raise e
+def _retrieve_ue_ipv4(session_info: CreateSession):
+    return session_info.device.ipv4Address.root.privateAddress
 
-    # implementation of the NetworkManagementInterface Traffic Influence Methods
-    def create_traffic_influence_resource(self, traffic_influence_info):
-        try:
-            ti_input = CamaraTrafficInfluence(**traffic_influence_info)
 
-            # convert CAMARA TI to NEF TrafficInflSub model and do POST
-            nef_req = camara_ti_to_3gpp_ti(ti_input)
-            nef_res = oai_traffic_influence_post(self.base_url, self.scs_as_id, nef_req)
+def _retrieve_app_ipv4(session_info: CreateSession):
+    return session_info.applicationServer.ipv4Address
 
-            # retrieve the NEF resource id
-            if "self" in nef_res.keys():
-                nef_url = nef_res["self"]
-                nef_id = nef_url.split("subscriptions/")[1]
-            else:
-                raise OaiNetworkError(
-                    "No valid ID for the created resource was returned"
-                )
 
-            # create TI session detail and return info with resource Id
-            ti_input.trafficInfluenceID = nef_id
+def _add_qod_flow_descriptor(
+    qos_sub: AsSessionWithQoSSubscription, flow_desriptor: str
+):
+    qos_sub.flowInfo = list()
+    qos_sub.flowInfo.append(
+        FlowInfo(flowId=len(qos_sub.flowInfo) + 1, flowDescriptions=[flow_desriptor])
+    )
 
-            log.info(f"Traffic Influence session activated successfully [id={nef_id}]")
 
-            return ti_input
+def _add_qod_snssai(qos_sub: AsSessionWithQoSSubscription, sst: int, sd: str = None):
+    qos_sub.snssai = Snssai(sst=sst, sd=sd)
 
-        except ValidationError as e:
-            raise OaiNetworkError("Could not validate Traffic Influence data") from e
-        except KeyError as e:
-            raise OaiNetworkError(
-                f"Missing field in Traffic Influence data: {e}"
-            ) from e
-        except OaiHttpError as e:
-            raise OaiNetworkError(
-                f"The network could not enable the Traffic Influence Session. It returned {e}"
-            ) from e
-        except OaiNetworkError as e:
-            raise e
 
-    def delete_traffic_influence_resource(self, session_id):
-        """
-        Deletes a specific Traffic Influence (TI) session.
-        It maps CAMARA TI API DELETE /sessions/{sessionId} to
-        OAI NEF DELETE /3gpp-traffic-influence/v1/{scs_as_id}/subscriptions/{subscriptionId}
-        """
-        try:
-            oai_traffic_influence_delete(
-                self.base_url, self.scs_as_id, session_id=session_id
-            )
-
-            log.info(f"TI session deleted successfully [id={session_id}]")
-
-        except OaiHttpError as e:
-            raise OaiNetworkError(
-                f"The network could not delete the TI session. It returned {e}"
-            ) from e
-        except OaiNetworkError as e:
-            raise e
-
-    def put_traffic_influence_resource(self, resource_id, traffic_influence_info):
-        try:
-            qod_input = CamaraTrafficInfluence(**traffic_influence_info)
-
-            # convert CAMARA TI to NEF TrafficInflSub model and do POST
-            nef_req = camara_ti_to_3gpp_ti(qod_input)
-            updated_res = oai_traffic_influence_put(
-                self.base_url, self.scs_as_id, resource_id, nef_req
-            )
-
-            log.info(
-                f"Traffic Influence resource updated successfully [id={resource_id}]"
-            )
-
-            return updated_res
-
-        except ValidationError as e:
-            raise OaiNetworkError("Could not validate Traffic Influence data") from e
-        except KeyError as e:
-            raise OaiNetworkError(
-                f"Missing field in Traffic Influence data: {e}"
-            ) from e
-        except OaiHttpError as e:
-            raise OaiNetworkError(
-                f"The network could not update the Traffic Influence Session. It returned {e}"
-            ) from e
-        except OaiNetworkError as e:
-            raise e
+class OaiValidationError(Exception):
+    pass
