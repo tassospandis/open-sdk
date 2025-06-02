@@ -5,11 +5,11 @@
 
 import ipaddress
 from enum import Enum
+from ipaddress import IPv4Address, IPv6Address
 from typing import Annotated
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, NonNegativeInt, RootModel
 from pydantic_extra_types.mac_address import MacAddress
-from ipaddress import IPv4Address, IPv6Address
 
 
 class FlowDirection(Enum):
@@ -147,8 +147,8 @@ class AsSessionWithQoSSubscription(BaseModel):
             lower the index of the array for a given entry, the higher the priority.",
         min_items=1,
     )
-    ueIpv4Addr: ipaddress.Ipv4Addr | None = None
-    ueIpv6Addr: ipaddress.Ipv6Addr | None = None
+    ueIpv4Addr: ipaddress.IPv4Address | None = None
+    ueIpv6Addr: ipaddress.IPv6Address | None = None
     macAddr: MacAddress | None = None
     usageThreshold: UsageThreshold | None = None
     sponsorInfo: SponsorInformation | None = None

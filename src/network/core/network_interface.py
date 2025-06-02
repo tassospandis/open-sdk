@@ -8,6 +8,7 @@
 #
 # Contributors:
 #   - Reza Mosahebfard (reza.mosahebfard@i2cat.net)
+#   - Ferran Cañellas (ferran.canellas@i2cat.net)
 ##
 from abc import ABC, abstractmethod
 from itertools import product
@@ -121,7 +122,7 @@ class NetworkManagementInterface(ABC):
         )
         self.add_core_specific_parameters(subscription)
         url = f"{self.base_url}/{self.scs_as_id}/subscriptions"
-        common.as_session_with_qos_post(self.base_url, self.scs_as_id, subscription)
+        common.as_session_with_qos_post(url, self.scs_as_id, subscription)
 
     def get_qod_session(self, session_id: str) -> Dict:
         """

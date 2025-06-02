@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Common utilities (errors, HTTP helpers) used by the Open5GS client implementation (client.py).
 
-from pydantic import BaseModel
 import requests
+from pydantic import BaseModel
 
 from src import logger
 
