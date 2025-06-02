@@ -34,7 +34,7 @@ class AppDeployData(BaseModel):
 
 class AppDeploy(BaseModel):
     app_deploy_data: AppDeployData
-    app_parameters: Optional[AppParameters] = None
+    app_parameters: Optional[AppParameters] = Field(default=AppParameters())
 
 
 # Artefact
