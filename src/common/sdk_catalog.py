@@ -11,6 +11,7 @@ def _edgecloud_catalog(client_name: str, base_url: str):
     edge_cloud_factory = {
         "aeros": lambda url: AerosClient(base_url=url),
         "i2edge": lambda url: I2EdgeClient(base_url=url),
+        # TODO: uncomment when missing PiEdge's imports are added
         # "piedge": lambda url: PiEdgeClient(base_url=url),
     }
     try:
@@ -21,35 +22,45 @@ def _edgecloud_catalog(client_name: str, base_url: str):
         )
 
 
-def _network_catalog(client_name: str, base_url: str):
+def _network_catalog(client_name: str, base_url: str, scs_as_id: str):
     network_factory = {
-        "open5gs": lambda url: Open5GSClient(base_url=url),
-        "oai": lambda url: OaiCoreClient(base_url=url),
-        "open5gcore": lambda url: Open5GCoreClient(base_url=url),
+        "open5gs": lambda url, scs_id: Open5GSClient(base_url=url, scs_as_id=scs_id),
+        "oai": lambda url, scs_id: OaiCoreClient(base_url=url, scs_as_id=scs_id),
+        "open5gcore": lambda url, scs_id: Open5GCoreClient(
+            base_url=url, scs_as_id=scs_id
+        ),
     }
     try:
-        return network_factory[client_name](base_url)
+        return network_factory[client_name](base_url, scs_as_id)
     except KeyError:
         raise ValueError(
             f"Invalid network client '{client_name}'. Available: {list(network_factory)}"
         )
 
 
-class UniversalClientCatalog:
+# def _oran_catalog(client_name: str, base_url: str):
+#     # TODO
+
+
+class SdkClientCatalog:
     _domain_factories = {
         "edgecloud": _edgecloud_catalog,
         "network": _network_catalog,
+        # "oran": _oran_catalog,
     }
 
     @classmethod
-    def get_client(cls, domain: str, client_name: str, base_url: str):
+    def get_client(cls, domain: str, client_name: str, base_url: str, **kwargs):
         try:
             catalog = cls._domain_factories[domain]
         except KeyError:
             raise ValueError(
                 f"Unsupported domain '{domain}'. Supported: {list(cls._domain_factories)}"
             )
-        return catalog(client_name, base_url)
 
-
-universal_client_catalog = UniversalClientCatalog()
+        if domain == "network":
+            if "scs_as_id" not in kwargs:
+                raise ValueError("Missing required 'scs_as_id' for network clients.")
+            return catalog(client_name, base_url, kwargs["scs_as_id"])
+        else:
+            return catalog(client_name, base_url)
