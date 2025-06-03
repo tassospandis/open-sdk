@@ -49,7 +49,9 @@ class SdkClientCatalog:
     }
 
     @classmethod
-    def get_client(cls, domain: str, client_name: str, base_url: str, **kwargs):
+    def instantiate_and_retrieve_clients(
+        cls, domain: str, client_name: str, base_url: str, **kwargs
+    ):
         try:
             catalog = cls._domain_factories[domain]
         except KeyError:
@@ -57,9 +59,3 @@ class SdkClientCatalog:
                 f"Unsupported domain '{domain}'. Supported: {list(cls._domain_factories)}"
             )
         return catalog(client_name, base_url, **kwargs)
-        if domain == "network":
-            if "scs_as_id" not in kwargs:
-                raise ValueError("Missing required 'scs_as_id' for network clients.")
-            return catalog(client_name, base_url, kwargs["scs_as_id"])
-        else:
-            return catalog(client_name, base_url)
