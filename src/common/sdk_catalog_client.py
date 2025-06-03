@@ -5,7 +5,9 @@ from src.common.sdk_catalog import SdkClientCatalog
 
 class SdkCatalogClient:
     @staticmethod
-    def create_clients(client_specs: Dict[str, Dict[str, str]]) -> Dict[str, object]:
+    def create_clients_from(
+        client_specs: Dict[str, Dict[str, str]],
+    ) -> Dict[str, object]:
         """
         Create and return a dictionary of instantiated edgecloud/network/o-ran clients
         based on the provided specifications.
@@ -44,7 +46,7 @@ class SdkCatalogClient:
             >>> edgecloud_client.get_edge_cloud_zones()
             >>> network_client.get_qod_session(session_id="example_session_id")
         """
-        universal_client_catalog = SdkClientCatalog()
+        sdk_client_catalog = SdkClientCatalog()
         clients = {}
 
         for domain, config in client_specs.items():
@@ -56,7 +58,7 @@ class SdkCatalogClient:
                 k: v for k, v in config.items() if k not in ("client_name", "base_url")
             }
 
-            client = universal_client_catalog.get_client(
+            client = sdk_client_catalog.instantiate_and_retrieve_clients(
                 domain, client_name, base_url, **kwargs
             )
             clients[domain] = client
