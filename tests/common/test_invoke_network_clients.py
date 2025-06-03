@@ -18,18 +18,20 @@ NETWORK_TEST_CASES = [
             "scs_as_id": "scs2",
         }
     },
-    {
-        "network": {
-            "client_name": "open5gcore",
-            "base_url": "http://test-open5gcore.url",
-            "scs_as_id": "scs3",
-        }
-    },
+    # TODO: Once the functionality from QoD, Location-retrieval and
+    # traffic influnce is validated, tests can be carried out for Open5GCore
+    # {
+    #     "network": {
+    #         "client_name": "open5gcore",
+    #         "base_url": "http://test-open5gcore.url",
+    #         "scs_as_id": "scs3",
+    #     }
+    # },
 ]
 
 
 @pytest.mark.parametrize(
-    "client_specs", NETWORK_TEST_CASES, ids=["open5gs", "oai", "open5gcore"]
+    "client_specs", NETWORK_TEST_CASES, ids=["open5gs", "oai"]  # TODO add Open5gcore
 )
 def test_network_platform_instantiation(client_specs):
     """Test instantiation of all network platform clients"""

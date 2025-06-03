@@ -23,8 +23,8 @@ jobs:
     - name: "Run test: validate edge cloud clients instantiation"
       run: pytest -v tests/common/test_invoke_edgecloud_clients.py
 
-    # - name: "Run test: validate network clients instantiation"
-    #   run: pytest -v tests/common/test_invoke_network_clients.py
+    - name: "Run test: validate network clients instantiation"
+      run: pytest -v tests/common/test_invoke_network_clients.py
 
   lint:
     name: Run linters
