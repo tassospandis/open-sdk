@@ -15,8 +15,9 @@ Key features:
 """
 import pytest
 
+from src.common.sdk_catalog_client import SdkCatalogClient
 from src.edgecloud.clients.errors import EdgeCloudPlatformError
-from src.edgecloud.core.edgecloud_factory import EdgeCloudFactory
+from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
 from tests.edgecloud.test_cases import test_cases
 from tests.edgecloud.test_config import (
     APP_ID,
@@ -31,14 +32,18 @@ from tests.edgecloud.test_config import (
 )
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
-def test_get_edge_cloud_zones(client_name, base_url):
-    """
-    Test the format of the response from get_edge_cloud_zones for each client.
-    """
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(client_name, base_url)
+@pytest.fixture(scope="function")
+def edgecloud_client(request):
+    """Fixture to create and share an edgecloud client across tests"""
+    client_specs = request.param
+    clients = SdkCatalogClient.create_clients_from(client_specs)
+    return clients.get("edgecloud")
+
+
+@pytest.mark.parametrize("edgecloud_client", test_cases, indirect=True)
+def test_get_edge_cloud_zones(edgecloud_client):
     try:
-        zones = edgecloud_platform.get_edge_cloud_zones()
+        zones = edgecloud_client.get_edge_cloud_zones()
         assert isinstance(zones, list)
         for zone in zones:
             assert "zoneId" in zone
@@ -47,18 +52,17 @@ def test_get_edge_cloud_zones(client_name, base_url):
         pytest.fail(f"Failed to retrieve zones: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
-def test_get_edge_cloud_zones_details(client_name, base_url, zone_id=ZONE_ID):
+@pytest.mark.parametrize("edgecloud_client", test_cases, indirect=True)
+def test_get_edge_cloud_zones_details(edgecloud_client, zone_id=ZONE_ID):
     """
     Test that get_edge_cloud_zone_details returns valid responses for each client.
     Since each client has different response formats, we only verify basic success criteria.
     """
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(client_name, base_url)
     try:
-        zones = edgecloud_platform.get_edge_cloud_zones()
+        zones = edgecloud_client.get_edge_cloud_zones()
         assert len(zones) > 0, "No zones available for testing"
 
-        zone_details = edgecloud_platform.get_edge_cloud_zones_details(zone_id)
+        zone_details = edgecloud_client.get_edge_cloud_zones_details(zone_id)
 
         # Basic checks that apply to all clients
         assert zone_details is not None, "Zone details should not be None"
@@ -71,14 +75,11 @@ def test_get_edge_cloud_zones_details(client_name, base_url, zone_id=ZONE_ID):
         pytest.fail(f"Missing expected key in response: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
-def test_create_artefact_success(client_name, base_url):
-    if client_name == "i2edge":
-        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-            client_name, base_url
-        )
+@pytest.mark.parametrize("edgecloud_client", test_cases, indirect=True)
+def test_create_artefact_success(edgecloud_client):
+    if isinstance(edgecloud_client, I2EdgeClient):
         try:
-            edgecloud_platform._create_artefact(
+            edgecloud_client._create_artefact(
                 artefact_id=ARTEFACT_ID,
                 artefact_name=ARTEFACT_NAME,
                 repo_name=REPO_NAME,
@@ -92,64 +93,49 @@ def test_create_artefact_success(client_name, base_url):
             pytest.fail(f"Artefact creation failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
-def test_onboard_app_success(client_name, base_url):
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(client_name, base_url)
+@pytest.mark.parametrize("edgecloud_client", test_cases, indirect=True)
+def test_onboard_app_success(edgecloud_client):
     try:
-        edgecloud_platform.onboard_app(APP_ONBOARD_MANIFEST)
+        edgecloud_client.onboard_app(APP_ONBOARD_MANIFEST)
     except EdgeCloudPlatformError as e:
         pytest.fail(f"App onboarding failed unexpectedly: {e}")
 
 
-@pytest.fixture(scope="module")
-def deployed_app(request):
-    client_name, base_url = request.param
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(client_name, base_url)
+@pytest.fixture(scope="function")
+def deployed_app(edgecloud_client):
     try:
-        output = edgecloud_platform.deploy_app(APP_ID, APP_ZONES)
-        return {
-            "client_name": client_name,
-            "base_url": base_url,
-            "appInstanceId": output["deploy_name"],
-        }
+        output = edgecloud_client.deploy_app(APP_ID, APP_ZONES)
+        return {"appInstanceId": output["deploy_name"]}
     except EdgeCloudPlatformError as e:
         pytest.fail(f"App deployment failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("deployed_app", test_cases, indirect=True)
-def test_deploy_app_success(deployed_app):
+@pytest.mark.parametrize("edgecloud_client", test_cases, indirect=True)
+def test_deploy_app_success(edgecloud_client, deployed_app):
     assert "appInstanceId" in deployed_app
-    if "client_name" in deployed_app == "i2edge":
-        assert deployed_app["appInstanceId"].startswith(ARTEFACT_NAME)
+    assert deployed_app["appInstanceId"] is not None
 
 
-@pytest.mark.parametrize("deployed_app", test_cases, indirect=True)
-def test_undeploy_app_success(deployed_app):
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-        deployed_app["client_name"], deployed_app["base_url"]
-    )
+@pytest.mark.parametrize("edgecloud_client", test_cases, indirect=True)
+def test_undeploy_app_success(edgecloud_client, deployed_app):
     try:
-        edgecloud_platform.undeploy_app(deployed_app["appInstanceId"])
+        edgecloud_client.undeploy_app(deployed_app["appInstanceId"])
     except EdgeCloudPlatformError as e:
         pytest.fail(f"App undeployment failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
-def test_delete_onboarded_app_success(client_name, base_url):
-    edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(client_name, base_url)
+@pytest.mark.parametrize("edgecloud_client", test_cases, indirect=True)
+def test_delete_onboarded_app_success(edgecloud_client):
     try:
-        edgecloud_platform.delete_onboarded_app(app_id=APP_ONBOARD_MANIFEST["appId"])
+        edgecloud_client.delete_onboarded_app(app_id=APP_ONBOARD_MANIFEST["appId"])
     except EdgeCloudPlatformError as e:
         pytest.fail(f"App onboarding deletion failed unexpectedly: {e}")
 
 
-@pytest.mark.parametrize("client_name, base_url", test_cases)
-def test_delete_artefact_success(client_name, base_url):
-    if client_name == "i2edge":
-        edgecloud_platform = EdgeCloudFactory.create_edgecloud_client(
-            client_name, base_url
-        )
+@pytest.mark.parametrize("edgecloud_client", test_cases, indirect=True)
+def test_delete_artefact_success(edgecloud_client):
+    if isinstance(edgecloud_client, I2EdgeClient):
         try:
-            edgecloud_platform._delete_artefact(artefact_id=ARTEFACT_ID)
+            edgecloud_client._delete_artefact(artefact_id=ARTEFACT_ID)
         except EdgeCloudPlatformError as e:
             pytest.fail(f"Artefact deletion failed unexpectedly: {e}")

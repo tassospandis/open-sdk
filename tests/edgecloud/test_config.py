@@ -10,7 +10,7 @@ the EdgeCloud Platform integration across different clients.
 # i2Edge variables
 ######################
 # EdgeCloud Zone
-ZONE_ID = "Omega"
+ZONE_ID = "Omega12345"
 
 # Artefact
 ARTEFACT_ID = "i2edgechart-id-2"
