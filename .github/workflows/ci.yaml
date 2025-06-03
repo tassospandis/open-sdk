@@ -7,21 +7,24 @@ on:
     branches: [ main ]
 
 jobs:
-  # tests:
-  #   name: Run tests
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: python:3.12-slim
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.12-slim
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-  #   - name: Install dependencies
-  #     run: pip install -r requirements.txt
+    - name: Install dependencies
+      run: pip install -r requirements.txt
 
-  #   - name: Run pytest
-  #     run: pytest tests/edgecloud
+    - name: "Run test: validate edge cloud clients instantiation"
+      run: pytest -v tests/common/test_invoke_edgecloud_clients.py
+
+    # - name: "Run test: validate network clients instantiation"
+    #   run: pytest -v tests/common/test_invoke_network_clients.py
 
   lint:
     name: Run linters
