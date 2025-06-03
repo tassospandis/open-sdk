@@ -8,6 +8,7 @@
 #
 # Contributors:
 #   - Reza Mosahebfard (reza.mosahebfard@i2cat.net)
+#   - Ferran Cañellas (ferran.canellas@i2cat.net)
 ##
 from abc import ABC, abstractmethod
 from itertools import product
@@ -193,6 +194,18 @@ class NetworkManagementInterface(ABC):
         return common.as_session_with_qos_post(
             self.base_url, self.scs_as_id, subscription
         )
+        valid_session_info = schemas.CreateSession.model_validate(session_info)
+        self.core_specific_validation(valid_session_info)
+        subscription = schemas.AsSessionWithQoSSubscription(
+            notificationDestination=valid_session_info.sink,
+            qosReference=valid_session_info.qosProfile,
+            ueIpv4Addr=valid_session_info.device.ipv4Address,
+            ueIpv6Addr=valid_session_info.device.ipv6Address,
+            usageThreshold=schemas.UsageThreshold(duration=valid_session_info.duration),
+        )
+        self.add_core_specific_parameters(subscription)
+        url = f"{self.base_url}/{self.scs_as_id}/subscriptions"
+        common.as_session_with_qos_post(url, self.scs_as_id, subscription)
 
     def get_qod_session(self, session_id: str) -> Dict:
         """

@@ -152,8 +152,6 @@ class AsSessionWithQoSSubscription(BaseModel):
             lower the index of the array for a given entry, the higher the priority.",
         min_length=1,
     )
-    snssai: Snssai | None = None
-    dnn: str | None = None
     ueIpv4Addr: ipaddress.IPv4Address | None = None
     ueIpv6Addr: ipaddress.IPv6Address | None = None
     macAddr: MacAddress | None = None
