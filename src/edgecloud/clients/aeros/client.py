@@ -19,9 +19,24 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
     FIXME: Handle None responses from continuum client
     """
 
-    def __init__(self, base_url: str):
+    def __init__(self, base_url: str, **kwargs):
         self.base_url = base_url
         self.logger = setup_logger(__name__, is_debug=True, file_name=config.LOG_FILE)
+
+        # Overwrite config values if provided via kwargs
+        if "aerOS_API_URL" in kwargs:
+            config.aerOS_API_URL = kwargs["aerOS_API_URL"]
+        if "aerOS_ACCESS_TOKEN" in kwargs:
+            config.aerOS_ACCESS_TOKEN = kwargs["aerOS_ACCESS_TOKEN"]
+        if "aerOS_HLO_TOKEN" in kwargs:
+            config.aerOS_HLO_TOKEN = kwargs["aerOS_HLO_TOKEN"]
+
+        if not config.aerOS_API_URL:
+            raise ValueError("Missing 'aerOS_API_URL'")
+        if not config.aerOS_ACCESS_TOKEN:
+            raise ValueError("Missing 'aerOS_ACCESS_TOKEN'")
+        if not config.aerOS_HLO_TOKEN:
+            raise ValueError("Missing 'aerOS_HLO_TOKEN'")
 
     def onboard_app(self, app_manifest: Dict) -> Dict:
         # HLO-FE POST with TOSCA and app_id (service_id)

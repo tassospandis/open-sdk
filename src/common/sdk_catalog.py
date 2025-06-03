@@ -7,15 +7,14 @@ from src.network.clients.open5gs.client import NetworkManager as Open5GSClient
 # from src.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
 
 
-def _edgecloud_catalog(client_name: str, base_url: str):
+def _edgecloud_catalog(client_name: str, base_url: str, **kwargs):
     edge_cloud_factory = {
-        "aeros": lambda url: AerosClient(base_url=url),
+        "aeros": lambda url, **kw: AerosClient(base_url=url, **kw),
         "i2edge": lambda url: I2EdgeClient(base_url=url),
-        # TODO: uncomment when missing PiEdge's imports are added
-        # "piedge": lambda url: PiEdgeClient(base_url=url),
+        # "piedge": lambda url: PiEdgeClient(base_url=url), Uncomment when import issues are solved
     }
     try:
-        return edge_cloud_factory[client_name](base_url)
+        return edge_cloud_factory[client_name](base_url, **kwargs)
     except KeyError:
         raise ValueError(
             f"Invalid edgecloud client '{client_name}'. Available: {list(edge_cloud_factory)}"
@@ -57,7 +56,7 @@ class SdkClientCatalog:
             raise ValueError(
                 f"Unsupported domain '{domain}'. Supported: {list(cls._domain_factories)}"
             )
-
+        return catalog(client_name, base_url, **kwargs)
         if domain == "network":
             if "scs_as_id" not in kwargs:
                 raise ValueError("Missing required 'scs_as_id' for network clients.")
