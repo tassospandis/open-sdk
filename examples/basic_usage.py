@@ -1,7 +1,5 @@
 from src.common.sdk_catalog_client import SdkCatalogClient
 
-# "src.common.universal_catalog_client" would be equivalent to "sunrise6g_opensdk"
-
 
 def main():
     # The module importing the SDK, loads the config
@@ -9,8 +7,7 @@ def main():
         "edgecloud": {
             "client_name": "i2edge",
             "base_url": "http://192.168.123.237:30769/",
-        }
-        # ,
+        },
         # "network": {
         #     "client_name": "open5gs",
         #     "base_url": "http://IP:PORT",
@@ -18,17 +15,16 @@ def main():
         # }
     }
 
-    clients = SdkCatalogClient.create_clients(client_specs)
+    clients = SdkCatalogClient.create_clients_from(client_specs)
 
+    # EdgeCloud
     edgecloud_client = clients.get("edgecloud")
-    # network_client = clients.get("network")
-
-    # Example of edgecloud client in action
     print("Testing edgecloud client function: get_edge_cloud_zones:")
     zones = edgecloud_client.get_edge_cloud_zones()
     print(zones)
 
-    # # Example of network client in action
+    # # Network
+    # network_client = clients.get("network")
     # print("Testing network client function: EXAMPLE_FUNCTION:")
     # network_client.get_qod_session(session_id="example_session_id")
 
