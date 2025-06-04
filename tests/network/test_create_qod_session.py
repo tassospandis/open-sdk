@@ -2,13 +2,14 @@
 import pytest
 
 from src.common.sdk_catalog_client import SdkCatalogClient
+from src.network.clients.open5gs.client import NetworkManager
 
 OPEN5GS_TEST_CASES = [
     {
         "network": {
             "client_name": "open5gs",
-            "base_url": "http://192.168.124.233:30769/",
-            "scs_as_id": "scs1",
+            "base_url": "http://192.168.124.233:8082/",
+            "scs_as_id": "scs",
         }
     }
 ]
@@ -20,7 +21,9 @@ OPEN5GS_TEST_CASES = [
     ids=["open5gs"],
 )
 def test_valid_input_open5gs(client_specs):
-    network_client = SdkCatalogClient.create_clients_from(client_specs)["network"]
+    network_client: NetworkManager = SdkCatalogClient.create_clients_from(client_specs)[
+        "network"
+    ]
 
     camara_session = {
         "duration": 3600,
@@ -33,7 +36,8 @@ def test_valid_input_open5gs(client_specs):
         "qosProfile": "qos-e",
         "sink": "https://endpoint.example.com/sink",
     }
-    network_client._build_qod_subscription(camara_session)
+    subscription = network_client._build_qod_subscription(camara_session)
+    print(subscription.model_dump_json(exclude_none=True, by_alias=True))
 
 
 @pytest.mark.parametrize(
@@ -42,7 +46,9 @@ def test_valid_input_open5gs(client_specs):
     ids=["open5gs"],
 )
 def test_create_qod_session_open5gs(client_specs):
-    network_client = SdkCatalogClient.create_clients_from(client_specs)["network"]
+    network_client: NetworkManager = SdkCatalogClient.create_clients_from(client_specs)[
+        "network"
+    ]
 
     camara_session = {
         "duration": 3600,
