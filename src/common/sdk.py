@@ -1,9 +1,19 @@
+# -*- coding: utf-8 -*-
+##
+# Copyright 2025-present by Software Networks Area, i2CAT.
+# All rights reserved.
+#
+# This file is part of the Open SDK
+#
+# Contributors:
+#   - Adrián Pino Martínez (adrian.pino@i2cat.net)
+##
 from typing import Dict
 
-from src.common.sdk_catalog import SdkClientCatalog
+from src.common.sdk_factory import SdkFactory
 
 
-class SdkCatalogClient:
+class Sdk:
     @staticmethod
     def create_clients_from(
         client_specs: Dict[str, Dict[str, str]],
@@ -46,7 +56,7 @@ class SdkCatalogClient:
             >>> edgecloud_client.get_edge_cloud_zones()
             >>> network_client.get_qod_session(session_id="example_session_id")
         """
-        sdk_client_catalog = SdkClientCatalog()
+        sdk_client = SdkFactory()
         clients = {}
 
         for domain, config in client_specs.items():
@@ -58,7 +68,7 @@ class SdkCatalogClient:
                 k: v for k, v in config.items() if k not in ("client_name", "base_url")
             }
 
-            client = sdk_client_catalog.instantiate_and_retrieve_clients(
+            client = sdk_client.instantiate_and_retrieve_clients(
                 domain, client_name, base_url, **kwargs
             )
             clients[domain] = client
