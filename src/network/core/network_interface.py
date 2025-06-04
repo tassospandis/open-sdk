@@ -29,7 +29,9 @@ def flatten_port_spec(ports_spec: schemas.PortsSpec | None) -> list[str]:
         flat_ports.extend([str(port) for port in ports_spec.ports])
     if ports_spec and ports_spec.ranges:
         has_ranges = True
-        flat_ports.extend([f"{range.from_}-{range.to}" for range in ports_spec.ranges])
+        flat_ports.extend(
+            [f"{range.from_.root}-{range.to.root}" for range in ports_spec.ranges]
+        )
     if not has_ports and not has_ranges:
         flat_ports.append("0-65535")
     return flat_ports
@@ -43,19 +45,26 @@ def build_flows(
     server_ports = flatten_port_spec(session_info.applicationServerPorts)
     ports_combis = list(product(device_ports, server_ports))
 
-    device_ip = session_info.device.ipv4Address or session_info.device.ipv4Address
+    device_ip = session_info.device.ipv4Address or session_info.device.ipv6Address
+    if isinstance(device_ip, schemas.DeviceIpv6Address):
+        device_ip = device_ip.root
+    else:  # IPv4
+        device_ip = (
+            device_ip.root.publicAddress.root or device_ip.root.privateAddress.root
+        )
+    device_ip = str(device_ip)
     server_ip = (
         session_info.applicationServer.ipv4Address
         or session_info.applicationServer.ipv6Address
     )
-
+    server_ip = server_ip.root
     flow_descrs = []
     for device_port, server_port in ports_combis:
         flow_descrs.append(
             f"permit in ip from {device_ip} {device_port} to {server_ip} {server_port}"
         )
         flow_descrs.append(
-            f"permit out ip from {device_ip} {device_port} to {server_ip} {server_port}"
+            f"permit out ip from {server_ip} {server_port} to {device_ip} {device_port}"
         )
     flows = [
         schemas.FlowInfo(flowId=flow_id, flowDescriptions=[", ".join(flow_descrs)])
@@ -130,7 +139,9 @@ class NetworkManagementInterface(ABC):
         # This method should be overridden by subclasses if needed
         pass
 
-    def _build_qod_subscription(self, session_info: Dict) -> None:
+    def _build_qod_subscription(
+        self, session_info: Dict
+    ) -> schemas.AsSessionWithQoSSubscription:
         valid_session_info = schemas.CreateSession.model_validate(session_info)
         device_ipv4 = None
         if valid_session_info.device.ipv4Address:

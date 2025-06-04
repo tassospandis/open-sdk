@@ -35,7 +35,7 @@ def _make_request(method: str, url: str, data=None):
 def as_session_with_qos_post(
     base_url: str, scs_as_id: str, model_payload: BaseModel
 ) -> dict:
-    data = model_payload.model_dump_json(exclude_none=True)
+    data = model_payload.model_dump_json(exclude_none=True, by_alias=True)
     url = as_session_with_qos_build_url(base_url, scs_as_id)
     return _make_request("POST", url, data=data)
 

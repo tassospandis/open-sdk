@@ -38,13 +38,13 @@ class NetworkManager(NetworkManagementInterface):
             log.error(f"Failed to initialize Open5GSClient: {e}")
             raise e
 
-    def core_specific_validation(self, session_info: schemas.CreateSession):
+    def core_specific_qod_validation(self, session_info: schemas.CreateSession):
         if session_info.qosProfile.root not in flow_id_mapping.keys():
             raise ValidationError(
                 f"Open5Gs only supports these qos-profiles: {', '.join(flow_id_mapping.keys())}"
             )
 
-    def add_core_specific_parameters(
+    def add_core_specific_qod_parameters(
         self,
         session_info: schemas.CreateSession,
         subscription: schemas.AsSessionWithQoSSubscription,
