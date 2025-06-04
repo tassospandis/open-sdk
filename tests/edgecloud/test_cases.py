@@ -3,9 +3,7 @@ test_cases = [
     {
         "edgecloud": {
             "client_name": "i2edge",
-            # "base_url": "http://192.168.123.89:30769/",
-            "base_url": "http://192.168.123.89:30769/",
-            # "base_url": "http://192.168.123.237:30760/",
+            "base_url": "http://192.168.123.48:30769/",
         }
     },
     # {

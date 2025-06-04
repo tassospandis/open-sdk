@@ -1,8 +1,18 @@
 # -*- coding: utf-8 -*-
+##
+# Copyright 2025-present by Software Networks Area, i2CAT.
+# All rights reserved.
+#
+# This file is part of the Open SDK
+#
+# Contributors:
+#   - Adrián Pino Martínez (adrian.pino@i2cat.net)
+#   - Sergio Giménez (sergio.gimenez@i2cat.net)
+##
 """
 EdgeCloud Platform Test Configuration
 
-This module contains shared configuration constants and manifests for testing
+This file contains the configuration constants and manifests for testing
 the EdgeCloud Platform integration across different clients.
 """
 
@@ -10,7 +20,7 @@ the EdgeCloud Platform integration across different clients.
 # i2Edge variables
 ######################
 # EdgeCloud Zone
-ZONE_ID = "Omega12345"
+ZONE_ID = "Omega"
 
 # Artefact
 ARTEFACT_ID = "i2edgechart-id-2"
