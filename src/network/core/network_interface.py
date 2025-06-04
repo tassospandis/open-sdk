@@ -10,7 +10,7 @@
 #   - Reza Mosahebfard (reza.mosahebfard@i2cat.net)
 #   - Ferran Cañellas (ferran.canellas@i2cat.net)
 ##
-from abc import ABC, abstractmethod
+from abc import ABC
 from itertools import product
 from typing import Dict
 
@@ -78,7 +78,6 @@ class NetworkManagementInterface(ABC):
     base_url: str
     scs_as_id: str
 
-    @abstractmethod
     def add_core_specific_qod_parameters(
         self,
         session_info: schemas.CreateSession,
@@ -90,7 +89,6 @@ class NetworkManagementInterface(ABC):
         """
         pass
 
-    @abstractmethod
     def add_core_specific_ti_parameters(
         self,
         traffic_influence_info: schemas.CreateTrafficInfluence,
@@ -102,7 +100,6 @@ class NetworkManagementInterface(ABC):
         """
         pass
 
-    @abstractmethod
     def core_specific_qod_validation(self, session_info: schemas.CreateSession) -> None:
         """
         Validates core-specific parameters for the session creation.
@@ -117,7 +114,6 @@ class NetworkManagementInterface(ABC):
         # This method should be overridden by subclasses if needed
         pass
 
-    @abstractmethod
     def core_specific_traffic_influence_validation(
         self, traffic_influence_info: schemas.CreateTrafficInfluence
     ) -> None:
@@ -152,7 +148,6 @@ class NetworkManagementInterface(ABC):
         return subscription
 
     def _build_ti_subscription(self, traffic_influence_info: Dict):
-
         traffic_influence_data = schemas.CreateTrafficInfluence.model_validate(
             traffic_influence_info
         )
@@ -194,18 +189,6 @@ class NetworkManagementInterface(ABC):
         return common.as_session_with_qos_post(
             self.base_url, self.scs_as_id, subscription
         )
-        valid_session_info = schemas.CreateSession.model_validate(session_info)
-        self.core_specific_validation(valid_session_info)
-        subscription = schemas.AsSessionWithQoSSubscription(
-            notificationDestination=valid_session_info.sink,
-            qosReference=valid_session_info.qosProfile,
-            ueIpv4Addr=valid_session_info.device.ipv4Address,
-            ueIpv6Addr=valid_session_info.device.ipv6Address,
-            usageThreshold=schemas.UsageThreshold(duration=valid_session_info.duration),
-        )
-        self.add_core_specific_parameters(subscription)
-        url = f"{self.base_url}/{self.scs_as_id}/subscriptions"
-        common.as_session_with_qos_post(url, self.scs_as_id, subscription)
 
     def get_qod_session(self, session_id: str) -> Dict:
         """
