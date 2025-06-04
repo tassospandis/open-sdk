@@ -1,30 +1,36 @@
-from src.common.sdk_catalog_client import SdkCatalogClient
+from src.common.sdk import Sdk as sdkclient
+
+# Note: that is equivalent to "from sunrise6g-sdk import Sdk as sdkclient"
 
 
 def main():
-    # The module importing the SDK, loads the config
+    # The module that imports the SDK library, must specify "client_specs"
     client_specs = {
         "edgecloud": {
             "client_name": "i2edge",
-            "base_url": "http://192.168.123.237:30769/",
+            "base_url": "http://IP:PORT",
         },
-        # "network": {
-        #     "client_name": "open5gs",
-        #     "base_url": "http://IP:PORT",
-        #     "scs_as_id": "id_example"
-        # }
+        "network": {
+            "client_name": "open5gs",
+            "base_url": "http://IP:PORT",
+            "scs_as_id": "id_example",
+        },
     }
 
-    clients = SdkCatalogClient.create_clients_from(client_specs)
-
-    # EdgeCloud
+    clients = sdkclient.create_clients_from(client_specs)
     edgecloud_client = clients.get("edgecloud")
-    print("Testing edgecloud client function: get_edge_cloud_zones:")
-    zones = edgecloud_client.get_edge_cloud_zones()
-    print(zones)
+    network_client = clients.get("network")
 
-    # # Network
-    # network_client = clients.get("network")
+    print("EdgeCloud client ready to be used:", edgecloud_client)
+    print("EdgeCloud client ready to be used:", network_client)
+
+    # Examples:
+    # EdgeCloud
+    # print("Testing edgecloud client function: get_edge_cloud_zones:")
+    # zones = edgecloud_client.get_edge_cloud_zones()
+    # print(zones)
+
+    # Network
     # print("Testing network client function: EXAMPLE_FUNCTION:")
     # network_client.get_qod_session(session_id="example_session_id")
 

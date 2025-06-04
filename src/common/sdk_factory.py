@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+##
+# Copyright 2025-present by Software Networks Area, i2CAT.
+# All rights reserved.
+#
+# This file is part of the Open SDK
+#
+# Contributors:
+#   - Adrián Pino Martínez (adrian.pino@i2cat.net)
+##
 from src.edgecloud.clients.aeros.client import EdgeApplicationManager as AerosClient
 from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
 from src.network.clients.oai.client import NetworkManager as OaiCoreClient
@@ -7,7 +17,7 @@ from src.network.clients.open5gs.client import NetworkManager as Open5GSClient
 # from src.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
 
 
-def _edgecloud_catalog(client_name: str, base_url: str, **kwargs):
+def _edgecloud_factory(client_name: str, base_url: str, **kwargs):
     edge_cloud_factory = {
         "aeros": lambda url, **kw: AerosClient(base_url=url, **kw),
         "i2edge": lambda url: I2EdgeClient(base_url=url),
@@ -21,7 +31,7 @@ def _edgecloud_catalog(client_name: str, base_url: str, **kwargs):
         )
 
 
-def _network_catalog(client_name: str, base_url: str, **kwargs):
+def _network_factory(client_name: str, base_url: str, **kwargs):
     if "scs_as_id" not in kwargs:
         raise ValueError("Missing required 'scs_as_id' for network clients.")
     scs_as_id = kwargs.pop("scs_as_id")
@@ -45,15 +55,15 @@ def _network_catalog(client_name: str, base_url: str, **kwargs):
         )
 
 
-# def _oran_catalog(client_name: str, base_url: str):
+# def _oran_factory(client_name: str, base_url: str):
 #     # TODO
 
 
-class SdkClientCatalog:
+class SdkFactory:
     _domain_factories = {
-        "edgecloud": _edgecloud_catalog,
-        "network": _network_catalog,
-        # "oran": _oran_catalog,
+        "edgecloud": _edgecloud_factory,
+        "network": _network_factory,
+        # "oran": _oran_factory,
     }
 
     @classmethod

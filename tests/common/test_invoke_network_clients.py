@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from src.common.sdk_catalog_client import SdkCatalogClient
+from src.common.sdk import Sdk as sdkclient
 
 NETWORK_TEST_CASES = [
     {
@@ -30,12 +30,14 @@ NETWORK_TEST_CASES = [
 ]
 
 
-@pytest.mark.parametrize(
-    "client_specs", NETWORK_TEST_CASES, ids=["open5gs", "oai"]  # TODO add Open5gcore
-)
+def id_func(val):
+    return val["network"]["client_name"]
+
+
+@pytest.mark.parametrize("client_specs", NETWORK_TEST_CASES, ids=id_func)
 def test_network_platform_instantiation(client_specs):
     """Test instantiation of all network platform clients"""
-    clients = SdkCatalogClient.create_clients_from(client_specs)
+    clients = sdkclient.create_clients_from(client_specs)
 
     assert "network" in clients
     network_client = clients["network"]
