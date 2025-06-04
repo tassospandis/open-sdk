@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ##
 # Copyright 2025-present by Software Networks Area, i2CAT.
@@ -151,15 +150,14 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         except I2EdgeError as e:
             raise e
 
-    # WIP - Harcoded by now
     def _select_best_flavour_for_app(self, zone_id) -> str:
         """
         Selects the best flavour for the specified app requirements in a given zone.
         """
         # list_of_flavours = self.get_edge_cloud_zones_details(zone_id)
+        # <logic that select the best flavour>
         # TODO - Harcoded
-        # flavourId = "67080247e43a30ca79b50d7d"
-        flavourId = "6800c5199f29328e5691cd68"
+        flavourId = "67f3a0b0e3184a85952e174d"
         return flavourId
 
     def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
