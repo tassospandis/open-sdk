@@ -11,6 +11,7 @@
 ##
 import logging
 import sys
+from pathlib import Path
 
 from colorlog import ColoredFormatter
 
@@ -24,21 +25,20 @@ FILE_FORMATTER = "[%(asctime)s] {%(name)s: %(lineno)d} %(levelname)s - %(message
 
 
 def setup_logger(logger_name=APP_LOGGER_NAME, is_debug=True, file_name=None):
-
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG if is_debug else logging.INFO)
 
     colored_formatter = ColoredFormatter(COLORED_FORMATERR)
-    file_formatter = logging.Formatter(FILE_FORMATTER)
-
     sh = logging.StreamHandler(sys.stdout)
     sh.setFormatter(colored_formatter)
     logger.handlers.clear()
     logger.addHandler(sh)
 
     if file_name:
+        log_path = Path(file_name)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
         fh = logging.FileHandler(file_name)
-        fh.setFormatter(file_formatter)
+        fh.setFormatter(logging.Formatter(FILE_FORMATTER))
         logger.addHandler(fh)
 
     return logger

@@ -43,45 +43,17 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         except I2EdgeError as e:
             raise e
 
-    # Harcoded
     def get_edge_cloud_zones_details(
         self, zone_id: str, flavour_id: Optional[str] = None
     ) -> Dict:
-        # Minimal mocked response based on required fields of 'ZoneRegisteredData' in GSMA OPG E/WBI API
-        return {
-            "zoneId": zone_id,
-            "reservedComputeResources": [
-                {
-                    "cpuArchType": "ISA_X86_64",
-                    "numCPU": "4",
-                    "memory": 8192,
-                }
-            ],
-            "computeResourceQuotaLimits": [
-                {
-                    "cpuArchType": "ISA_X86_64",
-                    "numCPU": "8",
-                    "memory": 16384,
-                }
-            ],
-            "flavoursSupported": [
-                {
-                    "flavourId": "medium-x86",
-                    "cpuArchType": "ISA_X86_64",
-                    "supportedOSTypes": [
-                        {
-                            "architecture": "x86_64",
-                            "distribution": "UBUNTU",
-                            "version": "OS_VERSION_UBUNTU_2204_LTS",
-                            "license": "OS_LICENSE_TYPE_FREE",
-                        }
-                    ],
-                    "numCPU": 4,
-                    "memorySize": 8192,
-                    "storageSize": 100,
-                }
-            ],
-        }
+        url = "{}zone/{}".format(self.base_url, zone_id)
+        params = {}
+        try:
+            response = i2edge_get(url, params=params)
+            log.info("Availability zone details retrieved successfully")
+            return response
+        except I2EdgeError as e:
+            raise e
 
     def _create_artefact(
         self,
@@ -179,19 +151,93 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         except I2EdgeError as e:
             raise e
 
-    # Harcoded
+    # WIP - Harcoded by now
+    def _select_best_flavour_for_app(self, zone_id) -> str:
+        """
+        Selects the best flavour for the specified app requirements in a given zone.
+        """
+        # list_of_flavours = self.get_edge_cloud_zones_details(zone_id)
+        # TODO - Harcoded
+        # flavourId = "67080247e43a30ca79b50d7d"
+        flavourId = "6800c5199f29328e5691cd68"
+        return flavourId
+
     def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
-        return {"appInstanceId": "abcd-efgh"}
+        appId = app_id
+        app = self.get_onboarded_app(appId)
+        profile_data = app["profile_data"]
+        appProviderId = profile_data["appProviderId"]
+        appVersion = profile_data["appMetaData"]["version"]
+        # TODO: Iterate in the list; deploy the app in all zones
+        zone_info = app_zones[0]["EdgeCloudZone"]
+        zone_id = zone_info["edgeCloudZoneId"]
+        flavourId = self._select_best_flavour_for_app(zone_id=zone_id)
+        app_deploy_data = schemas.AppDeployData(
+            appId=appId,
+            appProviderId=appProviderId,
+            appVersion=appVersion,
+            zoneInfo=schemas.ZoneInfo(flavourId=flavourId, zoneId=zone_id),
+        )
+        url = "{}/app/".format(self.base_url)
+        payload = schemas.AppDeploy(app_deploy_data=app_deploy_data)
+        try:
+            response = i2edge_post(url, payload)
+            log.info("App deployed successfully")
+            print(response)
+            return response
+        except I2EdgeError as e:
+            raise e
 
-    # Harcoded
-    def get_all_deployed_apps(
-        self,
-        app_id: Optional[str] = None,
-        app_instance_id: Optional[str] = None,
-        region: Optional[str] = None,
-    ) -> List[Dict]:
-        return [{"appInstanceId": "abcd-efgh", "status": "ready"}]
+    def get_all_deployed_apps(self) -> List[Dict]:
+        url = "{}/app/".format(self.base_url)
+        params = {}
+        try:
+            response = i2edge_get(url, params=params)
+            log.info("All app instances retrieved successfully")
+            return response
+        except I2EdgeError as e:
+            raise e
 
-    # Harcoded
+    def get_deployed_app(self, app_id, zone_id) -> List[Dict]:
+        # Logic: Get all onboarded apps and filter the one where release_name == artifact name
+
+        # Step 1) Extract "app_name" from the onboarded app using the "app_id"
+        onboarded_app = self.get_onboarded_app(app_id)
+        if not onboarded_app:
+            raise ValueError(f"No onboarded app found with ID: {app_id}")
+
+        try:
+            app_name = onboarded_app["profile_data"]["appMetaData"]["appName"]
+        except KeyError as e:
+            raise ValueError(f"Onboarded app missing required field: {e}")
+
+        # Step 2) Retrieve all deployed apps and filter the one(s) where release_name == app_name
+        deployed_apps = self.get_all_deployed_apps()
+        if not deployed_apps:
+            return []
+
+        # Filter apps where release_name matches our app_name and zone matches
+        for app_instance_name in deployed_apps:
+            if (
+                app_instance_name.get("release_name") == app_name
+                and app_instance_name.get("zone_id") == zone_id
+            ):
+                return app_instance_name
+        return None
+
+        url = "{}/app/{}/{}".format(self.base_url, zone_id, app_instance_name)
+        params = {}
+        try:
+            response = i2edge_get(url, params=params)
+            log.info("App instance retrieved successfully")
+            return response
+        except I2EdgeError as e:
+            raise e
+
     def undeploy_app(self, app_instance_id: str) -> None:
-        print(f"Deleting app instance: {app_instance_id}")
+        url = "{}/app".format(self.base_url)
+        try:
+            i2edge_delete(url, app_instance_id)
+            log.info("App instance deleted successfully")
+        except I2EdgeError as e:
+            raise e

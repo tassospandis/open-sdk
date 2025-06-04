@@ -23,7 +23,7 @@ class NetworkManager(NetworkManagementInterface):
              3GPP Monitoring Event API exposed Open5GS NEF.
     """
 
-    def __init__(self, base_url: str, scs_as_id: str):
+    def __init__(self, base_url: str, scs_as_id):
         """
         Initializes the Open5GS Client.
         """
