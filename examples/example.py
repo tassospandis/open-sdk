@@ -2,7 +2,7 @@ from sunrise6g_opensdk import Sdk as sdkclient
 
 
 def main():
-    # The module that imports the SDK library, must specify "client_specs"
+    # The module that imports the SDK package, must specify which adapters will be used:
     client_specs = {
         "edgecloud": {
             "client_name": "i2edge",
@@ -20,7 +20,7 @@ def main():
     network_client = clients.get("network")
 
     print("EdgeCloud client ready to be used:", edgecloud_client)
-    print("EdgeCloud client ready to be used:", network_client)
+    print("Network client ready to be used:", network_client)
 
     # Examples:
     # EdgeCloud
