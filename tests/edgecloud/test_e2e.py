@@ -28,9 +28,11 @@ import time
 
 import pytest
 
-from src.common.sdk import Sdk as sdkclient
-from src.edgecloud.clients.errors import EdgeCloudPlatformError
-from src.edgecloud.clients.i2edge.client import EdgeApplicationManager as I2EdgeClient
+from sunrise6g_opensdk.common.sdk import Sdk as sdkclient
+from sunrise6g_opensdk.edgecloud.clients.errors import EdgeCloudPlatformError
+from sunrise6g_opensdk.edgecloud.clients.i2edge.client import (
+    EdgeApplicationManager as I2EdgeClient,
+)
 from tests.edgecloud.test_cases import test_cases
 from tests.edgecloud.test_config import (
     APP_ID,
@@ -45,16 +47,16 @@ from tests.edgecloud.test_config import (
 )
 
 
-def id_func(val):
-    return val["edgecloud"]["client_name"]
-
-
 @pytest.fixture(scope="module", name="edgecloud_client")
 def instantiate_edgecloud_client(request):
     """Fixture to create and share an edgecloud client across tests"""
     client_specs = request.param
     clients = sdkclient.create_clients_from(client_specs)
     return clients.get("edgecloud")
+
+
+def id_func(val):
+    return val["edgecloud"]["client_name"]
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)

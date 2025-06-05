@@ -7,9 +7,9 @@ Thank you for contributing to this project. Please follow the guidelines below t
 
 ### Directory Structure
 Each contribution should be made in the appropriate directory:
-- **EdgeCloud Adapters** → `src/edgecloud/clients/`
-- **Network Adapters** → `src/network/clients/`
-- **O-RAN Adapters** → `src/o-ran/clients/`
+- **EdgeCloud Adapters** → `src/sunrise6g-opendk/edgecloud/clients/`
+- **Network Adapters** → `src/sunrise6g-opendk/network/clients/`
+- **O-RAN Adapters** → `src/sunrise6g-opendk/oran/clients/`
 
 ### Testing (Mandatory)
 To merge a feature branch into `main`, the adapter **must pass the unit tests**. Instructions to do so available at [TESTING.md](docs/TESTING.md)
