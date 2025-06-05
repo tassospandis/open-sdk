@@ -1,6 +1,4 @@
-from src.common.sdk import Sdk as sdkclient
-
-# Note: that is equivalent to "from sunrise6g-sdk import Sdk as sdkclient"
+from sunrise6g_opensdk import Sdk as sdkclient
 
 
 def main():
