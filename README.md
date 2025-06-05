@@ -139,12 +139,13 @@ AP ->> API: POST /appinstances (APP_ID, APP_ZONES)
 API ->> SDK: edgecloud_client.deploy_app(APP_ID, APP_ZONES)
 SDK ->> K8s: POST /deploy
 ```
+
 ---
 
 ## Roadmap
 
-- [ ] Expand GSMA TFs coverage
-- [ ] Include JUNIPER O-RAN adapter
+- [ ] Add support to GSMA OPG.02 TFs (WIP)
+- [ ] Include JUNIPER O-RAN adapter (WIP)
 
 ---
 
