@@ -138,6 +138,7 @@ SDK ->> K8s: POST /onboard
 AP ->> API: POST /appinstances (APP_ID, APP_ZONES)
 API ->> SDK: edgecloud_client.deploy_app(APP_ID, APP_ZONES)
 SDK ->> K8s: POST /deploy
+```
 ---
 
 ## Roadmap
