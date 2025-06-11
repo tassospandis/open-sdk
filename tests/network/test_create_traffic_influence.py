@@ -1,16 +1,14 @@
 # # -*- coding: utf-8 -*-
 import pytest
 
-from sunrise6g_opensdk.network.core.network_factory import NetworkClientFactory
+from sunrise6g_opensdk.common.sdk import Sdk as sdkclient
 
 test_cases = [("oai", "http://127.0.0.1/", "scs-oai")]
 
 
 @pytest.mark.parametrize("client_name, base_url, scs_as_id", test_cases)
 def test_valid_input(client_name, base_url, scs_as_id):
-    network_client = NetworkClientFactory.create_network_client(
-        client_name, base_url, scs_as_id
-    )
+    network_client = sdkclient.create_network_client(client_name, base_url, scs_as_id)
 
     ti_session = {
         "device": {
@@ -26,9 +24,7 @@ def test_valid_input(client_name, base_url, scs_as_id):
 
 @pytest.mark.parametrize("client_name, base_url, scs_as_id", test_cases)
 def test_create_traffic_influence(client_name, base_url, scs_as_id):
-    network_client = NetworkClientFactory.create_network_client(
-        client_name, base_url, scs_as_id
-    )
+    network_client = sdkclient.create_network_client(client_name, base_url, scs_as_id)
 
     ti_session = {
         "device": {

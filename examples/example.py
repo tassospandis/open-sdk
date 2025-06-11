@@ -1,4 +1,5 @@
-from sunrise6g_opensdk import Sdk as sdkclient
+# from sunrise6g_opensdk import Sdk as sdkclient # For PyPI users
+from sunrise6g_opensdk.common.sdk import Sdk as sdkclient  # For developers
 
 
 def main():

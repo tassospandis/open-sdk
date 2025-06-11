@@ -54,44 +54,23 @@ pip install sunrise6g-opensdk
 If you plan to modify the SDK:
 
 ```bash
-git clone https://github.com/<your-org>/sunrise6g-opensdk.git
-cd sunrise6g-opensdk
+git clone https://github.com/SunriseOpenOperatorPlatform/open-sdk.git
+cd open-sdk
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+pip intall -e .
 ```
 
 ### Basic Usage
 
-You can use the SDK by simply specifying the adapters to be used. E.g. i2Edge and Open5gs
-
-```python
-from sunrise6g_opensdk import Sdk as sdkclient
-
-def main():
-    client_specs = {
-        "edgecloud": {
-            "client_name": "i2edge",
-            "base_url": "http://IP:PORT",
-        },
-        "network": {
-            "client_name": "open5gs",
-            "base_url": "http://IP:PORT",
-            "scs_as_id": "id_example",
-        },
-    }
-
-    clients = sdkclient.create_clients_from(client_specs)
-    edgecloud_client = clients.get("edgecloud")
-    network_client = clients.get("network")
-
-    print(edgecloud_client.get_edge_cloud_zones())
-    print(network_client.get_qod_session(session_id="example_session_id"))
-
-
-if __name__ == "__main__":
-    main()
-```
+You can use the SDK by simply specifying the adapters to be used. E.g. Edge Cloud Platform: i2Edge, 5G core: Open5Gs
 
 Example available in [`/examples/example.py`](examples/example.py)
+
+```python
+python3 -m examples.example
+```
 
 ---
 
@@ -107,16 +86,11 @@ To get started:
 4. Ensure all tests and pre-commit checks pass.
 5. Submit a pull request with a clear description.
 
-Please follow our full [Contributing Guidelines](docs/CONTRIBUTING.md) for details on:
-- Directory structure
-- Branch naming conventions
-- Coding standards (PEP8, docstrings)
-- Pre-commit setup
-- Reporting issues
+Please follow our full [Contributing Guidelines](docs/CONTRIBUTING.md) for further details.
 
 ---
 
-## Example Workflow (Mermaid)
+## Example Workflow
 
 ```mermaid
 sequenceDiagram

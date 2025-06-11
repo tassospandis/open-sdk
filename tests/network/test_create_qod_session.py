@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from sunrise6g_opensdk.common.sdk_catalog_client import SdkCatalogClient
+from sunrise6g_opensdk.common.sdk import Sdk as sdkclient
 from sunrise6g_opensdk.network.clients.open5gs.client import NetworkManager
 
 OPEN5GS_TEST_CASES = [
@@ -21,7 +21,7 @@ OPEN5GS_TEST_CASES = [
     ids=["open5gs"],
 )
 def test_valid_input_open5gs(client_specs):
-    network_client: NetworkManager = SdkCatalogClient.create_clients_from(client_specs)[
+    network_client: NetworkManager = sdkclient.create_clients_from(client_specs)[
         "network"
     ]
 
@@ -46,7 +46,7 @@ def test_valid_input_open5gs(client_specs):
     ids=["open5gs"],
 )
 def test_create_qod_session_open5gs(client_specs):
-    network_client: NetworkManager = SdkCatalogClient.create_clients_from(client_specs)[
+    network_client: NetworkManager = sdkclient.create_clients_from(client_specs)[
         "network"
     ]
 
