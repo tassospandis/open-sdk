@@ -90,7 +90,7 @@ Please follow our full [Contributing Guidelines](docs/CONTRIBUTING.md) for furth
 
 ---
 
-## Example Workflow
+## Example Workflow #1: App deployment over Kubernetes
 
 ```mermaid
 sequenceDiagram
@@ -103,17 +103,45 @@ box Module implementing CAMARA APIs
 end
 participant K8s as Kubernetes
 
-note over SDK: [configuration] Edge Cloud platform: Kubernetes
-API ->> SDK: edgecloud_client = clients.get("edgecloud")
+note over SDK: [Config] Edge Cloud platform: Kubernetes, IP, Port
+API ->> SDK: from sunrise6g_opensdk import Sdk as sdkclient
 API ->> SDK: sdkclient.create_clients_from(configuration)
+API ->> SDK: edgecloud_client = clients.get("edgecloud")
+SDK ->> SDK: SDK initialized and ready to be used
+note over AP,API: Platform ready to receive CAMARA calls
 AP ->> API: POST /app (APP_ONBOARD_MANIFEST)
 API ->> SDK: edgecloud_client.onboard_app(APP_ONBOARD_MANIFEST)
-SDK ->> K8s: POST /onboard
+SDK ->> K8s: Equivalent dedicated endpoint
 AP ->> API: POST /appinstances (APP_ID, APP_ZONES)
 API ->> SDK: edgecloud_client.deploy_app(APP_ID, APP_ZONES)
-SDK ->> K8s: POST /deploy
+SDK ->> K8s: Equivalent dedicated endpoint
 ```
 
+## Example Workflow #2: QoS Session Creation over Open5Gs
+
+```mermaid
+sequenceDiagram
+title QoS Session Creation over Open5GS
+
+actor AP as Application Vertical Provider
+box Module implementing CAMARA APIs
+    participant API as CAMARA QoS Management API
+    participant SDK as Open SDK
+end
+participant NEF as NEF
+participant 5GS as Open5GS
+
+note over SDK: [Config] Network core: Open5Gs, IP, Port
+API ->> SDK: from sunrise6g_opensdk import Sdk as sdkclient
+API ->> SDK: sdkclient.create_clients_from(configuration)
+API ->> SDK: network_client = clients.get("network")
+SDK ->> SDK: SDK initialized and ready to be used
+note over AP,API: Platform ready to receive CAMARA calls
+AP ->> API: POST /sessions (QOS_SESSION_REQUEST)
+API ->> SDK: network_client.create_qos_session(QOS_SESSION_REQUEST)
+SDK ->> NEF: Equivalent endpoint
+NEF ->> 5GS: QoS session creation
+```
 ---
 
 ## Roadmap
