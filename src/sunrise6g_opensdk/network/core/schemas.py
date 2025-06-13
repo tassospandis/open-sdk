@@ -4,9 +4,11 @@
 # specifically focusing on the APIs needed to support CAMARA QoD.
 
 import ipaddress
+from datetime import datetime
 from enum import Enum
 from ipaddress import IPv4Address, IPv6Address
 from typing import Annotated
+from uuid import UUID
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, NonNegativeInt, RootModel
 from pydantic_extra_types.mac_address import MacAddress
@@ -401,6 +403,50 @@ class CreateSession(BaseSessionInfo):
             ge=1,
         ),
     ]
+
+
+class SessionId(RootModel[UUID]):
+    root: Annotated[UUID, Field(description="Session ID in UUID format")]
+
+
+class QosStatus(Enum):
+    REQUESTED = "REQUESTED"
+    AVAILABLE = "AVAILABLE"
+    UNAVAILABLE = "UNAVAILABLE"
+
+
+class StatusInfo(Enum):
+    DURATION_EXPIRED = "DURATION_EXPIRED"
+    NETWORK_TERMINATED = "NETWORK_TERMINATED"
+    DELETE_REQUESTED = "DELETE_REQUESTED"
+
+
+class SessionInfo(BaseSessionInfo):
+    sessionId: SessionId
+    duration: Annotated[
+        int,
+        Field(
+            description='Session duration in seconds. Implementations can grant the requested session duration or set a different duration, based on network policies or conditions.\n- When `qosStatus` is "REQUESTED", the value is the duration to be scheduled, granted by the implementation.\n- When `qosStatus` is AVAILABLE", the value is the overall duration since `startedAt. When the session is extended, the value is the new overall duration of the session.\n- When `qosStatus` is "UNAVAILABLE", the value is the overall effective duration since `startedAt` until the session was terminated.\n',
+            examples=[3600],
+            ge=1,
+        ),
+    ]
+    startedAt: Annotated[
+        datetime | None,
+        Field(
+            description='Date and time when the QoS status became "AVAILABLE". Not to be returned when `qosStatus` is "REQUESTED". Format must follow RFC 3339 and must indicate time zone (UTC or local).',
+            examples=["2024-06-01T12:00:00Z"],
+        ),
+    ] = None
+    expiresAt: Annotated[
+        datetime | None,
+        Field(
+            description='Date and time of the QoS session expiration. Format must follow RFC 3339 and must indicate time zone (UTC or local).\n- When `qosStatus` is "AVAILABLE", it is the limit time when the session is scheduled to finnish, if not terminated by other means.\n- When `qosStatus` is "UNAVAILABLE", it is the time when the session was terminated.\n- Not to be returned when `qosStatus` is "REQUESTED".\nWhen the session is extended, the value is the new expiration time of the session.\n',
+            examples=["2024-06-01T13:00:00Z"],
+        ),
+    ] = None
+    qosStatus: QosStatus
+    statusInfo: StatusInfo | None = None
 
 
 class CreateTrafficInfluence(BaseModel):

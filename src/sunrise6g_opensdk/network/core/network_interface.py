@@ -10,11 +10,13 @@
 #   - Reza Mosahebfard (reza.mosahebfard@i2cat.net)
 #   - Ferran Cañellas (ferran.canellas@i2cat.net)
 ##
+import uuid
 from abc import ABC
 from itertools import product
 from typing import Dict
 
 from sunrise6g_opensdk import logger
+from sunrise6g_opensdk.network.clients.errors import NetworkPlatformError
 from sunrise6g_opensdk.network.core import common, schemas
 
 log = logger.get_logger(__name__)
@@ -197,9 +199,23 @@ class NetworkManagementInterface(ABC):
             dictionary containing the created session details, including its ID.
         """
         subscription = self._build_qod_subscription(session_info)
-        return common.as_session_with_qos_post(
+        response = common.as_session_with_qos_post(
             self.base_url, self.scs_as_id, subscription
         )
+        subscription_info: schemas.AsSessionWithQoSSubscription = (
+            schemas.AsSessionWithQoSSubscription(**response)
+        )
+        subscription_url = subscription_info.self_.root
+        subscription_id = subscription_url.split("/")[-1] if subscription_url else None
+        if not subscription_id:
+            log.error("Failed to retrieve QoS session ID from response")
+            raise NetworkPlatformError("QoS session ID not found in response")
+        session_info = schemas.SessionInfo(
+            sessionId=schemas.SessionId(uuid.UUID(subscription_id)),
+            qosStatus=schemas.QosStatus.REQUESTED,
+            **session_info,
+        )
+        return session_info.model_dump()
 
     def get_qod_session(self, session_id: str) -> Dict:
         """
