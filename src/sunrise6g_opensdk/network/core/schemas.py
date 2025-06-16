@@ -157,6 +157,8 @@ class AsSessionWithQoSSubscription(BaseModel):
     ueIpv4Addr: ipaddress.IPv4Address | None = None
     ueIpv6Addr: ipaddress.IPv6Address | None = None
     macAddr: MacAddress | None = None
+    snssai: Snssai | None = None
+    dnn: str | None = None
     usageThreshold: UsageThreshold | None = None
     sponsorInfo: SponsorInformation | None = None
     qosMonInfo: QosMonitoringInformationModel | None = None
