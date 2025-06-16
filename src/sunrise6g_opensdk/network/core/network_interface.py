@@ -291,7 +291,7 @@ class NetworkManagementInterface(ABC):
             self.base_url, self.scs_as_id, resource_id, subscription
         )
 
-        traffic_influence_info.trafficInfluenceID = resource_id
+        traffic_influence_info["trafficInfluenceID"] = resource_id
         return traffic_influence_info
 
     def delete_traffic_influence_resource(self, resource_id: str) -> None:
