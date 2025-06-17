@@ -25,7 +25,7 @@ Open source SDK to abstract CAMARA/GSMA Transformation Functions (TFs) for Edge 
 
 | Platform   | Status     |
 |------------|------------|
-| Kubernetes | To be supported soon |
+| Kubernetes (old PiEdge) | Supported  |
 | i2Edge     | Supported  |
 | aerOS      | Supported  |
 
@@ -144,10 +144,10 @@ NEF ->> 5GS: QoS session creation
 ```
 ---
 
-## Roadmap
+## Roadmap for Open SDK 2nd release
 
-- [ ] Add support to GSMA OPG.02 TFs (WIP)
-- [ ] Include JUNIPER O-RAN adapter (WIP)
+- [ ] Add support to GSMA OPG.02 TFs
+- [ ] Include JUNIPER O-RAN adapter
 
 ---
 
