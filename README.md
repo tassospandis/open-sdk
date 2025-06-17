@@ -1,3 +1,26 @@
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/commits/" title="Last Commit">
+  <img src="https://img.shields.io/github/last-commit/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/issues" title="Open Issues">
+  <img src="https://img.shields.io/github/issues/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/pulls" title="Open Pull Requests">
+  <img src="https://img.shields.io/github/issues-pr/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/graphs/contributors" title="Contributors">
+  <img src="https://img.shields.io/github/contributors/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk" title="Repo Size">
+  <img src="https://img.shields.io/github/repo-size/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/blob/main/LICENSE" title="license">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-green.svg?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/releases/latest" title="Latest Release">
+  <img src="https://img.shields.io/github/release/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+
+
 # OpenSDK
 
 Open source SDK to abstract CAMARA/GSMA Transformation Functions (TFs) for Edge Cloud platforms, 5G network cores and O-RAN solutions.
@@ -14,18 +37,18 @@ Open source SDK to abstract CAMARA/GSMA Transformation Functions (TFs) for Edge 
 
 ### CAMARA APIs
 
-| API Name             | Version      |
-|----------------------|--------------|
-| Edge Application Management            | v0.9.3-wip   |
-| Quality-on-Demand    | v1.0.0       |
-| Location Retrieval   | v1.0.0       |
-| Traffic Influence    | v0.8.1       |
+| API Name                  | Version |
+|---------------------------|---------|
+| Edge Application Management | [v0.9.3-wip](https://raw.githubusercontent.com/camaraproject/EdgeCloud/main/code/API_definitions/Edge-Application-Management.yaml) |
+| Quality-on-Demand         | [v1.0.0](https://raw.githubusercontent.com/camaraproject/QualityOnDemand/refs/tags/r2.2/code/API_definitions/quality-on-demand.yaml) |
+| Location Retrieval        | [v0.4.0](https://raw.githubusercontent.com/camaraproject/DeviceLocation/refs/tags/r2.2/code/API_definitions/location-retrieval.yaml) |
+| Traffic Influence         | [v0.8.1](https://raw.githubusercontent.com/camaraproject/EdgeCloud/v0.8.1/code/API_definitions/Traffic_Influence.yaml) |
 
 ### EdgeCloud Platforms
 
 | Platform   | Status     |
 |------------|------------|
-| Kubernetes | To be supported soon |
+| Kubernetes (old PiEdge) | Supported  |
 | i2Edge     | Supported  |
 | aerOS      | Supported  |
 
@@ -144,10 +167,10 @@ NEF ->> 5GS: QoS session creation
 ```
 ---
 
-## Roadmap
+## Roadmap for Open SDK 2nd release
 
-- [ ] Add support to GSMA OPG.02 TFs (WIP)
-- [ ] Include JUNIPER O-RAN adapter (WIP)
+- [ ] Add support to GSMA OPG.02 TFs
+- [ ] Include JUNIPER O-RAN adapter
 
 ---
 
