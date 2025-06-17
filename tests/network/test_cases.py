@@ -14,4 +14,11 @@ test_cases = [
             "scs_as_id": "scs",
         }
     },
+    {
+        "network": {
+            "client_name": "open5gcore",
+            "base_url": "http://192.168.11.80:8080",
+            "scs_as_id": "0001",
+        }
+    }
 ]
