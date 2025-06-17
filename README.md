@@ -1,3 +1,26 @@
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/commits/" title="Last Commit">
+  <img src="https://img.shields.io/github/last-commit/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/issues" title="Open Issues">
+  <img src="https://img.shields.io/github/issues/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/pulls" title="Open Pull Requests">
+  <img src="https://img.shields.io/github/issues-pr/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/graphs/contributors" title="Contributors">
+  <img src="https://img.shields.io/github/contributors/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk" title="Repo Size">
+  <img src="https://img.shields.io/github/repo-size/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/blob/main/LICENSE" title="license">
+  <img src="https://img.shields.io/badge/License-Apache%202.0-green.svg?style=plastic">
+</a>
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/releases/latest" title="Latest Release">
+  <img src="https://img.shields.io/github/release/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
+</a>
+
+
 # OpenSDK
 
 Open source SDK to abstract CAMARA/GSMA Transformation Functions (TFs) for Edge Cloud platforms, 5G network cores and O-RAN solutions.
