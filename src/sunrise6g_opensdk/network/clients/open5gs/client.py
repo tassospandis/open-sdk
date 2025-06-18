@@ -56,6 +56,14 @@ class NetworkManager(NetworkManagementInterface):
         flow_id = flow_id_mapping[session_info.qosProfile.root]
         subscription.flowInfo = build_flows(flow_id, session_info)
 
+    def core_specific_monitoring_event_validation(self, retrieve_location_request : schemas.RetrievalLocationRequest) -> None:
+        if retrieve_location_request.device is None:
+            raise ValidationError(
+                "Open5GS requires a device to be specified for location retrieval."
+            )
+    def add_core_specific_location_parameters(self, retrieve_location_request: schemas.RetrievalLocationRequest, subscription: schemas.MonitoringEventSubscriptionRequest) -> None:
+        subscription.msisdn = retrieve_location_request.device.phoneNumber
+
 
 # Note:
 # As this class is inheriting from NetworkManagementInterface, it is

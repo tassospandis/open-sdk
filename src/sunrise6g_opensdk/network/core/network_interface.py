@@ -111,6 +111,17 @@ class NetworkManagementInterface(ABC):
         """
         pass
 
+    def add_core_specific_location_parameters(
+        self,
+        retrieve_location_request: schemas.RetrievalLocationRequest,
+        subscription: schemas.MonitoringEventSubscriptionRequest,
+    ):
+        """
+        Placeholder for adding core-specific parameters to the location subscription.
+        This method should be overridden by subclasses to implement specific logic.
+        """
+        pass
+
     def core_specific_qod_validation(self, session_info: schemas.CreateSession) -> None:
         """
         Validates core-specific parameters for the session creation.
@@ -136,6 +147,20 @@ class NetworkManagementInterface(ABC):
 
         raises:
             ValidationError: If the session information does not meet core-specific requirements.
+        """
+        # Placeholder for core-specific validation logic
+        # This method should be overridden by subclasses if needed
+        pass
+
+    def core_specific_monitoring_event_validation(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> None:
+        """
+        Validates core-specific parameters for the monitoring event subscription.
+
+        args:
+            retrieve_location_request: The request information to validate.
+
+        raises:
+            ValidationError: If the request information does not meet core-specific requirements.
         """
         # Placeholder for core-specific validation logic
         # This method should be overridden by subclasses if needed
@@ -186,6 +211,22 @@ class NetworkManagementInterface(ABC):
 
         self.add_core_specific_ti_parameters(traffic_influence_data, subscription)
         return subscription
+    
+    def _build_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) ->schemas.MonitoringEventSubscriptionRequest:
+        pass
+
+    def create_monitoring_event_subscription(self, retrieve_location_request: Dict) -> Dict:
+        """
+        Creates a Monitoring Event subscription based on CAMARA Location API input.
+
+        args:
+            retrieve_location_request: Dictionary containing location retrieval details conforming to
+                                       the CAMARA Location API parameters.
+
+        returns:
+            dictionary containing the created subscription details, including its ID.
+        """
+        pass
 
     def create_qod_session(self, session_info: Dict) -> Dict:
         """
