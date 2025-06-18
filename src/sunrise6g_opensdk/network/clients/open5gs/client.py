@@ -59,10 +59,18 @@ class NetworkManager(NetworkManagementInterface):
     def core_specific_monitoring_event_validation(self, retrieve_location_request : schemas.RetrievalLocationRequest) -> None:
         if retrieve_location_request.device is None:
             raise ValidationError(
-                "Open5GS requires a device to be specified for location retrieval."
+                "Open5GS requires a device to be specified for location retrieval in NEF."
             )
     def add_core_specific_location_parameters(self, retrieve_location_request: schemas.RetrievalLocationRequest, subscription: schemas.MonitoringEventSubscriptionRequest) -> None:
         subscription.msisdn = retrieve_location_request.device.phoneNumber
+        subscription.monitoringType = schemas.MonitoringType.LOCATION_REPORTING
+        subscription.locationType = schemas.LocationType.CURRENT_LOCATION 
+        # subscription.locationType = schemas.LocationType.LAST_KNOWN
+        # subscription.maximumNumberOfReports = 1
+        # subscription.repPeriod = schemas.DurationSec(root=20)
+
+        return subscription
+
 
 
 # Note:

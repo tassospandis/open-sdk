@@ -115,7 +115,7 @@ class NetworkManagementInterface(ABC):
         self,
         retrieve_location_request: schemas.RetrievalLocationRequest,
         subscription: schemas.MonitoringEventSubscriptionRequest,
-    ):
+    )-> schemas.MonitoringEventSubscriptionRequest:
         """
         Placeholder for adding core-specific parameters to the location subscription.
         This method should be overridden by subclasses to implement specific logic.
@@ -213,7 +213,16 @@ class NetworkManagementInterface(ABC):
         return subscription
     
     def _build_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) ->schemas.MonitoringEventSubscriptionRequest:
-        pass
+        self.core_specific_monitoring_event_validation(retrieve_location_request)
+        device = retrieve_location_request.device
+        subscription = schemas.MonitoringEventSubscriptionRequest(
+            externalId=device.networkAccessIdentifier,
+            ipv4Address=device.ipv4Address,
+            ipv6Addr=device.ipv6Address,
+            msisdn=device.phoneNumber,
+            notificationDestination= "http://test_server:8001")
+        mapped_3gpp_subscription = self.add_core_specific_location_parameters(retrieve_location_request,subscription)
+        return mapped_3gpp_subscription
 
     def create_monitoring_event_subscription(self, retrieve_location_request: Dict) -> Dict:
         """
