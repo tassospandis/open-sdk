@@ -1,7 +1,8 @@
-import requests
 from __future__ import (
     print_function,
 )
+import requests
+
 from kubernetes import (
     client,
 )
