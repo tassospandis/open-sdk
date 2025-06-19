@@ -14,6 +14,7 @@ import uuid
 from abc import ABC
 from itertools import product
 from typing import Dict
+from datetime import datetime, timedelta
 
 from sunrise6g_opensdk import logger
 from sunrise6g_opensdk.network.clients.errors import NetworkPlatformError
@@ -224,7 +225,19 @@ class NetworkManagementInterface(ABC):
         mapped_3gpp_subscription = self.add_core_specific_location_parameters(retrieve_location_request,subscription)
         return mapped_3gpp_subscription
 
-    def create_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> Dict:
+    def _compute_camara_last_location_time(self, event_time_str: datetime, age_of_location_info_min : int = None) -> :
+        """
+        event_time_str: ISO 8601 string, e.g. "2025-06-18T12:30:00Z"
+        age_of_location_info_min: unsigned int, age of location info in minutes
+        """
+        event_time = datetime.fromisoformat(event_time_str.replace("Z", "+00:00"))
+        if age_of_location_info_min is not None:
+            last_location_time = event_time - timedelta(minutes=age_of_location_info_min)
+            return last_location_time
+        else:
+            return event_time_str
+
+    def create_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> dict:
         """
         Creates a Monitoring Event subscription based on CAMARA Location API input.
 
@@ -245,8 +258,18 @@ class NetworkManagementInterface(ABC):
             log.error("Failed to retrieve location information from monitoring event report")
             raise NetworkPlatformError("Location information not found in monitoring event report")
         geo_area = monitoring_event_report.locationInfo.geographicArea
-        area = geo_area.polygon
-        camara_location = schemas.Location(area=area,lastLocationTime=)
+        report_event_time = monitoring_event_report.eventTime
+        ageOfLocationInfo = None
+        if monitoring_event_report.locationInfo.ageOfLocationInfo is not None:    
+            ageOfLocationInfo = monitoring_event_report.locationInfo.ageOfLocationInfo.duration
+        last_location_time = self._compute_camara_last_location_time(report_event_time,ageOfLocationInfo)
+            
+        camara_polygon = schemas.Polygon(areaType=schemas.AreaType.polygon,boundary=geo_area.polygon.point_list)
+        camara_loc_area = schemas.Area.model_validate(camara_polygon)
+        
+        camara_location = schemas.Location(area=camara_loc_area,lastLocationTime=last_location_time)
+
+        return camara_location.model_dump(mode="json")
 
     def create_qod_session(self, session_info: Dict) -> Dict:
         """

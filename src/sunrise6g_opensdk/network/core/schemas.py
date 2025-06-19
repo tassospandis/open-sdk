@@ -250,11 +250,11 @@ class GeographicalCoordinates(BaseModel):
 class PointList(BaseModel):
     geographical_coords: list[GeographicalCoordinates] = Field(..., description="List of geographical coordinates defining the points.",min_length=3,max_length=15)
 
-class Polygon(BaseModel):
+class NefPolygon(BaseModel):
     point_list: PointList = Field(..., description="List of points defining the polygon.")
 
 class GeographicArea(BaseModel):
-    polygon: Polygon | None = Field(None, description="Identifies a polygonal geographic area.")
+    polygon: NefPolygon | None = Field(None, description="Identifies a polygonal geographic area.")
 
 #This data type represents the user location information which is sent from the NEF to the AF.
 class LocationInfo(BaseModel):
@@ -400,12 +400,12 @@ class PointList(RootModel[Annotated[
     pass
 
 class Circle(BaseModel):
-    areaType: Literal["CIRCLE"]
+    areaType: Literal[AreaType.circle]
     center: Annotated[Point, Field(description="Center point of the circle.")]
     radius: Annotated[float,Field(description="Radius of the circle.",ge=1)]
 
 class Polygon(BaseModel):
-    areaType: Literal["POLYGON"]
+    areaType: Literal[AreaType.polygon]
     boundary: Annotated[PointList, Field(description="List of points defining the polygon.")]
 
 Area = Annotated[Circle | Polygon, Field(discriminator="areaType")]
