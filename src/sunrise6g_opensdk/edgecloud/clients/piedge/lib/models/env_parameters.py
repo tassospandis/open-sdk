@@ -1,7 +1,4 @@
-# coding: utf-8
-
 from __future__ import absolute_import
-
 from sunrise6g_opensdk.edgecloud.clients.piedge.lib import (
     util,
 )

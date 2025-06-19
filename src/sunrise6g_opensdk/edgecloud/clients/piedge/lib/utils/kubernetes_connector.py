@@ -1,15 +1,13 @@
+import requests
 from __future__ import (
     print_function,
 )
-
-import requests
 from kubernetes import (
     client,
 )
 from kubernetes.client.rest import (
     ApiException,
 )
-
 from sunrise6g_opensdk.edgecloud.clients.piedge.lib.utils import (
     auxiliary_functions,
 )
@@ -220,7 +218,9 @@ class KubernetesConnector:
         for volume in volume_list.items:
             name_v = service_function_name + str("-")
             if name_v in volume.metadata.name:
-                self.v1.delete_persistent_volume(name=volume.spec.volume_name)
+                self.v1.delete_persistent_volume(
+                    name=volume.spec.volume_name
+                )
 
                 self.v1.delete_namespaced_persistent_volume_claim(
                     name=volume.metadata.name, namespace="sunrise6g"
@@ -287,7 +287,9 @@ class KubernetesConnector:
                 )
             )
             # api_response_service = api_instance_apiregv1.create_api_service(body_service)
-            self.v1.create_namespaced_service("sunrise6g", body_service)
+            self.v1.create_namespaced_service(
+                "sunrise6g", body_service
+            )
             if "autoscaling_policies" in descriptor_service_function:
                 # V1 AUTOSCALER
                 body_hpa = self.create_hpa(descriptor_service_function)
@@ -850,14 +852,15 @@ def create_pv_dict(name, volumes, storage_class, node=None):
 
     return body
 
-
 def create_hpa(descriptor_service_function):
 
     # V1!!!!!!!
 
     dict_label = {}
     dict_label["name"] = descriptor_service_function["name"]
-    client.V1ObjectMeta(name=descriptor_service_function["name"], labels=dict_label)
+    client.V1ObjectMeta(
+        name=descriptor_service_function["name"], labels=dict_label
+    )
 
     #  spec
 
