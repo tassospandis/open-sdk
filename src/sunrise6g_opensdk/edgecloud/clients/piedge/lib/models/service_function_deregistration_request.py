@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-
 from sunrise6g_opensdk.edgecloud.clients.piedge.lib import util
 from sunrise6g_opensdk.edgecloud.clients.piedge.lib.models.base_model_ import Model
 
