@@ -43,7 +43,7 @@ ti_session2 = {
 def instantiate_network_client(request):
     """Fixture to create and share a network client across tests"""
     adapter_specs = request.param
-    adapters = sdkclient.create_clients_from(adapter_specs)
+    adapters = sdkclient.create_adapters_from(adapter_specs)
     return adapters.get("network")
 
 
