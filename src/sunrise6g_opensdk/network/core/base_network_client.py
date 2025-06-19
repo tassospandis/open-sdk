@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ##
-# Copyright 2025-present by Software Networks Area, i2CAT.
-# All rights reserved.
-#
 # This file is part of the Open SDK
 #
 # Contributors:
 #   - Reza Mosahebfard (reza.mosahebfard@i2cat.net)
 #   - Ferran Cañellas (ferran.canellas@i2cat.net)
+#   - Giulio Carota (giulio.carota@eurecom.fr)
 ##
 import uuid
-from abc import ABC
 from itertools import product
 from typing import Dict
 
 from sunrise6g_opensdk import logger
-from sunrise6g_opensdk.network.clients.errors import NetworkPlatformError
+from sunrise6g_opensdk.network.adapters.errors import NetworkPlatformError
 from sunrise6g_opensdk.network.core import common, schemas
 
 log = logger.get_logger(__name__)
@@ -74,16 +71,13 @@ def build_flows(
     return flows
 
 
-class NetworkManagementInterface(ABC):
+class BaseNetworkClient:
     """
-    Abstract Base Class for Network Resource Management.
+    Class for Network Resource Management.
 
-    This interface defines the standard methods that all
-    Network Clients (Open5GS, OAI, Open5GCore) must implement.
-
-    Partners implementing a new network client should inherit from this class
-    and provide concrete implementations for all abstract methods relevant
-    to their specific NEF capabilities.
+    This class provides shared logic and extension points for different
+    Network 5G Cores (e.g., Open5GS, OAI, Open5GCopre-commit run --all-filesre) interacting with
+    NEF-like platforms using CAMARA APIs.
     """
 
     base_url: str
@@ -339,5 +333,4 @@ class NetworkManagementInterface(ABC):
         r = common.traffic_influence_get(self.base_url, self.scs_as_id)
         return [self._build_camara_ti(item) for item in r]
 
-    # Placeholder for other CAMARA APIs (e.g., Traffic Influence,
-    # Location-retrieval, etc.)
+    # Placeholder for other CAMARA APIs (e.g: Location-retrieval, etc.)

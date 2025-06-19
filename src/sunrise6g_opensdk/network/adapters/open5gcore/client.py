@@ -2,8 +2,8 @@
 from pydantic import ValidationError
 
 from sunrise6g_opensdk import logger
-from sunrise6g_opensdk.network.core.network_interface import (
-    NetworkManagementInterface,
+from sunrise6g_opensdk.network.core.base_network_client import (
+    BaseNetworkClient,
     build_flows,
 )
 
@@ -19,7 +19,7 @@ qos_support_map = {
 }
 
 
-class NetworkManager(NetworkManagementInterface):
+class NetworkManager(BaseNetworkClient):
     def __init__(self, base_url: str, scs_as_id: str):
         if not base_url:
             raise ValueError("base_url is required and cannot be empty.")

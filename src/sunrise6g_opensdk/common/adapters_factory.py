@@ -8,28 +8,31 @@
 # Contributors:
 #   - Adrián Pino Martínez (adrian.pino@i2cat.net)
 ##
-from sunrise6g_opensdk.edgecloud.clients.aeros.client import (
+
+from sunrise6g_opensdk.edgecloud.adapters.aeros.client import (
     EdgeApplicationManager as AerosClient,
 )
-from sunrise6g_opensdk.edgecloud.clients.i2edge.client import (
+from sunrise6g_opensdk.edgecloud.adapters.i2edge.client import (
     EdgeApplicationManager as I2EdgeClient,
 )
-from sunrise6g_opensdk.network.clients.oai.client import NetworkManager as OaiCoreClient
-from sunrise6g_opensdk.network.clients.open5gcore.client import (
+from sunrise6g_opensdk.network.adapters.oai.client import (
+    NetworkManager as OaiCoreClient,
+)
+from sunrise6g_opensdk.network.adapters.open5gcore.client import (
     NetworkManager as Open5GCoreClient,
 )
-from sunrise6g_opensdk.network.clients.open5gs.client import (
+from sunrise6g_opensdk.network.adapters.open5gs.client import (
     NetworkManager as Open5GSClient,
 )
 
-# from sunrise6g_opensdk.edgecloud.clients.piedge.client import EdgeApplicationManager as PiEdgeClient
+# from sunrise6g_opensdk.edgecloud.adapters.kubernetes.client import EdgeApplicationManager as kubernetesClient
 
 
-def _edgecloud_factory(client_name: str, base_url: str, **kwargs):
+def _edgecloud_adapters_factory(client_name: str, base_url: str, **kwargs):
     edge_cloud_factory = {
         "aeros": lambda url, **kw: AerosClient(base_url=url, **kw),
         "i2edge": lambda url: I2EdgeClient(base_url=url),
-        # "piedge": lambda url: PiEdgeClient(base_url=url), Uncomment when import issues are solved
+        # "kubernetes": lambda url: kubernetesClient(base_url=url), Uncomment when import issues are solved
     }
     try:
         return edge_cloud_factory[client_name](base_url, **kwargs)
@@ -39,9 +42,9 @@ def _edgecloud_factory(client_name: str, base_url: str, **kwargs):
         )
 
 
-def _network_factory(client_name: str, base_url: str, **kwargs):
+def _network_adapters_factory(client_name: str, base_url: str, **kwargs):
     if "scs_as_id" not in kwargs:
-        raise ValueError("Missing required 'scs_as_id' for network clients.")
+        raise ValueError("Missing required 'scs_as_id' for network adapters.")
     scs_as_id = kwargs.pop("scs_as_id")
 
     network_factory = {
@@ -63,19 +66,19 @@ def _network_factory(client_name: str, base_url: str, **kwargs):
         )
 
 
-# def _oran_factory(client_name: str, base_url: str):
+# def _oran_adapters_factory(client_name: str, base_url: str):
 #     # TODO
 
 
-class SdkFactory:
+class AdaptersFactory:
     _domain_factories = {
-        "edgecloud": _edgecloud_factory,
-        "network": _network_factory,
-        # "oran": _oran_factory,
+        "edgecloud": _edgecloud_adapters_factory,
+        "network": _network_adapters_factory,
+        # "oran": _oran_adapters_factory,
     }
 
     @classmethod
-    def instantiate_and_retrieve_clients(
+    def instantiate_and_retrieve_adapters(
         cls, domain: str, client_name: str, base_url: str, **kwargs
     ):
         try:

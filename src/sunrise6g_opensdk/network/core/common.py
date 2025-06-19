@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Common utilities (errors, HTTP helpers) used by the core network interface (network_interface.py).
 
 import requests
 from pydantic import BaseModel
