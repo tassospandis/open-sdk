@@ -1,3 +1,6 @@
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/actions/workflows/ci.yaml" title="CI Status">
+  <img src="https://github.com/SunriseOpenOperatorPlatform/open-sdk/actions/workflows/ci.yaml/badge.svg">
+</a>
 <a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/commits/" title="Last Commit">
   <img src="https://img.shields.io/github/last-commit/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
 </a>
@@ -10,10 +13,7 @@
 <a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/graphs/contributors" title="Contributors">
   <img src="https://img.shields.io/github/contributors/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
 </a>
-<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk" title="Repo Size">
-  <img src="https://img.shields.io/github/repo-size/SunriseOpenOperatorPlatform/open-sdk?style=plastic">
-</a>
-<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/blob/main/LICENSE" title="license">
+<a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/blob/main/LICENSE" title="License">
   <img src="https://img.shields.io/badge/License-Apache%202.0-green.svg?style=plastic">
 </a>
 <a href="https://github.com/SunriseOpenOperatorPlatform/open-sdk/releases/latest" title="Latest Release">
@@ -27,9 +27,10 @@ Open source SDK to abstract CAMARA/GSMA Transformation Functions (TFs) for Edge 
 
 ## Features
 
-- Unified SDK for interacting with Edge Cloud platforms, 5G Core solutions, and O-RAN solutions.
+- Abstract CAMARA Transformation Functions (TFs)
+- Unified Python SDK for interacting with Edge Cloud platforms, 5G Core solutions, and O-RAN solutions.
 - Modular and extensible adapter structure
-- Conforms to CAMARA/GSMA API standards.
+
 
 ---
 
@@ -48,17 +49,17 @@ Open source SDK to abstract CAMARA/GSMA Transformation Functions (TFs) for Edge 
 
 | Platform   | Status     |
 |------------|------------|
-| Kubernetes (old PiEdge) | Supported  |
-| i2Edge     | Supported  |
-| aerOS      | Supported  |
+| Kubernetes | ✅  |
+| i2Edge     | ✅  |
+| aerOS      | ✅  |
 
 ### Network Adapters
 
 | Platform     | NEF Version | QoD | Location Retrieval | Traffic Influence |
 |--------------|-------------|-----|---------------------|--------------------|
-| Open5GS      | v1.2.3      | ✅  | ✅                  | ❌                 |
-| Open5GCore   | v1.2.3      | ✅  | ❌                  | ❌                 |
-| OAI          | v1.2.3      | ✅  | ❌                  | ✅                 |
+| Open5GS      | [v1.2.3](https://www.3gpp.org/ftp/Specs/archive/29_series/29.122/29122-hc0.zip) TS 29.122 (v17.12.0) | ✅  | ✅                  | ❌                 |
+| Open5GCore   | [v1.2.3](https://www.3gpp.org/ftp/Specs/archive/29_series/29.122/29122-hc0.zip) TS 29.122 (v17.12.0) | ✅  | ❌                  | ❌                 |
+| OAI          | [v1.2.3](https://www.3gpp.org/ftp/Specs/archive/29_series/29.122/29122-hc0.zip) TS 29.122 (v17.12.0) | ✅  | ❌                  | ✅                 |
 
 ---
 
@@ -82,7 +83,7 @@ cd open-sdk
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pip intall -e .
+pip install -e .
 ```
 
 ### Basic Usage
@@ -128,8 +129,8 @@ participant K8s as Kubernetes
 
 note over SDK: [Config] Edge Cloud platform: Kubernetes, IP, Port
 API ->> SDK: from sunrise6g_opensdk import Sdk as sdkclient
-API ->> SDK: sdkclient.create_clients_from(configuration)
-API ->> SDK: edgecloud_client = clients.get("edgecloud")
+API ->> SDK: sdkclient.create_adapters_from(configuration)
+API ->> SDK: edgecloud_client = adapters.get("edgecloud")
 SDK ->> SDK: SDK initialized and ready to be used
 note over AP,API: Platform ready to receive CAMARA calls
 AP ->> API: POST /app (APP_ONBOARD_MANIFEST)
@@ -156,8 +157,8 @@ participant 5GS as Open5GS
 
 note over SDK: [Config] Network core: Open5Gs, IP, Port
 API ->> SDK: from sunrise6g_opensdk import Sdk as sdkclient
-API ->> SDK: sdkclient.create_clients_from(configuration)
-API ->> SDK: network_client = clients.get("network")
+API ->> SDK: sdkclient.create_adapters_from(configuration)
+API ->> SDK: network_client = adapters.get("network")
 SDK ->> SDK: SDK initialized and ready to be used
 note over AP,API: Platform ready to receive CAMARA calls
 AP ->> API: POST /sessions (QOS_SESSION_REQUEST)
