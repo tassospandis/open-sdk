@@ -10,9 +10,9 @@ To contribute:
 
 1. Fork the repository and create a feature branch from `main`.
 2. Develop your changes in the appropriate adapter directory:
-   - `src/sunrise6g_opensdk/edgecloud/clients/`
-   - `src/sunrise6g_opensdk/network/clients/`
-   - `src/sunrise6g_opensdk/oran/clients/`
+   - `src/sunrise6g_opensdk/edgecloud/adapters/`
+   - `src/sunrise6g_opensdk/network/adapters/`
+   - `src/sunrise6g_opensdk/oran/adapters/`
 3. Follow the coding guidelines below.
 4. Write or update unit tests for your changes.
 5. Ensure all tests pass.

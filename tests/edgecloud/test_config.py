@@ -13,7 +13,7 @@
 EdgeCloud Platform Test Configuration
 
 This file contains the configuration constants and manifests for testing
-the EdgeCloud Platform integration across different clients.
+the EdgeCloud Platform integration across different adapters.
 """
 
 ######################
@@ -87,7 +87,7 @@ APP_ZONES = [
 ]
 
 ######################
-# PiEdge variables
+# kubernetes variables
 ######################
 # TODO
 

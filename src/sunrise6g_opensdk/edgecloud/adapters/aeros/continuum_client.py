@@ -12,8 +12,8 @@ aerOS REST API Client
 
 import requests
 
-from sunrise6g_opensdk.edgecloud.clients.aeros import config
-from sunrise6g_opensdk.edgecloud.clients.aeros.utils import catch_requests_exceptions
+from sunrise6g_opensdk.edgecloud.adapters.aeros import config
+from sunrise6g_opensdk.edgecloud.adapters.aeros.utils import catch_requests_exceptions
 from sunrise6g_opensdk.logger import setup_logger
 
 

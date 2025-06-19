@@ -4,9 +4,9 @@ from sunrise6g_opensdk.common.sdk import Sdk as sdkclient  # For developers
 
 def main():
     # The module that imports the SDK package, must specify which adapters will be used:
-    client_specs = {
+    adapter_specs = {
         "edgecloud": {
-            "client_name": "i2edge",
+            "client_name": "kubernetes",
             "base_url": "http://IP:PORT",
         },
         "network": {
@@ -16,9 +16,9 @@ def main():
         },
     }
 
-    clients = sdkclient.create_clients_from(client_specs)
-    edgecloud_client = clients.get("edgecloud")
-    network_client = clients.get("network")
+    adapters = sdkclient.create_adapters_from(adapter_specs)
+    edgecloud_client = adapters.get("edgecloud")
+    network_client = adapters.get("network")
 
     print("EdgeCloud client ready to be used:", edgecloud_client)
     print("Network client ready to be used:", network_client)

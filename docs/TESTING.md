@@ -14,7 +14,7 @@ To run tests for the Edge Cloud adapters:
 pytest tests/edgecloud/
 ```
 
-To run tests for the Network adapters (WIP):
+To run tests for the Network adapters:
 ```bash
 pytest tests/network/
 ```

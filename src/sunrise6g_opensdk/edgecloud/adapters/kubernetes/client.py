@@ -5,14 +5,14 @@ import os
 from typing import Dict, List, Optional
 
 from edgecloud.core.edgecloud_interface import EdgeCloudManagementInterface
-from swagger_server.core.piedge_encoder import deploy_service_function
+from swagger_server.core.kubernetes_encoder import deploy_service_function
 from swagger_server.models.deploy_service_function import DeployServiceFunction
 from swagger_server.models.service_function_registration_request import (
     ServiceFunctionRegistrationRequest,
 )
 from swagger_server.utils import connector_db, kubernetes_connector
 
-piedge_ip = os.environ["EDGE_CLOUD_ADAPTER"]
+kubernetes_ip = os.environ["EDGE_CLOUD_ADAPTER"]
 edge_cloud_provider = os.environ["PLATFORM_PROVIDER"]
 
 

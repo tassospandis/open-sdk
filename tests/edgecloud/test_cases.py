@@ -17,8 +17,8 @@ test_cases = [
     # },
     # {
     #     "edgecloud": {
-    #         "client_name": "piedge",
-    #         "base_url": "http://test-piedge.url"
+    #         "client_name": "kubernetes",
+    #         "base_url": "http://test-kubernetes.url"
     #     }
     # }
 ]

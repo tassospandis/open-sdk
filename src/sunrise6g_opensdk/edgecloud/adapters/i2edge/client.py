@@ -16,7 +16,7 @@ from sunrise6g_opensdk.edgecloud.core.edgecloud_interface import (
     EdgeCloudManagementInterface,
 )
 
-from . import schemas
+from ...adapters.i2edge import schemas
 from .common import (
     I2EdgeError,
     i2edge_delete,
@@ -29,6 +29,10 @@ log = logger.get_logger(__name__)
 
 
 class EdgeApplicationManager(EdgeCloudManagementInterface):
+    """
+    i2Edge Client
+    """
+
     def __init__(self, base_url: str):
         self.base_url = base_url
 

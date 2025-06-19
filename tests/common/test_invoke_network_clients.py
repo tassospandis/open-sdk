@@ -32,12 +32,12 @@ def id_func(val):
     return val["network"]["client_name"]
 
 
-@pytest.mark.parametrize("client_specs", NETWORK_TEST_CASES, ids=id_func)
-def test_network_platform_instantiation(client_specs):
-    """Test instantiation of all network platform clients"""
-    clients = sdkclient.create_clients_from(client_specs)
+@pytest.mark.parametrize("adapter_specs", NETWORK_TEST_CASES, ids=id_func)
+def test_network_platform_instantiation(adapter_specs):
+    """Test instantiation of all network platform adapters"""
+    adapters = sdkclient.create_adapters_from(adapter_specs)
 
-    assert "network" in clients
-    network_client = clients["network"]
+    assert "network" in adapters
+    network_client = adapters["network"]
     assert network_client is not None
     assert "NetworkManager" in str(type(network_client))
