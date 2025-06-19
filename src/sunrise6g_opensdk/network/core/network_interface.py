@@ -212,7 +212,7 @@ class NetworkManagementInterface(ABC):
         self.add_core_specific_ti_parameters(traffic_influence_data, subscription)
         return subscription
     
-    def _build_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) ->schemas.MonitoringEventSubscriptionRequest:
+    def _build_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> schemas.MonitoringEventSubscriptionRequest:
         self.core_specific_monitoring_event_validation(retrieve_location_request)
         device = retrieve_location_request.device
         subscription = schemas.MonitoringEventSubscriptionRequest(
@@ -224,7 +224,7 @@ class NetworkManagementInterface(ABC):
         mapped_3gpp_subscription = self.add_core_specific_location_parameters(retrieve_location_request,subscription)
         return mapped_3gpp_subscription
 
-    def create_monitoring_event_subscription(self, retrieve_location_request: Dict) -> Dict:
+    def create_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> Dict:
         """
         Creates a Monitoring Event subscription based on CAMARA Location API input.
 
@@ -235,7 +235,18 @@ class NetworkManagementInterface(ABC):
         returns:
             dictionary containing the created subscription details, including its ID.
         """
-        pass
+        subscription = self._build_monitoring_event_subscription(retrieve_location_request)
+        response = common.monitoring_event_post(
+            self.base_url, self.scs_as_id, subscription
+        )
+
+        monitoring_event_report = schemas.MonitoringEventReport(**response)
+        if monitoring_event_report.locationInfo is None:
+            log.error("Failed to retrieve location information from monitoring event report")
+            raise NetworkPlatformError("Location information not found in monitoring event report")
+        geo_area = monitoring_event_report.locationInfo.geographicArea
+        area = geo_area.polygon
+        camara_location = schemas.Location(area=area,lastLocationTime=)
 
     def create_qod_session(self, session_info: Dict) -> Dict:
         """

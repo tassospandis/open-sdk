@@ -7,7 +7,7 @@ import ipaddress
 from datetime import datetime
 from enum import Enum
 from ipaddress import IPv4Address, IPv6Address
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, NonNegativeInt, RootModel, AnyHttpUrl
@@ -243,6 +243,19 @@ class LocationFailureCause(str,Enum):
     not_registered_ue = "NOT_REGISTERED_UE" # UE is not registered.
     unspecified = "UNSPECIFIED" # Unspecified cause.
 
+class GeographicalCoordinates(BaseModel):
+    lon: float = Field(..., description="Longitude coordinate.")
+    lat: float = Field(..., description="Latitude coordinate.")
+
+class PointList(BaseModel):
+    geographical_coords: list[GeographicalCoordinates] = Field(..., description="List of geographical coordinates defining the points.",min_length=3,max_length=15)
+
+class Polygon(BaseModel):
+    point_list: PointList = Field(..., description="List of points defining the polygon.")
+
+class GeographicArea(BaseModel):
+    polygon: Polygon | None = Field(None, description="Identifies a polygonal geographic area.")
+
 #This data type represents the user location information which is sent from the NEF to the AF.
 class LocationInfo(BaseModel):
     ageOfLocationInfo: DurationMin | None = Field(None,description="Indicates the elapsed time since the last network contact of the UE.")
@@ -252,7 +265,7 @@ class LocationInfo(BaseModel):
     routingAreaId: str | None = Field(None, description="Routing Area ID where the UE is located")
     plmnId: PlmnId | None = Field(None, description="PLMN ID where the UE is located.")
     twanId: str | None = Field(None, description="TWAN ID where the UE is located.")
-    #geographicArea: GeographicArea | None = Field(None,description="Identifies a geographic area of the user where the UE is located.")
+    geographicArea: GeographicArea | None = Field(None,description="Identifies a geographic area of the user where the UE is located.")
 
 class MonitoringEventSubscriptionRequest(BaseModel):
     accuracy: Accuracy | None = Field(None,description="Accuracy represents a desired granularity of accuracy of the requested location information.")
@@ -377,16 +390,6 @@ class AreaType(str,Enum):
     circle = "CIRCLE" # The area is defined as a circle.
     polygon = "POLYGON" # The area is defined as a polygon.
 
-
-class Area(RootModel[Annotated[
-        AreaType,
-        Field(description="""
-            Type of this area.
-            CIRCLE - The area is defined as a circle.
-            POLYGON - The area is defined as a polygon.
-            """)]]):
-    pass
-
 class Point(BaseModel):
     latitude: Annotated[float,Field(description="Latitude component of a location.",examples=["50.735851"],ge=-90,le=90)]
     longitude: Annotated[float,Field(..., description="Longitude component of location.",examples=["7.10066"],ge=-180,le=180)]
@@ -396,12 +399,16 @@ class PointList(RootModel[Annotated[
         Field(min_length=3,max_length=15, description="List of points defining the area.")]]):
     pass
 
-class Circle(Area):
+class Circle(BaseModel):
+    areaType: Literal["CIRCLE"]
     center: Annotated[Point, Field(description="Center point of the circle.")]
     radius: Annotated[float,Field(description="Radius of the circle.",ge=1)]
 
-class Polygon(Area):
+class Polygon(BaseModel):
+    areaType: Literal["POLYGON"]
     boundary: Annotated[PointList, Field(description="List of points defining the polygon.")]
+
+Area = Annotated[Circle | Polygon, Field(discriminator="areaType")]
 
 class LastLocationTime(RootModel[Annotated[
         datetime, 
