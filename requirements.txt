@@ -98,7 +98,6 @@ shortuuid==1.0.13
 six==1.17.0
 soupsieve==2.6
 stack-data==0.6.3
--e git+ssh://git@github.com/SunriseOpenOperatorPlatform/open-sdk.git@df5a0ec92f9f26892b38bb72d2486430055faf7c#egg=sunrise6g_opensdk
 tinycss2==1.4.0
 tomli==2.2.1
 tornado==6.5
