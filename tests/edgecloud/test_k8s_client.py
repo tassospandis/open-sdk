@@ -1,7 +1,9 @@
 import unittest
+
 from sunrise6g_opensdk.edgecloud.clients.piedge.client import (
     EdgeApplicationManager,
 )
+
 
 class TestK8sEdgeApplicationManager(unittest.TestCase):
 

@@ -32,19 +32,11 @@ def deploy_service_function(
     if not ser_function_:
         return "The given service function does not exist in the catalogue"
 
-    # search if node exists in the node catalogue
-    # if service_function.location is not None:
-    #     node_ = connector_db.get_documents_from_collection("points_of_presence", input_type="location",
-    #                                                        input_value=service_function.location)
-    #     if not node_:
-    #         return "The given location does not exist in the node catalogue"
-
     final_deploy_descriptor = {}
     # final_deploy_descriptor["name"]=app_[0]["name"]
 
     # deployed_name= app_[0]["name"]  + "emp"+ descriptor_paas_input["paas_input_name"]
-    if paas_name is not None:
-        final_deploy_descriptor["paas_name"] = paas_name
+   
 
     deployed_name = service_function.service_function_instance_name
 
@@ -52,16 +44,7 @@ def deploy_service_function(
 
     final_deploy_descriptor["name"] = deployed_name
 
-    final_deploy_descriptor["count-min"] = (
-        1 if service_function.count_min is None else service_function.count_min
-    )
-    final_deploy_descriptor["count-max"] = (
-        1 if service_function.count_max is None else service_function.count_max
-    )
-
-    if final_deploy_descriptor["count-min"] > final_deploy_descriptor["count-max"]:
-        final_deploy_descriptor["count-min"] = final_deploy_descriptor["count-max"]
-
+    
     if service_function.location is not None:
         final_deploy_descriptor["location"] = service_function.location
 
@@ -69,10 +52,7 @@ def deploy_service_function(
     con_ = {}
     con_["image"] = ser_function_[0]["image"]
 
-    if "privileged" in ser_function_[0]:
-
-        con_["privileged"] = ser_function_[0]["privileged"]
-
+   
     # con_["imagePullPolicy"] = "Always"
     # ports
 
@@ -82,7 +62,7 @@ def deploy_service_function(
     if service_function.all_node_ports is not None:
 
         if (
-            service_function.all_node_ports == False
+            service_function.all_node_ports is False
             and service_function.node_ports is None
         ):
             return "Please provide the application ports in the field exposed_ports or all_node_ports==true"
@@ -111,55 +91,6 @@ def deploy_service_function(
 
     final_deploy_descriptor["containers"] = containers
     # final_deploy_descriptor["restartPolicy"] = "Always"
-
-    # check volumes!!
-    req_volumes = []
-    if "required_volumes" in ser_function_[0]:
-        if ser_function_[0].get("required_volumes") is not None:
-            for required_volumes in ser_function_[0]["required_volumes"]:
-                req_volumes.append(required_volumes["name"])
-    vol_mount = []
-    volume_input = []
-
-    if service_function.volume_mounts is not None:
-        for volume_mounts in service_function.volume_mounts:
-
-            vo_in = {}
-
-            vo_in["name"] = volume_mounts.name
-            vo_in["storage"] = volume_mounts.storage
-            volume_input.append(vo_in)
-            vol_mount.append(volume_mounts.name)
-    if len(vol_mount) != len(req_volumes):
-        return (
-            "The selected service function requires "
-            + str(len(req_volumes))
-            + " volume/ volumes "
-        )
-    else:
-        if ser_function_[0].get("required_volumes") is not None:
-
-            result = auxiliary_functions.equal_ignore_order(req_volumes, vol_mount)
-
-            if result is False:
-                return (
-                    "The selected service function requires "
-                    + str(len(req_volumes))
-                    + " volume/ volumes. Please check volume names"
-                )
-            else:
-                volumes = []
-                for vol in ser_function_[0]["required_volumes"]:
-                    for vol_re in service_function.volume_mounts:
-                        vol_ = {}
-                        if vol["name"] == vol_re.name:
-                            vol_["name"] = vol_re.name
-                            vol_["storage"] = vol_re.storage
-                            vol_["path"] = vol["path"]
-                            if "hostpath" in vol:
-                                vol_["hostpath"] = vol["hostpath"]
-                            volumes.append(vol_)
-                final_deploy_descriptor["volumes"] = volumes
 
     # check env parameters:
     req_env_parameters = []
@@ -215,21 +146,8 @@ def deploy_service_function(
                             paremeters.append(reqenv_)
                 final_deploy_descriptor["env_parameters"] = paremeters
 
-    ##################START##################### TODO!!!!!!!!!!!!!!!!!!!!1
-
-    # #Get deployed apps to check if app exist (if yes use patch methods)
-    # deployed_apps = kubernetes_connector.get_deployed_apps()
-    #
-    #
-    # exists_flag = False
-    # for deployed_app in deployed_apps:
-    #     if "appname" in deployed_app:
-    #         if final_deploy_descriptor["name"] == deployed_app["appname"]:
-    #             exists_flag = True
-    #             break
 
     exists_flag = False
-    ##################END#####################
 
     if exists_flag:
         response = kubernetes_connector.patch_service_function(final_deploy_descriptor)
