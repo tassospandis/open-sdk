@@ -10,9 +10,9 @@
 #   - Sergio Giménez (sergio.gimenez@i2cat.net)
 ##
 """
-EdgeCloud Platform Integration Tests
+EdgeCloud adapters Integration Tests
 
-Validates the complete application lifecycle across multiple adapters:
+Validates the complete application lifecycle:
 1. Infrastructure (zone discovery)
 2. Artefact management (create/delete)
 3. Application lifecycle (onboard/deploy/undeploy/delete app onboarded)
@@ -22,7 +22,7 @@ Key features:
 - Tests configuration available in test_config.py
 - Ensures proper resource cleanup
 - Uses shared test constants and CAMARA-compliant manifests
-- Includes i2edge-specific tests where needed
+- Includes artefact unit tests where needed
 """
 import time
 

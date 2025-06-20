@@ -33,8 +33,9 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
     i2Edge Client
     """
 
-    def __init__(self, base_url: str):
+    def __init__(self, base_url: str, flavour_id: str):
         self.base_url = base_url
+        self.flavour_id = flavour_id
 
     def get_edge_cloud_zones(
         self, region: Optional[str] = None, status: Optional[str] = None
@@ -156,15 +157,10 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         except I2EdgeError as e:
             raise e
 
-    def _select_best_flavour_for_app(self, zone_id) -> str:
-        """
-        Selects the best flavour for the specified app requirements in a given zone.
-        """
-        # list_of_flavours = self.get_edge_cloud_zones_details(zone_id)
-        # <logic that select the best flavour>
-        # TODO - Harcoded
-        flavourId = "67f3a0b0e3184a85952e174d"
-        return flavourId
+    # def _select_best_flavour_for_app(self, zone_id) -> str:
+    #     # list_of_flavours = self.get_edge_cloud_zones_details(zone_id)
+    #     # <logic that select the best flavour>
+    #     return flavourId
 
     def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
         appId = app_id
@@ -172,15 +168,15 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         profile_data = app["profile_data"]
         appProviderId = profile_data["appProviderId"]
         appVersion = profile_data["appMetaData"]["version"]
-        # TODO: Iterate in the list; deploy the app in all zones
         zone_info = app_zones[0]["EdgeCloudZone"]
         zone_id = zone_info["edgeCloudZoneId"]
-        flavourId = self._select_best_flavour_for_app(zone_id=zone_id)
+        # TODO: atm the flavour id is specified as an input parameter
+        # flavourId = self._select_best_flavour_for_app(zone_id=zone_id)
         app_deploy_data = schemas.AppDeployData(
             appId=appId,
             appProviderId=appProviderId,
             appVersion=appVersion,
-            zoneInfo=schemas.ZoneInfo(flavourId=flavourId, zoneId=zone_id),
+            zoneInfo=schemas.ZoneInfo(flavourId=self.flavour_id, zoneId=zone_id),
         )
         url = "{}/app/".format(self.base_url)
         payload = schemas.AppDeploy(app_deploy_data=app_deploy_data)

@@ -4,6 +4,7 @@ test_cases = [
         "edgecloud": {
             "client_name": "i2edge",
             "base_url": "http://192.168.123.48:30769/",
+            "flavour_id": "67f3a0b0e3184a85952e174d",
         }
     },
     # {
