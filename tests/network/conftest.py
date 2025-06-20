@@ -1,7 +1,8 @@
 import pytest
+import datetime
 
 from sunrise6g_opensdk.common.sdk import Sdk as sdkclient
-from sunrise6g_opensdk.network.core.schemas import RetrievalLocationRequest, Device, MonitoringEventSubscriptionRequest
+from sunrise6g_opensdk.network.core.schemas import RetrievalLocationRequest, Device, MonitoringEventSubscriptionRequest, Location, AreaType, PointList, Point,Polygon
 
 
 
@@ -48,7 +49,7 @@ def camara_payload_input_data() -> RetrievalLocationRequest:
 #   "monitoringType": "LOCATION_REPORTING",
 #   "locationType": "CURRENT_LOCATION"
 # }
-@pytest.fixture(scope="module", name="expected_output_data")
+@pytest.fixture(scope="module", name="expected_3gpp_output_data")
 def monitoring_request_3gpp_payload_output_data(camara_payload_input_data: RetrievalLocationRequest) -> MonitoringEventSubscriptionRequest:
     """
     Fixture to provide output data for 3GPP monitoring event request payload.
@@ -60,3 +61,43 @@ def monitoring_request_3gpp_payload_output_data(camara_payload_input_data: Retri
         monitoringType="LOCATION_REPORTING",
         locationType="LAST_KNOWN_LOCATION"
     )
+
+
+@pytest.fixture(scope="module", name="expected_camara_output_data")
+def monitoring_request_camara_payload_output_data(camara_payload_input_data: RetrievalLocationRequest) -> Location:
+    """
+    Fixture to provide output data for 3GPP monitoring event request payload.
+
+    Example:
+
+    {
+        "lastLocationTime": "2023-10-27T15:30:00Z",
+        "area": {
+            "areaType": "POLYGON",
+            "boundary": [
+            {
+                "latitude": 34.0522,
+                "longitude": -118.2437
+            },
+            {
+                "latitude": 34.0535,
+                "longitude": -118.2500
+            },
+            {
+                "latitude": 34.0480,
+                "longitude": -118.2520
+            }
+            ]
+        }
+    }
+    """
+    point1 = Point(latitude=34.0522, longitude=-118.2437)
+    point2 = Point(latitude=34.0535, longitude=-118.2500)
+    point3 = Point(latitude=34.0480, longitude=-118.2520)
+
+    point_list = PointList(root=[point1, point2, point3])
+    
+    polygon_area = Polygon(areaType=AreaType.polygon,boundary=point_list)
+
+    location = Location(lastLocationTime="2023-10-27T15:30:00Z",area=polygon_area)
+    return location

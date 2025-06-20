@@ -258,10 +258,10 @@ class NetworkManagementInterface(ABC):
             raise NetworkPlatformError("Location information not found in monitoring event report")
         geo_area = monitoring_event_report.locationInfo.geographicArea
         report_event_time = monitoring_event_report.eventTime
-        ageOfLocationInfo = None
+        age_of_location_info = None
         if monitoring_event_report.locationInfo.ageOfLocationInfo is not None:    
-            ageOfLocationInfo = monitoring_event_report.locationInfo.ageOfLocationInfo.duration
-        last_location_time = self._compute_camara_last_location_time(report_event_time,ageOfLocationInfo)
+            age_of_location_info = monitoring_event_report.locationInfo.ageOfLocationInfo.duration
+        last_location_time = self._compute_camara_last_location_time(report_event_time,age_of_location_info)
             
         camara_polygon = schemas.Polygon(areaType=schemas.AreaType.polygon,boundary=geo_area.polygon.point_list)
         camara_loc_area = schemas.Area.model_validate(camara_polygon)

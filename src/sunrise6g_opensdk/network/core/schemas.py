@@ -247,11 +247,11 @@ class GeographicalCoordinates(BaseModel):
     lon: float = Field(..., description="Longitude coordinate.")
     lat: float = Field(..., description="Latitude coordinate.")
 
-class PointList(BaseModel):
+class PointListNef(BaseModel):
     geographical_coords: list[GeographicalCoordinates] = Field(..., description="List of geographical coordinates defining the points.",min_length=3,max_length=15)
 
 class NefPolygon(BaseModel):
-    point_list: PointList = Field(..., description="List of points defining the polygon.")
+    point_list: PointListNef = Field(..., description="List of points defining the polygon.")
 
 class GeographicArea(BaseModel):
     polygon: NefPolygon | None = Field(None, description="Identifies a polygonal geographic area.")
