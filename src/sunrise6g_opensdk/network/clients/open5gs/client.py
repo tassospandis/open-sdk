@@ -61,16 +61,19 @@ class NetworkManager(NetworkManagementInterface):
             raise ValidationError(
                 "Open5GS requires a device to be specified for location retrieval in NEF."
             )
-    def add_core_specific_location_parameters(self, retrieve_location_request: schemas.RetrievalLocationRequest, subscription: schemas.MonitoringEventSubscriptionRequest) -> None:
-        subscription.msisdn = retrieve_location_request.device.phoneNumber
-        subscription.monitoringType = schemas.MonitoringType.LOCATION_REPORTING
-        subscription.locationType = schemas.LocationType.CURRENT_LOCATION 
-        # subscription.locationType = schemas.LocationType.LAST_KNOWN
-        # subscription.maximumNumberOfReports = 1
-        # subscription.repPeriod = schemas.DurationSec(root=20)
-
-        return subscription
-
+    def add_core_specific_location_parameters(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> schemas.MonitoringEventSubscriptionRequest:
+        return schemas.MonitoringEventSubscriptionRequest(
+            msisdn=retrieve_location_request.device.phoneNumber.root.lstrip('+'),
+            notificationDestination="http://127.0.0.1:8001",
+            monitoringType=schemas.MonitoringType.LOCATION_REPORTING,
+            locationType=schemas.LocationType.LAST_KNOWN
+        )
+        # subscription.msisdn = retrieve_location_request.device.phoneNumber.root.lstrip('+')
+        # monitoringType = schemas.MonitoringType.LOCATION_REPORTING
+        # locationType = schemas.LocationType.LAST_KNOWN
+        # locationType = schemas.LocationType.CURRENT_LOCATION 
+        # maximumNumberOfReports = 1
+        # repPeriod = schemas.DurationSec(root=20)
 
 
 # Note:

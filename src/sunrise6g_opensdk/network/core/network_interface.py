@@ -114,8 +114,7 @@ class NetworkManagementInterface(ABC):
 
     def add_core_specific_location_parameters(
         self,
-        retrieve_location_request: schemas.RetrievalLocationRequest,
-        subscription: schemas.MonitoringEventSubscriptionRequest,
+        retrieve_location_request: schemas.RetrievalLocationRequest
     )-> schemas.MonitoringEventSubscriptionRequest:
         """
         Placeholder for adding core-specific parameters to the location subscription.
@@ -215,17 +214,17 @@ class NetworkManagementInterface(ABC):
     
     def _build_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> schemas.MonitoringEventSubscriptionRequest:
         self.core_specific_monitoring_event_validation(retrieve_location_request)
+        subscription_3gpp = self.add_core_specific_location_parameters(retrieve_location_request)
         device = retrieve_location_request.device
-        subscription = schemas.MonitoringEventSubscriptionRequest(
-            externalId=device.networkAccessIdentifier,
-            ipv4Address=device.ipv4Address,
-            ipv6Addr=device.ipv6Address,
-            msisdn=device.phoneNumber,
-            notificationDestination= "http://test_server:8001")
-        mapped_3gpp_subscription = self.add_core_specific_location_parameters(retrieve_location_request,subscription)
-        return mapped_3gpp_subscription
+        subscription_3gpp.externalId = device.networkAccessIdentifier
+        subscription_3gpp.ipv4Addr = device.ipv4Address
+        subscription_3gpp.ipv6Addr = device.ipv6Address
+        # subscription.msisdn = device.phoneNumber.root.lstrip('+')
+        # subscription.notificationDestination = "http://127.0.0.1:8001"
+        
+        return subscription_3gpp
 
-    def _compute_camara_last_location_time(self, event_time_str: datetime, age_of_location_info_min : int = None) -> :
+    def _compute_camara_last_location_time(self, event_time_str: datetime, age_of_location_info_min : int = None) -> datetime:
         """
         event_time_str: ISO 8601 string, e.g. "2025-06-18T12:30:00Z"
         age_of_location_info_min: unsigned int, age of location info in minutes
