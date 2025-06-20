@@ -8,6 +8,8 @@ EDGE_CLOUD_TEST_CASES = [
         "edgecloud": {
             "client_name": "i2edge",
             "base_url": "http://test-nbi-i2edge.sunrise6g",
+            # Additional parameters for i2Edge client:
+            "flavour_id": "id",
         }
     },
     {
