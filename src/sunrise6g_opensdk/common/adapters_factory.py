@@ -29,9 +29,13 @@ from sunrise6g_opensdk.network.adapters.open5gs.client import (
 
 
 def _edgecloud_adapters_factory(client_name: str, base_url: str, **kwargs):
+    if client_name == "i2edge":
+        if "flavour_id" not in kwargs:
+            raise ValueError("Missing required 'flavour_id' for i2edge client.")
+
     edge_cloud_factory = {
         "aeros": lambda url, **kw: AerosClient(base_url=url, **kw),
-        "i2edge": lambda url: I2EdgeClient(base_url=url),
+        "i2edge": lambda url, **kw: I2EdgeClient(base_url=url, **kw),
         # "kubernetes": lambda url: kubernetesClient(base_url=url), Uncomment when import issues are solved
     }
     try:
