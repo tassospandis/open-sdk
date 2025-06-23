@@ -45,10 +45,10 @@ class KubernetesConnector:
             self.api_instance_appsv1 = client.AppsV1Api(api_client)
             self.api_instance_apiregv1 = client.ApiregistrationV1Api(api_client)
             self.api_instance_v1autoscale = client.AutoscalingV1Api(api_client)
-            self.api_instance_v2beta1autoscale = client.AutoscalingV2beta1Api(
+            self.api_instance_v2beta1autoscale = client.AutoscalingV2Api(
                 api_client
             )
-            self.api_instance_v2beta2autoscale = client.AutoscalingV2beta2Api(
+            self.api_instance_v2beta2autoscale = client.AutoscalingV2Api(
                 api_client
             )
             self.api_instance_corev1api = client.CoreV1Api(api_client)

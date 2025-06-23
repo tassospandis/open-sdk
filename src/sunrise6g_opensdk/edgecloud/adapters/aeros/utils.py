@@ -10,7 +10,7 @@ Docstring
 """
 from requests.exceptions import HTTPError, RequestException, Timeout
 
-import sunrise6g_opensdk.edgecloud.clients.aeros.config as config
+import sunrise6g_opensdk.edgecloud.adapters.aeros.config as config
 from sunrise6g_opensdk.logger import setup_logger
 
 

@@ -8,10 +8,10 @@
 # Contributors:
 #   - Adrián Pino Martínez (adrian.pino@i2cat.net)
 ##
-from sunrise6g_opensdk.edgecloud.clients.aeros.client import (
+from sunrise6g_opensdk.edgecloud.adapters.aeros.client import (
     EdgeApplicationManager as AerosClient,
 )
-from sunrise6g_opensdk.edgecloud.clients.i2edge.client import (
+from sunrise6g_opensdk.edgecloud.adapters.i2edge.client import (
     EdgeApplicationManager as I2EdgeClient,
 )
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.client import (

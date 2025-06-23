@@ -8,3 +8,5 @@ __pycache__/
 .tar.gz
 /dist
 src/sunrise6g_opensdk.egg-info/
+tests/edgecloud/test_k8s_client.py
+isi_setup_k8s_test.sh

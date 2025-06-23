@@ -16,7 +16,7 @@ import requests
 from pydantic import BaseModel
 
 from sunrise6g_opensdk import logger
-from sunrise6g_opensdk.edgecloud.clients.errors import EdgeCloudPlatformError
+from sunrise6g_opensdk.edgecloud.adapters.errors import EdgeCloudPlatformError
 
 log = logger.get_logger(__name__)
 
