@@ -533,24 +533,18 @@ class KubernetesConnector:
 
             containers.append(con)
 
-        node_selector_dict = {}
-        if "location" in descriptor_service_function:
-            node_selector_dict["location"] = descriptor_service_function["location"]
+        pod_spec_args = {
+            "containers": containers,
+            "hostname": descriptor_service_function["name"],
+            "restart_policy": "Always",
+            "volumes": None if not volumes else volumes,
+        }
 
-            template_spec_ = client.V1PodSpec(
-                containers=containers,
-                node_selector=node_selector_dict,
-                hostname=descriptor_service_function["name"],
-                restart_policy="Always",
-                volumes=None if not volumes else volumes,
-            )
-        else:
-            template_spec_ = client.V1PodSpec(
-                containers=containers,
-                hostname=descriptor_service_function["name"],
-                restart_policy="Always",
-                volumes=None if not volumes else volumes,
-            )
+        location = descriptor_service_function.get("location")
+        if location:
+            pod_spec_args["node_selector"] = {"location": location}
+
+        template_spec_ = client.V1PodSpec(**pod_spec_args)
 
         template = client.V1PodTemplateSpec(metadata=metadata_spec, spec=template_spec_)
 
