@@ -14,7 +14,7 @@ from sunrise6g_opensdk.edgecloud.clients.aeros.client import (
 from sunrise6g_opensdk.edgecloud.clients.i2edge.client import (
     EdgeApplicationManager as I2EdgeClient,
 )
-from sunrise6g_opensdk.edgecloud.clients.piedge.client import (
+from sunrise6g_opensdk.edgecloud.adapters.kubernetes.client import (
     EdgeApplicationManager as PiEdgeClient,
 )
 from sunrise6g_opensdk.network.clients.oai.client import NetworkManager as OaiCoreClient

@@ -36,7 +36,6 @@ def deploy_service_function(
     # final_deploy_descriptor["name"]=app_[0]["name"]
 
     # deployed_name= app_[0]["name"]  + "emp"+ descriptor_paas_input["paas_input_name"]
-   
 
     deployed_name = service_function.service_function_instance_name
 
@@ -44,7 +43,6 @@ def deploy_service_function(
 
     final_deploy_descriptor["name"] = deployed_name
 
-    
     if service_function.location is not None:
         final_deploy_descriptor["location"] = service_function.location
 
@@ -52,7 +50,6 @@ def deploy_service_function(
     con_ = {}
     con_["image"] = ser_function_[0]["image"]
 
-   
     # con_["imagePullPolicy"] = "Always"
     # ports
 
@@ -145,7 +142,6 @@ def deploy_service_function(
                                 reqenv_["value_ref"] = env_in.value_ref
                             paremeters.append(reqenv_)
                 final_deploy_descriptor["env_parameters"] = paremeters
-
 
     exists_flag = False
 
