@@ -557,7 +557,7 @@ class KubernetesConnector:
         spec = client.V1DeploymentSpec(
             selector=selector,
             template=template,
-            replicas=descriptor_service_function["count-min"],
+            replicas=descriptor_service_function.get("count-min", 1),
         )
 
         body = client.V1Deployment(
