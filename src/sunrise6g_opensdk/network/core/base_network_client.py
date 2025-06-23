@@ -13,7 +13,6 @@ from itertools import product
 from typing import Dict
 
 from sunrise6g_opensdk import logger
-from sunrise6g_opensdk.network.adapters.errors import NetworkPlatformError
 from sunrise6g_opensdk.network.core import common, schemas
 
 log = logger.get_logger(__name__)
@@ -220,13 +219,9 @@ class BaseNetworkClient:
         subscription_info: schemas.AsSessionWithQoSSubscription = (
             schemas.AsSessionWithQoSSubscription(**response)
         )
-        subscription_url = subscription_info.self_.root
-        subscription_id = subscription_url.split("/")[-1] if subscription_url else None
-        if not subscription_id:
-            log.error("Failed to retrieve QoS session ID from response")
-            raise NetworkPlatformError("QoS session ID not found in response")
+
         session_info = schemas.SessionInfo(
-            sessionId=schemas.SessionId(uuid.UUID(subscription_id)),
+            sessionId=schemas.SessionId(uuid.UUID(subscription_info.subscription_id)),
             qosStatus=schemas.QosStatus.REQUESTED,
             **session_info,
         )
@@ -242,11 +237,28 @@ class BaseNetworkClient:
         returns:
             Dictionary containing the details of the requested QoS session.
         """
-        session = common.as_session_with_qos_get(
+        response = common.as_session_with_qos_get(
             self.base_url, self.scs_as_id, session_id=session_id
         )
-        log.info(f"QoD session retrived successfully [id={session_id}]")
-        return session
+        subscription_info = schemas.AsSessionWithQoSSubscription(**response)
+        flowDesc = subscription_info.flowInfo[0].flowDescriptions[0]
+        serverIp = flowDesc.split("to ")[1].split("/")[0]
+        session_info = schemas.SessionInfo(
+            sessionId=schemas.SessionId(uuid.UUID(subscription_info.subscription_id)),
+            duration=subscription_info.usageThreshold.duration,
+            sink=subscription_info.notificationDestination,
+            qosProfile=subscription_info.qosReference,
+            device=schemas.Device(
+                ipv4Address=schemas.DeviceIpv4Addr1(
+                    publicAddress=subscription_info.ueIpv4Addr,
+                    privateAddress=subscription_info.ueIpv4Addr,
+                ),
+            ),
+            applicationServer=schemas.ApplicationServer(
+                ipv4Address=schemas.ApplicationServerIpv4Address(serverIp)
+            ),
+        )
+        return session_info.model_dump()
 
     def delete_qod_session(self, session_id: str) -> None:
         """
