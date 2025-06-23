@@ -63,7 +63,7 @@ def deploy_service_function(
     deployed_service_function_db["location"] = service_function.location
     deployed_service_function_db["instance_name"] = deployed_name
 
-    if "Conflict" not in response:
+    if isinstance(response, dict) and response.get("status") == "success":
         connector_db.insert_document_deployed_service_function(
             document=deployed_service_function_db
         )
