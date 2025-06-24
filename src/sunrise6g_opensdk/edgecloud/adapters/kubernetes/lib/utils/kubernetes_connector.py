@@ -21,7 +21,7 @@ configuration = client.Configuration()
 
 
 class KubernetesConnector:
-    def __init__(self, ip, port, token, username):
+    def __init__(self, ip, port, token, username, storage_class=None):
         master_node_ip = ip
         master_node_port = port
         username = username
@@ -34,6 +34,9 @@ class KubernetesConnector:
 
         configuration.username = username
         configuration.verify_ssl = False
+
+        self.storage_class = storage_class
+
         self.v1 = client.CoreV1Api(client.ApiClient(configuration))
 
         # config.lod
@@ -259,7 +262,9 @@ class KubernetesConnector:
                             + "/api/v1/namespaces/sunrise6g/persistentvolumeclaims"
                         )
                         body_volume = self.create_pvc_dict(
-                            descriptor_service_function["name"], volume
+                            descriptor_service_function["name"],
+                            volume,
+                            storage_class=self.storage_class,
                         )
                         headers = {"Authorization": "Bearer " + self.token_k8s}
                         requests.post(
@@ -731,6 +736,29 @@ class KubernetesConnector:
                 % e
             )
 
+    def create_pvc_dict(self, name, volumes, storage_class=None, volume_name=None):
+        name_vol = name + str("-") + volumes["name"]
+        # body={}
+        # body["api_version"]="v1"
+        # body["kind"]="PersistentVolumeClaim"
+        # metadata={}
+        # labels={}
+        body = {
+            "api_version": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {"labels": {"sunrise6g": name_vol}, "name": name_vol},
+            "spec": {
+                "accessModes": ["ReadWriteOnce"],
+                "resources": {"requests": {"storage": volumes["storage"]}},
+                "storageClassName": storage_class,
+            },
+        }
+
+        if volume_name is not None:
+            body["spec"]["volume_name"] = volume_name
+
+        return body
+
 
 def create_pvc(name, volumes):
     dict_label = {}
@@ -749,30 +777,6 @@ def create_pvc(name, volumes):
     body = client.V1PersistentVolumeClaim(
         api_version="v1", kind=kind, metadata=metadata, spec=spec
     )
-
-    return body
-
-
-def create_pvc_dict(name, volumes, storage_class="microk8s-hostpath", volume_name=None):
-    name_vol = name + str("-") + volumes["name"]
-    # body={}
-    # body["api_version"]="v1"
-    # body["kind"]="PersistentVolumeClaim"
-    # metadata={}
-    # labels={}
-    body = {
-        "api_version": "v1",
-        "kind": "PersistentVolumeClaim",
-        "metadata": {"labels": {"sunrise6g": name_vol}, "name": name_vol},
-        "spec": {
-            "accessModes": ["ReadWriteOnce"],
-            "resources": {"requests": {"storage": volumes["storage"]}},
-            "storageClassName": storage_class,
-        },
-    }
-
-    if volume_name is not None:
-        body["spec"]["volume_name"] = volume_name
 
     return body
 

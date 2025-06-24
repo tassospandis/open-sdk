@@ -34,12 +34,14 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         kubernetes_port = kwargs.get("KUBERNETES_MASTER_PORT")
         storage_uri = kwargs.get("EMP_STORAGE_URI")
         username = kwargs.get("KUBERNETES_USERNAME")
+        storage_class = kwargs.get("KUBERNETES_STORAGE_CLASS")
         if base_url is not None and base_url != "":
             self.k8s_connector = KubernetesConnector(
                 ip=self.kubernetes_host,
                 port=kubernetes_port,
                 token=kubernetes_token,
                 username=username,
+                storage_class=storage_class,
             )
         if storage_uri is not None:
             self.connector_db = ConnectorDB(storage_uri)
@@ -54,6 +56,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
             "networkInterfaces"
         )
         env_params = app_manifest.get("componentSpec")[0].get("required_env_parameters")
+        required_volumes = app_manifest.get("componentSpec")[0].get("required_volumes")
         ports = []
         for ni in network_interfaces:
             ports.append(ni.get("port"))
@@ -67,6 +70,8 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         sf_reg_dict = insert_doc.to_dict()
         if env_params:
             sf_reg_dict["required_env_parameters"] = env_params
+        if required_volumes:
+            sf_reg_dict["required_volumes"] = required_volumes
 
         result = self.connector_db.insert_document_service_function(sf_reg_dict)
         if type(result) is str:
@@ -115,6 +120,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
             return "Application with ID: " + app_id + " not found", 404
         if app is not None:
             env_parameters = app[0].get("required_env_parameters")
+            volume_mounts = app[0].get("required_volumes")
             for zone in app_zones:
                 sf = DeployServiceFunction(
                     service_function_name=app[0].get("name"),
@@ -123,6 +129,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
                     + zone.get("EdgeCloudZone").get("edgeCloudZoneName"),
                     location=zone.get("edgeCloudZoneName"),
                     env_parameters=env_parameters,
+                    volume_mounts=volume_mounts,
                 )
                 result = deploy_service_function(
                     service_function=sf,

@@ -51,6 +51,7 @@ class TestK8sEdgeApplicationManager(unittest.TestCase):
             "KUBERNETES_MASTER_PORT": "8443",
             "EMP_STORAGE_URI": "mongodb://localhost:27017",
             "KUBERNETES_USERNAME": "sdk-user",
+            "KUBERNETES_STORAGE_CLASS": "standard",
         }
         self.manager = EdgeApplicationManager(base_url=IP_ADDRESS, **kwargs)
 
@@ -70,7 +71,7 @@ class TestK8sEdgeApplicationManager(unittest.TestCase):
 
         # --- ARRANGE ---
         deploymentlocation = (
-            "PATRAS"  # This should match the name of your Minikube node location tag
+            "ATHENS"  # This should match the name of your Minikube node location tag
         )
         app_name = "Apache_test"
 
@@ -144,6 +145,7 @@ class TestK8sEdgeApplicationManager(unittest.TestCase):
                         {
                             "name": "postgres-data-storage",
                             "path": "/var/lib/postgresql/data",
+                            "storage": "1Gi",
                         }
                     ],
                 }

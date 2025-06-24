@@ -61,6 +61,9 @@ def deploy_service_function(
     if service_function.env_parameters:
         final_deploy_descriptor["env_parameters"] = service_function.env_parameters
 
+    if service_function.volume_mounts:
+        final_deploy_descriptor["volumes"] = service_function.volume_mounts
+
     response = kubernetes_connector.deploy_service_function(final_deploy_descriptor)
     # insert it to mongo db
     deployed_service_function_db = {}

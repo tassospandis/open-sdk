@@ -157,8 +157,8 @@ class ConnectorDB:
                 "required_env_parameters"
             )
 
-        # if "required_volumes" in document:
-        #     insert_doc["required_volumes"] = document["required_volumes"]
+        if document.get("required_volumes") is not None:
+            insert_doc["required_volumes"] = document.get("required_volumes")
         # if "privileged" in document:
         #     insert_doc["privileged"] = document["privileged"]
         # insert_doc["required_env_parameters"] = document["required_env_parameters"]
