@@ -65,7 +65,7 @@ def monitoring_request_3gpp_payload_output_data(camara_payload_input_data: Retri
 @pytest.fixture(scope="module", name="expected_camara_output_data")
 def monitoring_request_camara_payload_output_data(camara_payload_input_data: RetrievalLocationRequest) -> Location:
     """
-    Fixture to provide output data for 3GPP monitoring event request payload.
+    Fixture to provide output data for camara request payload.
 
     Example:
 

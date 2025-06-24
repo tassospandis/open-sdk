@@ -226,8 +226,14 @@ class NetworkManagementInterface(ABC):
 
     def _compute_camara_last_location_time(self, event_time: datetime, age_of_location_info_min : int = None) -> datetime:
         """
-        event_time_str: ISO 8601 string, e.g. "2025-06-18T12:30:00Z"
-        age_of_location_info_min: unsigned int, age of location info in minutes
+        Computes the last location time based on the event time and age of location info.
+
+        args:
+            event_time: ISO 8601 datetime, e.g. "2025-06-18T12:30:00Z"
+            age_of_location_info_min: unsigned int, age of location info in minutes
+
+        returns: 
+            datetime object representing the last location time in UTC.
         """
         if age_of_location_info_min is not None:
             last_location_time = event_time - timedelta(minutes=age_of_location_info_min)
