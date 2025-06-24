@@ -94,8 +94,15 @@ class ConnectorDB:
             # if "volumes" in document:
             #     insert_doc["volumes"] = document["volumes"]
 
-            # if "env_parameters" in document:
-            #     insert_doc["env_parameters"] = document["env_parameters"]
+            if document.get("autoscaling_policies") is not None:
+                insert_doc["autoscaling_policies"] = document.get(
+                    "autoscaling_policies"
+                )
+
+            if document.get("required_env_parameters") is not None:
+                insert_doc["required_env_parameters"] = document.get(
+                    "required_env_parameters"
+                )
 
             mycol.insert_one(insert_doc)
             return "Deployed service function registered successfully"
@@ -144,6 +151,12 @@ class ConnectorDB:
             insert_doc["application_ports"] = document.get("application_ports")
         if document.get("autoscaling_policies") is not None:
             insert_doc["autoscaling_policies"] = document.get("autoscaling_policies")
+
+        if document.get("required_env_parameters") is not None:
+            insert_doc["required_env_parameters"] = document.get(
+                "required_env_parameters"
+            )
+
         # if "required_volumes" in document:
         #     insert_doc["required_volumes"] = document["required_volumes"]
         # if "privileged" in document:

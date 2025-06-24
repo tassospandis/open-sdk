@@ -53,6 +53,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         network_interfaces = app_manifest.get("componentSpec")[0].get(
             "networkInterfaces"
         )
+        env_params = app_manifest.get("componentSpec")[0].get("required_env_parameters")
         ports = []
         for ni in network_interfaces:
             ports.append(ni.get("port"))
@@ -62,9 +63,12 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
             service_function_type=package_type,
             application_ports=ports,
         )
-        result = self.connector_db.insert_document_service_function(
-            insert_doc.to_dict()
-        )
+
+        sf_reg_dict = insert_doc.to_dict()
+        if env_params:
+            sf_reg_dict["required_env_parameters"] = env_params
+
+        result = self.connector_db.insert_document_service_function(sf_reg_dict)
         if type(result) is str:
             return result
         return {"appId": str(result.inserted_id)}
@@ -110,6 +114,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         if len(app) < 1:
             return "Application with ID: " + app_id + " not found", 404
         if app is not None:
+            env_parameters = app[0].get("required_env_parameters")
             for zone in app_zones:
                 sf = DeployServiceFunction(
                     service_function_name=app[0].get("name"),
@@ -117,6 +122,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
                     + "-"
                     + zone.get("EdgeCloudZone").get("edgeCloudZoneName"),
                     location=zone.get("edgeCloudZoneName"),
+                    env_parameters=env_parameters,
                 )
                 result = deploy_service_function(
                     service_function=sf,

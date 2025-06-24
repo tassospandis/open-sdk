@@ -70,22 +70,22 @@ class TestK8sEdgeApplicationManager(unittest.TestCase):
 
         # --- ARRANGE ---
         deploymentlocation = (
-            "PATRAS"  # This should match the name of your Minikube zone
+            "PATRAS"  # This should match the name of your Minikube node location tag
         )
-        app_name = "apacheiiboooioo1opatrastest"
+        app_name = "Apache_test"
 
-        # APACHE MANIFEST
-        camara_manifest = {
-            "name": app_name,
-            "packageType": "Container",
-            "appRepo": {"imagePath": "httpd:2.4"},
-            "componentSpec": [
-                {
-                    "componentName": "apache-web-server",
-                    "networkInterfaces": [{"protocol": "TCP", "port": 80}],
-                }
-            ],
-        }
+        # # APACHE MANIFEST
+        # camara_manifest = {
+        #     "name": app_name,
+        #     "packageType": "Container",
+        #     "appRepo": {"imagePath": "httpd:2.4"},
+        #     "componentSpec": [
+        #         {
+        #             "componentName": "apache-web-server",
+        #             "networkInterfaces": [{"protocol": "TCP", "port": 80}],
+        #         }
+        #     ],
+        # }
 
         # # REDIS MANIFEST
         # camara_manifest = {
@@ -129,36 +129,26 @@ class TestK8sEdgeApplicationManager(unittest.TestCase):
         # }
 
         # POSTGRES MANIFEST (testing persistency, networking, and environment variables) !not staying up, volume not created
-        # camara_manifest = {
-        #     "name": "postgres-db-app",
-        #     "packageType": "Container",
-        #     "appRepo": {
-        #         "imagePath": "postgres:15"
-        #     },
-        #     "componentSpec": [
-        #         {
-        #             "componentName": "postgres-db-container",
-
-        #             "networkInterfaces": [
-        #                 {"protocol": "TCP", "port": 5432}
-        #             ],
-
-        #             "required_env_parameters": [
-        #                 {
-        #                     "name": "POSTGRES_PASSWORD",
-        #                     "value": "password"
-        #                 }
-        #             ],
-
-        #             "required_volumes": [
-        #                 {
-        #                     "name": "postgres-data-storage",
-        #                     "path": "/var/lib/postgresql/data"
-        #                 }
-        #             ]
-        #         }
-        #     ]
-        # }
+        camara_manifest = {
+            "name": "postgres-db-app",
+            "packageType": "Container",
+            "appRepo": {"imagePath": "postgres:15"},
+            "componentSpec": [
+                {
+                    "componentName": "postgres-db-container",
+                    "networkInterfaces": [{"protocol": "TCP", "port": 5432}],
+                    "required_env_parameters": [
+                        {"name": "POSTGRES_PASSWORD", "value": "password"}
+                    ],
+                    "required_volumes": [
+                        {
+                            "name": "postgres-data-storage",
+                            "path": "/var/lib/postgresql/data",
+                        }
+                    ],
+                }
+            ],
+        }
 
         print("--> Step 1: Onboarding application...")
         onboard_response = self.manager.onboard_app(app_manifest=camara_manifest)
