@@ -1,14 +1,15 @@
 from __future__ import (
     print_function,
 )
-import requests
 
+import requests
 from kubernetes import (
     client,
 )
 from kubernetes.client.rest import (
     ApiException,
 )
+
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils import (
     auxiliary_functions,
 )
@@ -45,12 +46,8 @@ class KubernetesConnector:
             self.api_instance_appsv1 = client.AppsV1Api(api_client)
             self.api_instance_apiregv1 = client.ApiregistrationV1Api(api_client)
             self.api_instance_v1autoscale = client.AutoscalingV1Api(api_client)
-            self.api_instance_v2beta1autoscale = client.AutoscalingV2Api(
-                api_client
-            )
-            self.api_instance_v2beta2autoscale = client.AutoscalingV2Api(
-                api_client
-            )
+            self.api_instance_v2beta1autoscale = client.AutoscalingV2Api(api_client)
+            self.api_instance_v2beta2autoscale = client.AutoscalingV2Api(api_client)
             self.api_instance_corev1api = client.CoreV1Api(api_client)
             self.api_instance_storagev1api = client.StorageV1Api(api_client)
             self.api_instance_batchv1 = client.BatchV1Api(api_client)
@@ -219,9 +216,7 @@ class KubernetesConnector:
         for volume in volume_list.items:
             name_v = service_function_name + str("-")
             if name_v in volume.metadata.name:
-                self.v1.delete_persistent_volume(
-                    name=volume.spec.volume_name
-                )
+                self.v1.delete_persistent_volume(name=volume.spec.volume_name)
 
                 self.v1.delete_namespaced_persistent_volume_claim(
                     name=volume.metadata.name, namespace="sunrise6g"
@@ -288,9 +283,7 @@ class KubernetesConnector:
                 )
             )
             # api_response_service = api_instance_apiregv1.create_api_service(body_service)
-            self.v1.create_namespaced_service(
-                "sunrise6g", body_service
-            )
+            self.v1.create_namespaced_service("sunrise6g", body_service)
             if "autoscaling_policies" in descriptor_service_function:
                 # V1 AUTOSCALER
                 body_hpa = self.create_hpa(descriptor_service_function)
@@ -312,7 +305,7 @@ class KubernetesConnector:
                 "Exception when calling AppsV1Api->create_namespaced_deployment or ApiregistrationV1Api->create_api_service: %s\n"
                 % e
             )
-   
+
     def create_deployment(self, descriptor_service_function):
 
         metadata = client.V1ObjectMeta(name=descriptor_service_function["name"])
@@ -558,8 +551,7 @@ class KubernetesConnector:
             api_version="apps/v1", kind="Deployment", metadata=metadata, spec=spec
         )
         return body
- 
-    
+
     def get_deployed_service_functions(self, connector_db: ConnectorDB):
         # label_selector = {}
         # deployed_hpas=get_deployed_hpas()
@@ -572,7 +564,7 @@ class KubernetesConnector:
         api_response = self.api_instance_appsv1.list_namespaced_deployment("sunrise6g")
 
         api_response_service = self.v1.list_namespaced_service("sunrise6g")
-        api_response_pvc = self.v1.list_namespaced_persistent_volume_claim("sunrise6g")
+        # api_response_pvc = self.v1.list_namespaced_persistent_volume_claim("sunrise6g")  # is never used
 
         #
         # hpa_list = api_instance_v1autoscale.list_namespaced_horizontal_pod_autoscaler("sunrise6g")
@@ -597,16 +589,16 @@ class KubernetesConnector:
                     app_["uid"] = metadata.uid
                     actual_name = app_col["name"]
                     # app_["appid"] = app_col["_id"]
-                    
+
                     break
             for app_col in apps_col:
                 if actual_name == app_col["name"]:
                     app_["service_function_catalogue_name"] = app_col["name"]
-                    app_['id'] = app_col.get('_id')
-                    app_['appProvider'] = app_col.get('appProvider')
+                    app_["id"] = app_col.get("_id")
+                    app_["appProvider"] = app_col.get("appProvider")
                     # app_["appid"] = app_col["_id"]
                     break
-            
+
             if app_:  # if app_ is not empty
 
                 if (status.available_replicas is not None) and (
@@ -826,15 +818,14 @@ def create_pv_dict(name, volumes, storage_class, node=None):
 
     return body
 
+
 def create_hpa(descriptor_service_function):
 
     # V1!!!!!!!
 
     dict_label = {}
     dict_label["name"] = descriptor_service_function["name"]
-    client.V1ObjectMeta(
-        name=descriptor_service_function["name"], labels=dict_label
-    )
+    client.V1ObjectMeta(name=descriptor_service_function["name"], labels=dict_label)
 
     #  spec
 
