@@ -18,6 +18,6 @@ def test_camara_tf_3gpp_event(network_client : NetworkManagementInterface ,camar
 def test_create_monitoring_event(network_client : NetworkManagementInterface, camara_payload_input_data: RetrievalLocationRequest,expected_camara_output_data: Location ):
     try:
         actual_result = network_client.create_monitoring_event_subscription(retrieve_location_request=camara_payload_input_data)
-        assert actual_result == expected_camara_output_data
+        assert actual_result == expected_camara_output_data, f"Expected actual_result ({actual_result}) \n to be equal to expected_result ({expected_camara_output_data}), but they were not."
     except CoreHttpError as e:
         pytest.fail(f"Failed to retrieve event report: {e}")
