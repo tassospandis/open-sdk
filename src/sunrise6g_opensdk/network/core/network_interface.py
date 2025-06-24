@@ -12,9 +12,9 @@
 ##
 import uuid
 from abc import ABC
+from datetime import datetime, timedelta, timezone
 from itertools import product
 from typing import Dict
-from datetime import datetime, timedelta, timezone
 
 from sunrise6g_opensdk import logger
 from sunrise6g_opensdk.network.clients.errors import NetworkPlatformError
@@ -113,9 +113,8 @@ class NetworkManagementInterface(ABC):
         pass
 
     def add_core_specific_location_parameters(
-        self,
-        retrieve_location_request: schemas.RetrievalLocationRequest
-    )-> schemas.MonitoringEventSubscriptionRequest:
+        self, retrieve_location_request: schemas.RetrievalLocationRequest
+    ) -> schemas.MonitoringEventSubscriptionRequest:
         """
         Placeholder for adding core-specific parameters to the location subscription.
         This method should be overridden by subclasses to implement specific logic.
@@ -152,7 +151,9 @@ class NetworkManagementInterface(ABC):
         # This method should be overridden by subclasses if needed
         pass
 
-    def core_specific_monitoring_event_validation(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> None:
+    def core_specific_monitoring_event_validation(
+        self, retrieve_location_request: schemas.RetrievalLocationRequest
+    ) -> None:
         """
         Validates core-specific parameters for the monitoring event subscription.
 
@@ -211,20 +212,26 @@ class NetworkManagementInterface(ABC):
 
         self.add_core_specific_ti_parameters(traffic_influence_data, subscription)
         return subscription
-    
-    def _build_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> schemas.MonitoringEventSubscriptionRequest:
+
+    def _build_monitoring_event_subscription(
+        self, retrieve_location_request: schemas.RetrievalLocationRequest
+    ) -> schemas.MonitoringEventSubscriptionRequest:
         self.core_specific_monitoring_event_validation(retrieve_location_request)
-        subscription_3gpp = self.add_core_specific_location_parameters(retrieve_location_request)
+        subscription_3gpp = self.add_core_specific_location_parameters(
+            retrieve_location_request
+        )
         device = retrieve_location_request.device
         subscription_3gpp.externalId = device.networkAccessIdentifier
         subscription_3gpp.ipv4Addr = device.ipv4Address
         subscription_3gpp.ipv6Addr = device.ipv6Address
         # subscription.msisdn = device.phoneNumber.root.lstrip('+')
         # subscription.notificationDestination = "http://127.0.0.1:8001"
-        
+
         return subscription_3gpp
 
-    def _compute_camara_last_location_time(self, event_time: datetime, age_of_location_info_min : int = None) -> datetime:
+    def _compute_camara_last_location_time(
+        self, event_time: datetime, age_of_location_info_min: int = None
+    ) -> datetime:
         """
         Computes the last location time based on the event time and age of location info.
 
@@ -232,16 +239,20 @@ class NetworkManagementInterface(ABC):
             event_time: ISO 8601 datetime, e.g. "2025-06-18T12:30:00Z"
             age_of_location_info_min: unsigned int, age of location info in minutes
 
-        returns: 
+        returns:
             datetime object representing the last location time in UTC.
         """
         if age_of_location_info_min is not None:
-            last_location_time = event_time - timedelta(minutes=age_of_location_info_min)
+            last_location_time = event_time - timedelta(
+                minutes=age_of_location_info_min
+            )
             return last_location_time.replace(tzinfo=timezone.utc)
         else:
             return event_time.replace(tzinfo=timezone.utc)
 
-    def create_monitoring_event_subscription(self, retrieve_location_request: schemas.RetrievalLocationRequest) -> schemas.Location:
+    def create_monitoring_event_subscription(
+        self, retrieve_location_request: schemas.RetrievalLocationRequest
+    ) -> schemas.Location:
         """
         Creates a Monitoring Event subscription based on CAMARA Location API input.
 
@@ -252,28 +263,45 @@ class NetworkManagementInterface(ABC):
         returns:
             dictionary containing the created subscription details, including its ID.
         """
-        subscription = self._build_monitoring_event_subscription(retrieve_location_request)
+        subscription = self._build_monitoring_event_subscription(
+            retrieve_location_request
+        )
         response = common.monitoring_event_post(
             self.base_url, self.scs_as_id, subscription
         )
 
         monitoring_event_report = schemas.MonitoringEventReport(**response)
         if monitoring_event_report.locationInfo is None:
-            log.error("Failed to retrieve location information from monitoring event report")
-            raise NetworkPlatformError("Location information not found in monitoring event report")
+            log.error(
+                "Failed to retrieve location information from monitoring event report"
+            )
+            raise NetworkPlatformError(
+                "Location information not found in monitoring event report"
+            )
         geo_area = monitoring_event_report.locationInfo.geographicArea
         report_event_time = monitoring_event_report.eventTime
         age_of_location_info = None
-        if monitoring_event_report.locationInfo.ageOfLocationInfo is not None:    
-            age_of_location_info = monitoring_event_report.locationInfo.ageOfLocationInfo.duration
-        last_location_time = self._compute_camara_last_location_time(report_event_time,age_of_location_info)
+        if monitoring_event_report.locationInfo.ageOfLocationInfo is not None:
+            age_of_location_info = (
+                monitoring_event_report.locationInfo.ageOfLocationInfo.duration
+            )
+        last_location_time = self._compute_camara_last_location_time(
+            report_event_time, age_of_location_info
+        )
         print(f"Last Location time is {last_location_time}")
-        camara_point_list : list[schemas.Point] = []
+        camara_point_list: list[schemas.Point] = []
         for point in geo_area.polygon.point_list.geographical_coords:
-            camara_point_list.append(schemas.Point(latitude=point.lat,longitude=point.lon))   
-        camara_polygon = schemas.Polygon(areaType=schemas.AreaType.polygon,boundary=schemas.PointList(camara_point_list))
-        
-        camara_location = schemas.Location(area=camara_polygon,lastLocationTime=last_location_time)
+            camara_point_list.append(
+                schemas.Point(latitude=point.lat, longitude=point.lon)
+            )
+        camara_polygon = schemas.Polygon(
+            areaType=schemas.AreaType.polygon,
+            boundary=schemas.PointList(camara_point_list),
+        )
+
+        camara_location = schemas.Location(
+            area=camara_polygon, lastLocationTime=last_location_time
+        )
 
         return camara_location
 

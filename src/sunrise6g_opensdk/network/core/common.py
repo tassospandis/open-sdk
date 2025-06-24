@@ -29,11 +29,12 @@ def _make_request(method: str, url: str, data=None):
         raise CoreHttpError(e) from e
     except requests.exceptions.ConnectionError as e:
         raise CoreHttpError("connection error") from e
-    
 
 
 # Monitoring Event Methods
-def monitoring_event_post(base_url: str, scs_as_id: str, model_payload: BaseModel) -> dict:
+def monitoring_event_post(
+    base_url: str, scs_as_id: str, model_payload: BaseModel
+) -> dict:
     data = model_payload.model_dump_json(exclude_none=True, by_alias=True)
     url = monitoring_event_build_url(base_url, scs_as_id)
     return _make_request("POST", url, data=data)

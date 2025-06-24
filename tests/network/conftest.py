@@ -1,9 +1,16 @@
 import pytest
 
 from sunrise6g_opensdk.common.sdk import Sdk as sdkclient
-from sunrise6g_opensdk.network.core.schemas import RetrievalLocationRequest, Device, MonitoringEventSubscriptionRequest, Location, AreaType, PointList, Point,Polygon
-
-
+from sunrise6g_opensdk.network.core.schemas import (
+    AreaType,
+    Device,
+    Location,
+    MonitoringEventSubscriptionRequest,
+    Point,
+    PointList,
+    Polygon,
+    RetrievalLocationRequest,
+)
 
 
 @pytest.fixture(scope="session", name="network_client")
@@ -32,6 +39,7 @@ def instantiate_network_client():
 #   "ipv6Address": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
 # }
 
+
 @pytest.fixture(scope="module")
 def camara_payload_input_data() -> RetrievalLocationRequest:
     """
@@ -41,6 +49,7 @@ def camara_payload_input_data() -> RetrievalLocationRequest:
 
     return RetrievalLocationRequest(device=Device(phoneNumber="+306912345678"))
 
+
 # Sample output test data 3GPP MonitoringEventSubscription Request Payload
 # {
 #   "msisdn": "+306912345678",
@@ -49,21 +58,25 @@ def camara_payload_input_data() -> RetrievalLocationRequest:
 #   "locationType": "CURRENT_LOCATION"
 # }
 @pytest.fixture(scope="module", name="expected_3gpp_output_data")
-def monitoring_request_3gpp_payload_output_data(camara_payload_input_data: RetrievalLocationRequest) -> MonitoringEventSubscriptionRequest:
+def monitoring_request_3gpp_payload_output_data(
+    camara_payload_input_data: RetrievalLocationRequest,
+) -> MonitoringEventSubscriptionRequest:
     """
     Fixture to provide output data for 3GPP monitoring event request payload.
     """
-    output_msisdn = camara_payload_input_data.device.phoneNumber.root.lstrip('+')
+    output_msisdn = camara_payload_input_data.device.phoneNumber.root.lstrip("+")
     return MonitoringEventSubscriptionRequest(
         msisdn=output_msisdn,
         notificationDestination="http://127.0.0.1:8001",
         monitoringType="LOCATION_REPORTING",
-        locationType="LAST_KNOWN_LOCATION"
+        locationType="LAST_KNOWN_LOCATION",
     )
 
 
 @pytest.fixture(scope="module", name="expected_camara_output_data")
-def monitoring_request_camara_payload_output_data(camara_payload_input_data: RetrievalLocationRequest) -> Location:
+def monitoring_request_camara_payload_output_data(
+    camara_payload_input_data: RetrievalLocationRequest,
+) -> Location:
     """
     Fixture to provide output data for camara request payload.
 
@@ -98,9 +111,9 @@ def monitoring_request_camara_payload_output_data(camara_payload_input_data: Ret
     point3 = Point(latitude=37.97, longitude=23.73)
     point4 = Point(latitude=37.975, longitude=23.71)
 
-    point_list = PointList(root=[point1, point2, point3,point4])
-    
-    polygon_area = Polygon(areaType=AreaType.polygon,boundary=point_list)
+    point_list = PointList(root=[point1, point2, point3, point4])
 
-    location = Location(lastLocationTime="2025-06-23T20:47:22Z",area=polygon_area)
+    polygon_area = Polygon(areaType=AreaType.polygon, boundary=point_list)
+
+    location = Location(lastLocationTime="2025-06-23T20:47:22Z", area=polygon_area)
     return location
