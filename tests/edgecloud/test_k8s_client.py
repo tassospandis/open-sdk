@@ -32,7 +32,7 @@ class TestK8sEdgeApplicationManager(unittest.TestCase):
             print(TOKEN)
         else:
             print("Environment variable 'NEW_TOKEN' is not set. Using TOKEN set in test_k8s_client.py")
-            TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6IkFwdHpTc3FiV0tpaVozNWhkaEM2SXprQ1BRQlhERDVDdTA4c2xHajRUUEUifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNzUwNDI3NjI2LCJpYXQiOjE3NTA0MjQwMjYsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwianRpIjoiMzkwOWMzZGItZWQyYi00ZGYyLWEzZGMtYTk2ZTFkMzFhODU5Iiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJzdW5yaXNlNmciLCJzZXJ2aWNlYWNjb3VudCI6eyJuYW1lIjoic2RrLXVzZXIiLCJ1aWQiOiI5YzIzMWYwOC1hYTdmLTQ2YzItODdmMy0yMGE4MTdhMTU2NGEifX0sIm5iZiI6MTc1MDQyNDAyNiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OnN1bnJpc2U2ZzpzZGstdXNlciJ9.XC6PHpnWVo9shQN5173CTX4IP4ByEldCRou_-ZH7EaBXrEv-uEq06U1NZ7O0Z-KUvWP47OpiBLtrVRI95aE2v1Q4ritJZp8g7MDjZ7nf5vHJ_N2zcfO0SdE1DAVue-Ur5MfMyjBKLhHMJNbugQobStfrOMEY8vxR21P9L72GhoAisKFwGwOOglH5JrmP_xsrIVRk4Cs6N1YsyeqYYiarcOeu24LIectfl22oz3fynMfd2XwwHdLJLWeao3LdBWfZoqVtPXdSQs7_4wGaaGYyDCkUIxK9GHru7rC4i9MjoXLxEwl9sCywk93i__LTV-PyS-PCXNIZEJDUXaEybRA40g"
+            TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6InV4Z1VsMGFWd2JfMkxITFF6WGZkNkJLbkVaNWZFY0ZKWlVJVHZtR2ZFMVUifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNzUwNjk3NDIyLCJpYXQiOjE3NTA2OTM4MjIsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwianRpIjoiNDRlMjg2NjAtMzRjOC00OGJjLTg5N2MtNjE0NWZkYTA4NWYyIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJzdW5yaXNlNmciLCJzZXJ2aWNlYWNjb3VudCI6eyJuYW1lIjoic2RrLXVzZXIiLCJ1aWQiOiI0MjU2ZDM3Yi03MjEzLTQwMDItYmI0Ny1lNjBhZWM4NGEzN2QifX0sIm5iZiI6MTc1MDY5MzgyMiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OnN1bnJpc2U2ZzpzZGstdXNlciJ9.hH4W_JIp6D_kgY988qSA30jESF1csVqYQzT9hqGV_DzcNE4vEfYo8SAz219cCdfv9P9LN8CRfBx9N5JUNuHvpi0Utc4__oRa5uhADgK6BUv6m1XKp-QJXFxDUEqzMK1EMEkevz7TPyAiJI63DDF6YY7ciPgPj8u8gWp-mBrsLUgikK0FbR9VPDT4MT5hYZcu-DiPCBeuOHWDcEzV_dekOk3xCgvACKZa0kUyvK04ZcoqElBe08sl8kZQxWmo4ooYmcUvUMRTyaFpjGMGYu86-OZ-KQIDlb3fQ07vHSg3Sdjx5NKc82i3Lc7rPpqThLl1G6OEVtiUL7Afn5Js_jiIfA"
 
         # --------------------------------------------------
 
@@ -65,43 +65,43 @@ class TestK8sEdgeApplicationManager(unittest.TestCase):
         print("\n--- Running Test 2: Full Onboard, Deploy, and Verify Workflow ---")
         
         # --- ARRANGE ---
-        deploymentcloudzonename = "minikube"  # This should match the name of your Minikube zone
-        app_name = "apacheiiboiooo"
+        deploymentlocation = "PATRAS"  # This should match the name of your Minikube zone
+        app_name = "apacheiiboooioo1opatrastest"
         
-        #APACHE MANIFEST
-        # camara_manifest = {
-        #     "name": app_name,
-        #     "packageType": "Container",
-        #     "appRepo": {
-        #         "imagePath": "httpd:2.4" 
-        #     },
-        #     "componentSpec": [
-        #         {
-        #             "componentName": "apache-web-server",
-        #             "networkInterfaces": [
-        #                 {"protocol": "TCP", "port": 80}
-        #             ]
-        #         }
-        #     ],
-        # }
-
-        # REDIS MANIFEST
+        # APACHE MANIFEST
         camara_manifest = {
-            "name": "my-redis-cache",
+            "name": app_name,
             "packageType": "Container",
             "appRepo": {
-                "imagePath": "redis:7.0"  # Use a specific, stable version of Redis
+                "imagePath": "httpd:2.4" 
             },
             "componentSpec": [
                 {
-                    "componentName": "redis-server-container",
-                    # Redis listens on port 6379 by default
+                    "componentName": "apache-web-server",
                     "networkInterfaces": [
-                        {"protocol": "TCP", "port": 6379}
+                        {"protocol": "TCP", "port": 80}
                     ]
                 }
-            ]
+            ],
         }
+
+        # # REDIS MANIFEST
+        # camara_manifest = {
+        #     "name": "my-redis-cache",
+        #     "packageType": "Container",
+        #     "appRepo": {
+        #         "imagePath": "redis:7.0"  # Use a specific, stable version of Redis
+        #     },
+        #     "componentSpec": [
+        #         {
+        #             "componentName": "redis-server-container",
+        #             # Redis listens on port 6379 by default
+        #             "networkInterfaces": [
+        #                 {"protocol": "TCP", "port": 6379}
+        #             ]
+        #         }
+        #     ]
+        # }
 
         # ENVIRONMENT VARIABLES MANIFEST
         # camara_manifest = {
@@ -167,7 +167,7 @@ class TestK8sEdgeApplicationManager(unittest.TestCase):
         #!!!!!!
         #if the onboarding happens with the same name then onboarding will fail
         
-        deployment_zones = [{"EdgeCloudZone": {"edgeCloudZoneName": deploymentcloudzonename}}] #Set the deployment zone
+        deployment_zones = [{"EdgeCloudZone": {"edgeCloudZoneName": deploymentlocation}}] #Set the deployment zone
         print(f"--> Step 2: Deploying app '{app_name}' to zone 'minikube'...")
         deploy_response = self.manager.deploy_app(app_id=app_id, app_zones=deployment_zones)
         self.assertIsNotNone(deploy_response, "Deploy command did not return a response.")
