@@ -9,6 +9,7 @@
 # Contributors:
 #   - Reza Mosahebfard (reza.mosahebfard@i2cat.net)
 #   - Ferran Cañellas (ferran.canellas@i2cat.net)
+#   - Panagiotis Pavlidis (p.pavlidis@iit.demokritos.gr)
 ##
 import uuid
 from abc import ABC

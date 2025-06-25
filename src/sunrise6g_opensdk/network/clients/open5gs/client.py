@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+
+# Contributors:
+#   - Panagiotis Pavlidis (p.pavlidis@iit.demokritos.gr)
+##
 from pydantic import ValidationError
 
 from sunrise6g_opensdk import logger
@@ -59,6 +63,7 @@ class NetworkManager(NetworkManagementInterface):
     def core_specific_monitoring_event_validation(
         self, retrieve_location_request: schemas.RetrievalLocationRequest
     ) -> None:
+        """Check core specific elements that required for location retrieval in NEF."""
         if retrieve_location_request.device is None:
             raise ValidationError(
                 "Open5GS requires a device to be specified for location retrieval in NEF."
@@ -67,6 +72,7 @@ class NetworkManager(NetworkManagementInterface):
     def add_core_specific_location_parameters(
         self, retrieve_location_request: schemas.RetrievalLocationRequest
     ) -> schemas.MonitoringEventSubscriptionRequest:
+        """Add core specific location parameters to support location retrieval scenario in NEF."""
         return schemas.MonitoringEventSubscriptionRequest(
             msisdn=retrieve_location_request.device.phoneNumber.root.lstrip("+"),
             notificationDestination="http://127.0.0.1:8001",

@@ -1,3 +1,6 @@
+# Contributors:
+#   - Panagiotis Pavlidis (p.pavlidis@iit.demokritos.gr)
+##
 import pytest
 
 from sunrise6g_opensdk.common.sdk import Sdk as sdkclient

@@ -1,6 +1,8 @@
+# Contributors:
+#   - Panagiotis Pavlidis (p.pavlidis@iit.demokritos.gr)
+##
 import pytest
 
-from sunrise6g_opensdk.common.sdk import Sdk as sdkclient
 from sunrise6g_opensdk.network.core.common import CoreHttpError
 from sunrise6g_opensdk.network.core.network_interface import NetworkManagementInterface
 from sunrise6g_opensdk.network.core.schemas import (
