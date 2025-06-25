@@ -112,11 +112,6 @@ def test_onboard_app(edgecloud_client):
         pytest.fail(f"App onboarding failed unexpectedly: {e}")
 
 
-# @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
-# def test_timer_wait_15_seconds(edgecloud_client):
-#     time.sleep(15)
-
-
 @pytest.fixture(scope="module")
 def app_instance_id(edgecloud_client):
     try:
@@ -134,8 +129,8 @@ def test_deploy_app(app_instance_id):
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
-def test_timer_wait_30_seconds(edgecloud_client):
-    time.sleep(30)
+def test_timer_wait_60_seconds(edgecloud_client):
+    time.sleep(60)
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
@@ -146,12 +141,18 @@ def test_undeploy_app(edgecloud_client, app_instance_id):
         pytest.fail(f"App undeployment failed unexpectedly: {e}")
 
 
-# @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
-# def test_delete_onboarded_app(edgecloud_client):
-#     try:
-#         edgecloud_client.delete_onboarded_app(app_id=APP_ONBOARD_MANIFEST["appId"])
-#     except EdgeCloudPlatformError as e:
-#         pytest.fail(f"App onboarding deletion failed unexpectedly: {e}")
+@pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
+def test_timer_wait_30_seconds(edgecloud_client):
+    time.sleep(30)
+
+
+@pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
+def test_delete_onboarded_app(edgecloud_client):
+    try:
+        edgecloud_client.delete_onboarded_app(app_id=APP_ONBOARD_MANIFEST["appId"])
+    except EdgeCloudPlatformError as e:
+        pytest.fail(f"App onboarding deletion failed unexpectedly: {e}")
+
 
 # @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
 # def test_delete_artefact(edgecloud_client):

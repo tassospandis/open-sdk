@@ -139,7 +139,7 @@ class ContinuumClient:
             return response.json()
 
     @catch_requests_exceptions
-    def onboard_service(self, service_id: str, tosca_str: str) -> dict:
+    def onboard_and_deploy_service(self, service_id: str, tosca_str: str) -> dict:
         """
         Onboard (& deploy) service  on aerOS continuum
         :input
@@ -168,3 +168,29 @@ class ContinuumClient:
                     response.text,
                 )
             return response.json()
+
+    @catch_requests_exceptions
+    def purge_service(self, service_id: str) -> bool:
+        """
+        Purge service from aerOS continuum
+        :input
+        @param service_id: the id of the service to be purged
+        :output
+        the purge result message from aerOS continuum
+        """
+        purge_url = f"{self.api_url}/hlo_fe/services/{service_id}/purge"
+        response = requests.delete(purge_url, headers=self.hlo_headers, timeout=15)
+        if response is None:
+            return False
+        else:
+            if config.DEBUG:
+                self.logger.debug("Purge service URL: %s", purge_url)
+                self.logger.debug(
+                    "Purge service response: %s %s",
+                    response.status_code,
+                    response.text,
+                )
+            if response.status_code != 200:
+                self.logger.error("Failed to purge service: %s", response.text)
+                return False
+            return True
