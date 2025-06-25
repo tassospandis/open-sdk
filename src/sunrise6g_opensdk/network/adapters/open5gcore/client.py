@@ -47,3 +47,19 @@ class NetworkManager(BaseNetworkClient):
         flow_id = qos_support_map[session_info.qosProfile.root]
         subscription.flowInfo = build_flows(flow_id, session_info)
         subscription.ueIpv4Addr = "192.168.6.1"  # ToDo
+
+    def add_core_specific_ti_parameters(
+        self,
+        traffic_influence_info: schemas.CreateTrafficInfluence,
+        subscription: schemas.TrafficInfluSub,
+    ):
+        raise NotImplementedError(
+            "add_core_specific_ti_parameters not implemented for Open5GCore"
+        )
+
+    def core_specific_traffic_influence_validation(
+        self, traffic_influence_info: schemas.CreateTrafficInfluence
+    ) -> None:
+        raise NotImplementedError(
+            "core_specific_traffic_influence_validation not implemented for Open5GCore"
+        )
