@@ -202,7 +202,7 @@ class BaseNetworkClient:
             ipv4Addr=str(device_ip),
             notificationDestination=sink_url,
         )
-        subscription.add_flow_descriptor(flow_desriptor=flow_descriptor)
+        subscription.add_flow_descriptor(flow_descriptor=flow_descriptor)
         subscription.add_traffic_route(dnai=edge_zone)
 
         self.add_core_specific_ti_parameters(traffic_influence_data, subscription)

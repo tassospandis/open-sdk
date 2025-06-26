@@ -221,11 +221,11 @@ class TrafficInfluSub(BaseModel):  # Replace with a meaningful name
     )
     suppFeat: str | None = None
 
-    def add_flow_descriptor(self, flow_desriptor: str):
+    def add_flow_descriptor(self, flow_descriptor: str):
         self.trafficFilters = list()
         self.trafficFilters.append(
             FlowInfo(
-                flowId=len(self.trafficFilters) + 1, flowDescriptions=[flow_desriptor]
+                flowId=len(self.trafficFilters) + 1, flowDescriptions=[flow_descriptor]
             )
         )
 
