@@ -1,14 +1,4 @@
 # -*- coding: utf-8 -*-
-##
-# Copyright 2025-present by Software Networks Area, i2CAT.
-# All rights reserved.
-#
-# This file is part of the Open SDK
-#
-# Contributors:
-#   - Adrián Pino Martínez (adrian.pino@i2cat.net)
-#   - Sergio Giménez (sergio.gimenez@i2cat.net)
-##
 """
 EdgeCloud Platform Test Configuration
 
