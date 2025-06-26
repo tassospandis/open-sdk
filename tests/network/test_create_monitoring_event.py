@@ -26,7 +26,7 @@ client_specs = {
         "scs_as_id": "af_1",
     }
 }
-clients = sdkclient.create_clients_from(client_specs)
+clients = sdkclient.create_adapters_from(client_specs)
 network_client: BaseNetworkClient = clients.get("network")
 
 
