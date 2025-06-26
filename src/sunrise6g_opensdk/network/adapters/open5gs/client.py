@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Contributors:
+#   - Ferran Cañellas (ferran.canellas@i2cat.net)
 #   - Panagiotis Pavlidis (p.pavlidis@iit.demokritos.gr)
 ##
 from pydantic import ValidationError
