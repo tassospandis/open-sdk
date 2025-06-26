@@ -16,10 +16,10 @@ from sunrise6g_opensdk.network.core.schemas import (
     CreateSession,
     CreateTrafficInfluence,
     FlowInfo,
+    MonitoringEventSubscriptionRequest,
+    RetrievalLocationRequest,
     Snssai,
     TrafficInfluSub,
-    RetrievalLocationRequest,
-    MonitoringEventSubscriptionRequest,
 )
 
 log = logger.get_logger(__name__)
@@ -114,11 +114,11 @@ class NetworkManager(BaseNetworkClient):
             raise OaiValidationError(
                 "OAI requires UE IPv4 Address to activate Traffic Influence"
             )
-    
+
     def core_specific_monitoring_event_validation(
         self, retrieve_location_request: RetrievalLocationRequest
     ) -> None:
-         raise NotImplementedError(
+        raise NotImplementedError(
             "core_specific_monitoring_event_validation not implemented for OAI"
         )
 

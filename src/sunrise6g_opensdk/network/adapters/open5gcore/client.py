@@ -63,11 +63,11 @@ class NetworkManager(BaseNetworkClient):
         raise NotImplementedError(
             "core_specific_traffic_influence_validation not implemented for Open5GCore"
         )
-    
+
     def core_specific_monitoring_event_validation(
         self, retrieve_location_request: schemas.RetrievalLocationRequest
     ) -> None:
-         raise NotImplementedError(
+        raise NotImplementedError(
             "core_specific_monitoring_event_validation not implemented for Open5GCore"
         )
 
