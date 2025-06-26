@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ##
-# Copyright 2025-present by Software Networks Area, i2CAT.
-# All rights reserved.
-#
 # This file is part of the Open SDK
 #
 # Contributors:
 #   - Reza Mosahebfard (reza.mosahebfard@i2cat.net)
 #   - Ferran Cañellas (ferran.canellas@i2cat.net)
+#   - Giulio Carota (giulio.carota@eurecom.fr)
 #   - Panagiotis Pavlidis (p.pavlidis@iit.demokritos.gr)
 ##
 import uuid
-from abc import ABC
-from datetime import datetime, timedelta, timezone
 from itertools import product
 from typing import Dict
 
 from sunrise6g_opensdk import logger
-from sunrise6g_opensdk.network.clients.errors import NetworkPlatformError
 from sunrise6g_opensdk.network.core import common, schemas
 
 log = logger.get_logger(__name__)
@@ -76,16 +71,13 @@ def build_flows(
     return flows
 
 
-class NetworkManagementInterface(ABC):
+class BaseNetworkClient:
     """
-    Abstract Base Class for Network Resource Management.
+    Class for Network Resource Management.
 
-    This interface defines the standard methods that all
-    Network Clients (Open5GS, OAI, Open5GCore) must implement.
-
-    Partners implementing a new network client should inherit from this class
-    and provide concrete implementations for all abstract methods relevant
-    to their specific NEF capabilities.
+    This class provides shared logic and extension points for different
+    Network 5G Cores (e.g., Open5GS, OAI, Open5GCopre-commit run --all-filesre) interacting with
+    NEF-like platforms using CAMARA APIs.
     """
 
     base_url: str
@@ -214,97 +206,26 @@ class NetworkManagementInterface(ABC):
         self.add_core_specific_ti_parameters(traffic_influence_data, subscription)
         return subscription
 
-    def _build_monitoring_event_subscription(
-        self, retrieve_location_request: schemas.RetrievalLocationRequest
-    ) -> schemas.MonitoringEventSubscriptionRequest:
-        self.core_specific_monitoring_event_validation(retrieve_location_request)
-        subscription_3gpp = self.add_core_specific_location_parameters(
-            retrieve_location_request
+    def _build_camara_ti(self, trafficInflSub: Dict):
+        traffic_influence_data = schemas.TrafficInfluSub.model_validate(trafficInflSub)
+
+        flowDesc = traffic_influence_data.trafficFilters[0].flowDescriptions[0]
+        serverIp = flowDesc.split("to ")[1].split("/32")[0]
+        edgeId = traffic_influence_data.trafficRoutes[0].dnai
+
+        camara_ti = schemas.CreateTrafficInfluence(
+            appId=traffic_influence_data.afAppId,
+            appInstanceId=serverIp,
+            edgeCloudZoneId=edgeId,
+            notificationUri=traffic_influence_data.notificationDestination,
+            device=schemas.Device(
+                ipv4Address=schemas.DeviceIpv4Addr1(
+                    publicAddress=traffic_influence_data.ipv4Addr,
+                    privateAddress=traffic_influence_data.ipv4Addr,
+                )
+            ),
         )
-        device = retrieve_location_request.device
-        subscription_3gpp.externalId = device.networkAccessIdentifier
-        subscription_3gpp.ipv4Addr = device.ipv4Address
-        subscription_3gpp.ipv6Addr = device.ipv6Address
-        # subscription.msisdn = device.phoneNumber.root.lstrip('+')
-        # subscription.notificationDestination = "http://127.0.0.1:8001"
-
-        return subscription_3gpp
-
-    def _compute_camara_last_location_time(
-        self, event_time: datetime, age_of_location_info_min: int = None
-    ) -> datetime:
-        """
-        Computes the last location time based on the event time and age of location info.
-
-        args:
-            event_time: ISO 8601 datetime, e.g. "2025-06-18T12:30:00Z"
-            age_of_location_info_min: unsigned int, age of location info in minutes
-
-        returns:
-            datetime object representing the last location time in UTC.
-        """
-        if age_of_location_info_min is not None:
-            last_location_time = event_time - timedelta(
-                minutes=age_of_location_info_min
-            )
-            return last_location_time.replace(tzinfo=timezone.utc)
-        else:
-            return event_time.replace(tzinfo=timezone.utc)
-
-    def create_monitoring_event_subscription(
-        self, retrieve_location_request: schemas.RetrievalLocationRequest
-    ) -> schemas.Location:
-        """
-        Creates a Monitoring Event subscription based on CAMARA Location API input.
-
-        args:
-            retrieve_location_request: Dictionary containing location retrieval details conforming to
-                                       the CAMARA Location API parameters.
-
-        returns:
-            dictionary containing the created subscription details, including its ID.
-        """
-        subscription = self._build_monitoring_event_subscription(
-            retrieve_location_request
-        )
-        response = common.monitoring_event_post(
-            self.base_url, self.scs_as_id, subscription
-        )
-
-        monitoring_event_report = schemas.MonitoringEventReport(**response)
-        if monitoring_event_report.locationInfo is None:
-            log.error(
-                "Failed to retrieve location information from monitoring event report"
-            )
-            raise NetworkPlatformError(
-                "Location information not found in monitoring event report"
-            )
-        geo_area = monitoring_event_report.locationInfo.geographicArea
-        report_event_time = monitoring_event_report.eventTime
-        age_of_location_info = None
-        if monitoring_event_report.locationInfo.ageOfLocationInfo is not None:
-            age_of_location_info = (
-                monitoring_event_report.locationInfo.ageOfLocationInfo.duration
-            )
-        last_location_time = self._compute_camara_last_location_time(
-            report_event_time, age_of_location_info
-        )
-        print(f"Last Location time is {last_location_time}")
-        camara_point_list: list[schemas.Point] = []
-        for point in geo_area.polygon.point_list.geographical_coords:
-            camara_point_list.append(
-                schemas.Point(latitude=point.lat, longitude=point.lon)
-            )
-        camara_polygon = schemas.Polygon(
-            areaType=schemas.AreaType.polygon,
-            boundary=schemas.PointList(camara_point_list),
-        )
-
-        camara_location = schemas.Location(
-            area=camara_polygon, lastLocationTime=last_location_time
-        )
-
-        return camara_location
+        return camara_ti
 
     def create_qod_session(self, session_info: Dict) -> Dict:
         """
@@ -324,13 +245,9 @@ class NetworkManagementInterface(ABC):
         subscription_info: schemas.AsSessionWithQoSSubscription = (
             schemas.AsSessionWithQoSSubscription(**response)
         )
-        subscription_url = subscription_info.self_.root
-        subscription_id = subscription_url.split("/")[-1] if subscription_url else None
-        if not subscription_id:
-            log.error("Failed to retrieve QoS session ID from response")
-            raise NetworkPlatformError("QoS session ID not found in response")
+
         session_info = schemas.SessionInfo(
-            sessionId=schemas.SessionId(uuid.UUID(subscription_id)),
+            sessionId=schemas.SessionId(uuid.UUID(subscription_info.subscription_id)),
             qosStatus=schemas.QosStatus.REQUESTED,
             **session_info,
         )
@@ -346,11 +263,28 @@ class NetworkManagementInterface(ABC):
         returns:
             Dictionary containing the details of the requested QoS session.
         """
-        session = common.as_session_with_qos_get(
+        response = common.as_session_with_qos_get(
             self.base_url, self.scs_as_id, session_id=session_id
         )
-        log.info(f"QoD session retrived successfully [id={session_id}]")
-        return session
+        subscription_info = schemas.AsSessionWithQoSSubscription(**response)
+        flowDesc = subscription_info.flowInfo[0].flowDescriptions[0]
+        serverIp = flowDesc.split("to ")[1].split("/")[0]
+        session_info = schemas.SessionInfo(
+            sessionId=schemas.SessionId(uuid.UUID(subscription_info.subscription_id)),
+            duration=subscription_info.usageThreshold.duration,
+            sink=subscription_info.notificationDestination,
+            qosProfile=subscription_info.qosReference,
+            device=schemas.Device(
+                ipv4Address=schemas.DeviceIpv4Addr1(
+                    publicAddress=subscription_info.ueIpv4Addr,
+                    privateAddress=subscription_info.ueIpv4Addr,
+                ),
+            ),
+            applicationServer=schemas.ApplicationServer(
+                ipv4Address=schemas.ApplicationServerIpv4Address(serverIp)
+            ),
+        )
+        return session_info.model_dump()
 
     def delete_qod_session(self, session_id: str) -> None:
         """
@@ -410,7 +344,7 @@ class NetworkManagementInterface(ABC):
             self.base_url, self.scs_as_id, resource_id, subscription
         )
 
-        traffic_influence_info.trafficInfluenceID = resource_id
+        traffic_influence_info["trafficInfluenceID"] = resource_id
         return traffic_influence_info
 
     def delete_traffic_influence_resource(self, resource_id: str) -> None:
@@ -426,5 +360,15 @@ class NetworkManagementInterface(ABC):
         common.traffic_influence_delete(self.base_url, self.scs_as_id, resource_id)
         return
 
-    # Placeholder for other CAMARA APIs (e.g., Traffic Influence,
-    # Location-retrieval, etc.)
+    def get_individual_traffic_influence_resource(self, resource_id: str) -> Dict:
+        nef_response = common.traffic_influence_get(
+            self.base_url, self.scs_as_id, resource_id
+        )
+        camara_ti = self._build_camara_ti(nef_response)
+        return camara_ti
+
+    def get_all_traffic_influence_resource(self) -> list[Dict]:
+        r = common.traffic_influence_get(self.base_url, self.scs_as_id)
+        return [self._build_camara_ti(item) for item in r]
+
+    # Placeholder for other CAMARA APIs (e.g: Location-retrieval, etc.)

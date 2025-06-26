@@ -21,6 +21,11 @@ from pydantic import (
 )
 from pydantic_extra_types.mac_address import MacAddress
 
+from sunrise6g_opensdk.logger import setup_logger
+from sunrise6g_opensdk.network.adapters.errors import NetworkPlatformError
+
+log = setup_logger(__name__)
+
 
 class FlowDirection(Enum):
     """
@@ -165,9 +170,21 @@ class AsSessionWithQoSSubscription(BaseModel):
     ueIpv4Addr: ipaddress.IPv4Address | None = None
     ueIpv6Addr: ipaddress.IPv6Address | None = None
     macAddr: MacAddress | None = None
+    snssai: Snssai | None = None
+    dnn: str | None = None
     usageThreshold: UsageThreshold | None = None
     sponsorInfo: SponsorInformation | None = None
     qosMonInfo: QosMonitoringInformationModel | None = None
+
+    @property
+    def subscription_id(self) -> str:
+        """
+        Returns the subscription ID, which is the same as the self link.
+        """
+        subscription_id = self.self_.root.split("/")[-1] if self.self_.root else None
+        if not subscription_id:
+            log.error("Failed to retrieve QoS session ID from response")
+            raise NetworkPlatformError("QoS session ID not found in response")
 
 
 class SourceTrafficFilters(BaseModel):
@@ -220,7 +237,7 @@ class TrafficInfluSub(BaseModel):  # Replace with a meaningful name
         self.snssai = Snssai(sst=sst, sd=sd)
 
 
-##Monitoring Event API
+# Monitoring Event API
 
 
 class DurationMin(BaseModel):

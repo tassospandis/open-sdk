@@ -4,17 +4,17 @@ import time
 import pytest
 
 from sunrise6g_opensdk.common.sdk import Sdk as sdkclient
+from sunrise6g_opensdk.network.core.base_network_client import BaseNetworkClient
 from sunrise6g_opensdk.network.core.common import CoreHttpError
-from sunrise6g_opensdk.network.core.network_interface import NetworkManagementInterface
 from tests.network.test_cases import test_cases
 
 
 @pytest.fixture(scope="module", name="network_client")
 def instantiate_network_client(request):
     """Fixture to create and share a network client across tests"""
-    client_specs = request.param
-    clients = sdkclient.create_clients_from(client_specs)
-    return clients.get("network")
+    adapter_specs = request.param
+    adapters = sdkclient.create_adapters_from(adapter_specs)
+    return adapters.get("network")
 
 
 def id_func(val):
@@ -27,7 +27,7 @@ def id_func(val):
     ids=id_func,
     indirect=True,
 )
-def test_valid_input_open5gs(network_client: NetworkManagementInterface):
+def test_valid_input_open5gs(network_client: BaseNetworkClient):
     camara_session = {
         "duration": 3600,
         "device": {
@@ -43,7 +43,7 @@ def test_valid_input_open5gs(network_client: NetworkManagementInterface):
 
 
 @pytest.fixture(scope="module")
-def qod_session_id(network_client: NetworkManagementInterface):
+def qod_session_id(network_client: BaseNetworkClient):
     camara_session = {
         "duration": 3600,
         "device": {
@@ -84,7 +84,7 @@ def test_timer_wait_5_seconds(network_client):
 
 
 @pytest.mark.parametrize("network_client", test_cases, ids=id_func, indirect=True)
-def test_get_qod_session(network_client: NetworkManagementInterface, qod_session_id):
+def test_get_qod_session(network_client: BaseNetworkClient, qod_session_id):
     try:
         network_client.get_qod_session(qod_session_id)
     except CoreHttpError as e:
@@ -92,7 +92,7 @@ def test_get_qod_session(network_client: NetworkManagementInterface, qod_session
 
 
 @pytest.mark.parametrize("network_client", test_cases, ids=id_func, indirect=True)
-def test_delete_qod_session(network_client: NetworkManagementInterface, qod_session_id):
+def test_delete_qod_session(network_client: BaseNetworkClient, qod_session_id):
     try:
         network_client.delete_qod_session(qod_session_id)
     except CoreHttpError as e:

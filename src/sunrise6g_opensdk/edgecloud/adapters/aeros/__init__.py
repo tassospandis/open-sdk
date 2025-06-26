@@ -9,7 +9,7 @@ aerOS client
     and an access token for authentication.
 """
 
-from sunrise6g_opensdk.edgecloud.clients.aeros import config
+from sunrise6g_opensdk.edgecloud.adapters.aeros import config
 from sunrise6g_opensdk.logger import setup_logger
 
 logger = setup_logger(__name__, is_debug=True, file_name=config.LOG_FILE)

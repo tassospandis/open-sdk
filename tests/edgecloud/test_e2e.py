@@ -10,9 +10,9 @@
 #   - Sergio Giménez (sergio.gimenez@i2cat.net)
 ##
 """
-EdgeCloud Platform Integration Tests
+EdgeCloud adapters Integration Tests
 
-Validates the complete application lifecycle across multiple clients:
+Validates the complete application lifecycle:
 1. Infrastructure (zone discovery)
 2. Artefact management (create/delete)
 3. Application lifecycle (onboard/deploy/undeploy/delete app onboarded)
@@ -22,15 +22,15 @@ Key features:
 - Tests configuration available in test_config.py
 - Ensures proper resource cleanup
 - Uses shared test constants and CAMARA-compliant manifests
-- Includes i2edge-specific tests where needed
+- Includes artefact unit tests where needed
 """
 import time
 
 import pytest
 
 from sunrise6g_opensdk.common.sdk import Sdk as sdkclient
-from sunrise6g_opensdk.edgecloud.clients.errors import EdgeCloudPlatformError
-from sunrise6g_opensdk.edgecloud.clients.i2edge.client import (
+from sunrise6g_opensdk.edgecloud.adapters.errors import EdgeCloudPlatformError
+from sunrise6g_opensdk.edgecloud.adapters.i2edge.client import (
     EdgeApplicationManager as I2EdgeClient,
 )
 from tests.edgecloud.test_cases import test_cases
@@ -50,9 +50,9 @@ from tests.edgecloud.test_config import (
 @pytest.fixture(scope="module", name="edgecloud_client")
 def instantiate_edgecloud_client(request):
     """Fixture to create and share an edgecloud client across tests"""
-    client_specs = request.param
-    clients = sdkclient.create_clients_from(client_specs)
-    return clients.get("edgecloud")
+    adapter_specs = request.param
+    adapters = sdkclient.create_adapters_from(adapter_specs)
+    return adapters.get("edgecloud")
 
 
 def id_func(val):
@@ -73,17 +73,13 @@ def test_get_edge_cloud_zones(edgecloud_client):
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
 def test_get_edge_cloud_zones_details(edgecloud_client, zone_id=ZONE_ID):
-    """
-    Test that get_edge_cloud_zone_details returns valid responses for each client.
-    Since each client has different response formats, we only verify basic success criteria.
-    """
     try:
         zones = edgecloud_client.get_edge_cloud_zones()
         assert len(zones) > 0, "No zones available for testing"
 
         zone_details = edgecloud_client.get_edge_cloud_zones_details(zone_id)
 
-        # Basic checks that apply to all clients
+        # Basic checks that apply to all adapters
         assert zone_details is not None, "Zone details should not be None"
         assert isinstance(zone_details, dict), "Zone details should be a dictionary"
         assert len(zone_details) > 0, "Zone details should not be empty"

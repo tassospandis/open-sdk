@@ -8,6 +8,8 @@ EDGE_CLOUD_TEST_CASES = [
         "edgecloud": {
             "client_name": "i2edge",
             "base_url": "http://test-nbi-i2edge.sunrise6g",
+            # Additional parameters for i2Edge client:
+            "flavour_id": "id",
         }
     },
     {
@@ -20,11 +22,11 @@ EDGE_CLOUD_TEST_CASES = [
             "aerOS_HLO_TOKEN": "fake-hlo",
         }
     },
-    # Uncomment once piedge import issues are fixed
+    # Uncomment once kubernetes import issues are fixed
     # {
     #     "edgecloud": {
-    #         "client_name": "piedge",
-    #         "base_url": "http://test-piedge.url"
+    #         "client_name": "kubernetes",
+    #         "base_url": "http://test-kubernetes.url"
     #     }
     # }
 ]
@@ -34,12 +36,12 @@ def id_func(val):
     return val["edgecloud"]["client_name"]
 
 
-@pytest.mark.parametrize("client_specs", EDGE_CLOUD_TEST_CASES, ids=id_func)
-def test_edgecloud_platform_instantiation(client_specs):
-    """Test instantiation of all edgecloud platform clients"""
-    clients = sdkclient.create_clients_from(client_specs)
+@pytest.mark.parametrize("adapter_specs", EDGE_CLOUD_TEST_CASES, ids=id_func)
+def test_edgecloud_platform_instantiation(adapter_specs):
+    """Test instantiation of all edgecloud platform adapters"""
+    adapters = sdkclient.create_adapters_from(adapter_specs)
 
-    assert "edgecloud" in clients
-    edge_client = clients["edgecloud"]
+    assert "edgecloud" in adapters
+    edge_client = adapters["edgecloud"]
     assert edge_client is not None
     assert "EdgeApplicationManager" in str(type(edge_client))
