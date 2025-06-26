@@ -2,8 +2,8 @@
 from pydantic import ValidationError
 
 from sunrise6g_opensdk import logger
-from sunrise6g_opensdk.network.core.network_interface import (
-    NetworkManagementInterface,
+from sunrise6g_opensdk.network.core.base_network_client import (
+    BaseNetworkClient,
     build_flows,
 )
 
@@ -14,9 +14,9 @@ log = logger.get_logger(__name__)
 flow_id_mapping = {"qos-e": 3, "qos-s": 4, "qos-m": 5, "qos-l": 6}
 
 
-class NetworkManager(NetworkManagementInterface):
+class NetworkManager(BaseNetworkClient):
     """
-    This client implements the NetworkManagementInterface and translates the
+    This client implements the BaseNetworkClient and translates the
     CAMARA APIs into specific HTTP requests understandable by the Open5GS NEF API.
 
     Invloved partners and their roles in this implementation:
@@ -58,7 +58,7 @@ class NetworkManager(NetworkManagementInterface):
 
 
 # Note:
-# As this class is inheriting from NetworkManagementInterface, it is
+# As this class is inheriting from BaseNetworkClient, it is
 # expected to implement all the abstract methods defined in that interface.
 #
 # In case this network adapter doesn't support a specific method, it should

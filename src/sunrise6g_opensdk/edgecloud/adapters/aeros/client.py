@@ -10,9 +10,9 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-from sunrise6g_opensdk.edgecloud.clients.aeros import config
-from sunrise6g_opensdk.edgecloud.clients.aeros.continuum_client import ContinuumClient
-from sunrise6g_opensdk.edgecloud.clients.errors import EdgeCloudPlatformError
+from sunrise6g_opensdk.edgecloud.adapters.aeros import config
+from sunrise6g_opensdk.edgecloud.adapters.aeros.continuum_client import ContinuumClient
+from sunrise6g_opensdk.edgecloud.adapters.errors import EdgeCloudPlatformError
 from sunrise6g_opensdk.edgecloud.core.edgecloud_interface import (
     EdgeCloudManagementInterface,
 )

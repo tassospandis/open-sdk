@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Common utilities (errors, HTTP helpers) used by the core network interface (network_interface.py).
 
 import requests
 from pydantic import BaseModel
@@ -80,6 +79,18 @@ def traffic_influence_put(
     data = model_payload.model_dump_json(exclude_none=True)
     url = traffic_influence_build_url(base_url, scs_as_id, session_id)
     return _make_request("PUT", url, data=data)
+
+
+def traffic_influence_get(base_url: str, scs_as_id: str, sessionId: str = None) -> dict:
+    url = traffic_influence_build_url(base_url, scs_as_id, sessionId)
+    return _make_request("GET", url)
+
+
+def traffic_influence_get_all(
+    base_url: str, scs_as_id: str, sessionId: str = None
+) -> list[dict]:
+    url = traffic_influence_build_url(base_url, scs_as_id)
+    return _make_request("GET", url)
 
 
 def traffic_influence_build_url(base_url: str, scs_as_id: str, session_id: str = None):

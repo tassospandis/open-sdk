@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 ##
 # Copyright (c) 2025 Netsoft Group, EURECOM.
 # All rights reserved.
@@ -7,10 +9,8 @@
 # Contributors:
 #   - Giulio Carota (giulio.carota@eurecom.fr)
 ##
-
-
 from sunrise6g_opensdk import logger
-from sunrise6g_opensdk.network.core.network_interface import NetworkManagementInterface
+from sunrise6g_opensdk.network.core.base_network_client import BaseNetworkClient
 from sunrise6g_opensdk.network.core.schemas import (
     AsSessionWithQoSSubscription,
     CreateSession,
@@ -24,7 +24,7 @@ log = logger.get_logger(__name__)
 supportedQos = ["qos-e", "qos-s", "qos-m", "qos-l"]
 
 
-class NetworkManager(NetworkManagementInterface):
+class NetworkManager(BaseNetworkClient):
     def __init__(self, base_url: str, scs_as_id: str = None):
         """
         Initialize Network Client for OAI Core Network

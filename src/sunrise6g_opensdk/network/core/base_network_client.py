@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ##
-# Copyright 2025-present by Software Networks Area, i2CAT.
-# All rights reserved.
-#
 # This file is part of the Open SDK
 #
 # Contributors:
 #   - Reza Mosahebfard (reza.mosahebfard@i2cat.net)
 #   - Ferran Cañellas (ferran.canellas@i2cat.net)
+#   - Giulio Carota (giulio.carota@eurecom.fr)
 ##
-from abc import ABC
+import uuid
 from itertools import product
 from typing import Dict
 
@@ -72,16 +70,13 @@ def build_flows(
     return flows
 
 
-class NetworkManagementInterface(ABC):
+class BaseNetworkClient:
     """
-    Abstract Base Class for Network Resource Management.
+    Class for Network Resource Management.
 
-    This interface defines the standard methods that all
-    Network Clients (Open5GS, OAI, Open5GCore) must implement.
-
-    Partners implementing a new network client should inherit from this class
-    and provide concrete implementations for all abstract methods relevant
-    to their specific NEF capabilities.
+    This class provides shared logic and extension points for different
+    Network 5G Cores (e.g., Open5GS, OAI, Open5GCopre-commit run --all-filesre) interacting with
+    NEF-like platforms using CAMARA APIs.
     """
 
     base_url: str
@@ -185,6 +180,27 @@ class NetworkManagementInterface(ABC):
         self.add_core_specific_ti_parameters(traffic_influence_data, subscription)
         return subscription
 
+    def _build_camara_ti(self, trafficInflSub: Dict):
+        traffic_influence_data = schemas.TrafficInfluSub.model_validate(trafficInflSub)
+
+        flowDesc = traffic_influence_data.trafficFilters[0].flowDescriptions[0]
+        serverIp = flowDesc.split("to ")[1].split("/32")[0]
+        edgeId = traffic_influence_data.trafficRoutes[0].dnai
+
+        camara_ti = schemas.CreateTrafficInfluence(
+            appId=traffic_influence_data.afAppId,
+            appInstanceId=serverIp,
+            edgeCloudZoneId=edgeId,
+            notificationUri=traffic_influence_data.notificationDestination,
+            device=schemas.Device(
+                ipv4Address=schemas.DeviceIpv4Addr1(
+                    publicAddress=traffic_influence_data.ipv4Addr,
+                    privateAddress=traffic_influence_data.ipv4Addr,
+                )
+            ),
+        )
+        return camara_ti
+
     def create_qod_session(self, session_info: Dict) -> Dict:
         """
         Creates a QoS session based on CAMARA QoD API input.
@@ -197,9 +213,19 @@ class NetworkManagementInterface(ABC):
             dictionary containing the created session details, including its ID.
         """
         subscription = self._build_qod_subscription(session_info)
-        return common.as_session_with_qos_post(
+        response = common.as_session_with_qos_post(
             self.base_url, self.scs_as_id, subscription
         )
+        subscription_info: schemas.AsSessionWithQoSSubscription = (
+            schemas.AsSessionWithQoSSubscription(**response)
+        )
+
+        session_info = schemas.SessionInfo(
+            sessionId=schemas.SessionId(uuid.UUID(subscription_info.subscription_id)),
+            qosStatus=schemas.QosStatus.REQUESTED,
+            **session_info,
+        )
+        return session_info.model_dump()
 
     def get_qod_session(self, session_id: str) -> Dict:
         """
@@ -211,11 +237,28 @@ class NetworkManagementInterface(ABC):
         returns:
             Dictionary containing the details of the requested QoS session.
         """
-        session = common.as_session_with_qos_get(
+        response = common.as_session_with_qos_get(
             self.base_url, self.scs_as_id, session_id=session_id
         )
-        log.info(f"QoD session retrived successfully [id={session_id}]")
-        return session
+        subscription_info = schemas.AsSessionWithQoSSubscription(**response)
+        flowDesc = subscription_info.flowInfo[0].flowDescriptions[0]
+        serverIp = flowDesc.split("to ")[1].split("/")[0]
+        session_info = schemas.SessionInfo(
+            sessionId=schemas.SessionId(uuid.UUID(subscription_info.subscription_id)),
+            duration=subscription_info.usageThreshold.duration,
+            sink=subscription_info.notificationDestination,
+            qosProfile=subscription_info.qosReference,
+            device=schemas.Device(
+                ipv4Address=schemas.DeviceIpv4Addr1(
+                    publicAddress=subscription_info.ueIpv4Addr,
+                    privateAddress=subscription_info.ueIpv4Addr,
+                ),
+            ),
+            applicationServer=schemas.ApplicationServer(
+                ipv4Address=schemas.ApplicationServerIpv4Address(serverIp)
+            ),
+        )
+        return session_info.model_dump()
 
     def delete_qod_session(self, session_id: str) -> None:
         """
@@ -275,7 +318,7 @@ class NetworkManagementInterface(ABC):
             self.base_url, self.scs_as_id, resource_id, subscription
         )
 
-        traffic_influence_info.trafficInfluenceID = resource_id
+        traffic_influence_info["trafficInfluenceID"] = resource_id
         return traffic_influence_info
 
     def delete_traffic_influence_resource(self, resource_id: str) -> None:
@@ -291,5 +334,15 @@ class NetworkManagementInterface(ABC):
         common.traffic_influence_delete(self.base_url, self.scs_as_id, resource_id)
         return
 
-    # Placeholder for other CAMARA APIs (e.g., Traffic Influence,
-    # Location-retrieval, etc.)
+    def get_individual_traffic_influence_resource(self, resource_id: str) -> Dict:
+        nef_response = common.traffic_influence_get(
+            self.base_url, self.scs_as_id, resource_id
+        )
+        camara_ti = self._build_camara_ti(nef_response)
+        return camara_ti
+
+    def get_all_traffic_influence_resource(self) -> list[Dict]:
+        r = common.traffic_influence_get(self.base_url, self.scs_as_id)
+        return [self._build_camara_ti(item) for item in r]
+
+    # Placeholder for other CAMARA APIs (e.g: Location-retrieval, etc.)

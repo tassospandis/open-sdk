@@ -18,15 +18,13 @@ NETWORK_TEST_CASES = [
             "scs_as_id": "scs2",
         }
     },
-    # TODO: Once the functionality from QoD, Location-retrieval and
-    # traffic influnce is validated, tests can be carried out for Open5GCore
-    # {
-    #     "network": {
-    #         "client_name": "open5gcore",
-    #         "base_url": "http://test-open5gcore.url",
-    #         "scs_as_id": "scs3",
-    #     }
-    # },
+    {
+        "network": {
+            "client_name": "open5gcore",
+            "base_url": "http://test-open5gcore.url",
+            "scs_as_id": "scs3",
+        }
+    },
 ]
 
 
@@ -34,12 +32,12 @@ def id_func(val):
     return val["network"]["client_name"]
 
 
-@pytest.mark.parametrize("client_specs", NETWORK_TEST_CASES, ids=id_func)
-def test_network_platform_instantiation(client_specs):
-    """Test instantiation of all network platform clients"""
-    clients = sdkclient.create_clients_from(client_specs)
+@pytest.mark.parametrize("adapter_specs", NETWORK_TEST_CASES, ids=id_func)
+def test_network_platform_instantiation(adapter_specs):
+    """Test instantiation of all network platform adapters"""
+    adapters = sdkclient.create_adapters_from(adapter_specs)
 
-    assert "network" in clients
-    network_client = clients["network"]
+    assert "network" in adapters
+    network_client = adapters["network"]
     assert network_client is not None
     assert "NetworkManager" in str(type(network_client))
