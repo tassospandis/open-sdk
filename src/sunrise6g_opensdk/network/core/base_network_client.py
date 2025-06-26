@@ -76,7 +76,7 @@ class BaseNetworkClient:
     Class for Network Resource Management.
 
     This class provides shared logic and extension points for different
-    Network 5G Cores (e.g., Open5GS, OAI, Open5GCopre-commit run --all-filesre) interacting with
+    Network 5G Cores (e.g., Open5GS, OAI, Open5GCore) interacting with
     NEF-like platforms using CAMARA APIs.
     """
 
@@ -157,7 +157,7 @@ class BaseNetworkClient:
             ValidationError: If the request information does not meet core-specific requirements.
         """
         # Placeholder for core-specific validation logic
-        # This method should be overridden by subclasses if needed
+        # This method should be overwritten by subclasses if needed
         pass
 
     def _build_qod_subscription(
@@ -371,4 +371,5 @@ class BaseNetworkClient:
         r = common.traffic_influence_get(self.base_url, self.scs_as_id)
         return [self._build_camara_ti(item) for item in r]
 
-    # Placeholder for other CAMARA APIs (e.g: Location-retrieval, etc.)
+
+# Placeholder for other CAMARA APIs
