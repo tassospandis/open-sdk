@@ -1,14 +1,8 @@
-from __future__ import (
-    print_function,
-)
+from __future__ import print_function
 
 import requests
-from kubernetes import (
-    client,
-)
-from kubernetes.client.rest import (
-    ApiException,
-)
+from kubernetes import client
+from kubernetes.client.rest import ApiException
 
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils import (
     auxiliary_functions,
