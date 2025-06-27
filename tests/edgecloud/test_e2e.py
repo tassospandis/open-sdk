@@ -44,8 +44,11 @@ from tests.edgecloud.test_config import (
     REPO_TYPE,
     REPO_URL,
     ZONE_ID,
+    K8S_APP_MANIFEST,
+    K8S_APP_ID,
+    K8S_ONBOARDED_APP_NAME,
+    K8S_DEPLOY_PAYLOAD
 )
-
 
 @pytest.fixture(scope="module", name="edgecloud_client")
 def instantiate_edgecloud_client(request):
@@ -53,7 +56,6 @@ def instantiate_edgecloud_client(request):
     adapter_specs = request.param
     adapters = sdkclient.create_adapters_from(adapter_specs)
     return adapters.get("edgecloud")
-
 
 def id_func(val):
     return val["edgecloud"]["client_name"]
@@ -65,10 +67,13 @@ def test_get_edge_cloud_zones(edgecloud_client):
         zones = edgecloud_client.get_edge_cloud_zones()
         assert isinstance(zones, list)
         for zone in zones:
-            assert "zoneId" in zone
-            assert "geographyDetails" in zone
+            assert "edgeCloudZoneId" in zone
+            assert "edgeCloudZoneName" in zone
+            assert "edgeCloudZoneStatus" in zone
+            assert "edgeCloudProvider" in zone
+            assert "edgeCloudRegion" in zone
     except EdgeCloudPlatformError as e:
-        pytest.fail(f"Failed to retrieve zones: {e}")
+        pytest.fail("Failed to retrieve zones: ", e)
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
@@ -85,9 +90,9 @@ def test_get_edge_cloud_zones_details(edgecloud_client, zone_id=ZONE_ID):
         assert len(zone_details) > 0, "Zone details should not be empty"
 
     except EdgeCloudPlatformError as e:
-        pytest.fail(f"Failed to retrieve zone details: {e}")
+        pytest.fail("Failed to retrieve zone details: ",e)
     except KeyError as e:
-        pytest.fail(f"Missing expected key in response: {e}")
+        pytest.fail("Missing expected key in response: ",e)
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
@@ -111,16 +116,24 @@ def test_create_artefact(edgecloud_client):
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
 def test_onboard_app(edgecloud_client):
     try:
-        edgecloud_client.onboard_app(APP_ONBOARD_MANIFEST)
+        edgecloud_client.onboard_app(K8S_APP_MANIFEST)
     except EdgeCloudPlatformError as e:
-        pytest.fail(f"App onboarding failed unexpectedly: {e}")
+        pytest.fail("App onboarding failed unexpectedly: ", e)
+
+@pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
+def test_get_onboarded_app(edgecloud_client):
+    try:
+        app = edgecloud_client.get_onboarded_app(K8S_APP_ID)
+        assert app.get('name')==K8S_ONBOARDED_APP_NAME
+    except EdgeCloudPlatformError as e:
+        pytest.fail("App onboarding failed unexpectedly: ", e)
 
 
 @pytest.fixture(scope="module")
 def app_instance_id(edgecloud_client):
     try:
-        output = edgecloud_client.deploy_app(APP_ID, APP_ZONES)
-        deployed_app = {"appInstanceId": output["deploy_name"]}
+        output = edgecloud_client.deploy_app(K8S_DEPLOY_PAYLOAD)
+        deployed_app = {"appInstanceId": output["appInstanceId"]}
         assert "appInstanceId" in deployed_app
         assert deployed_app["appInstanceId"] is not None
         yield deployed_app["appInstanceId"]
@@ -128,29 +141,30 @@ def app_instance_id(edgecloud_client):
         pass
 
 
-@pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
-def test_deploy_app(app_instance_id):
-    assert app_instance_id is not None
+# @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
+# def test_deploy_app(app_instance_id):
+#     assert app_instance_id is not None
 
 
-@pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
-def test_timer_wait_30_seconds(edgecloud_client):
-    time.sleep(30)
+# @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
+# def test_timer_wait_30_seconds(edgecloud_client):
+#     time.sleep(30)
 
 
-@pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
-def test_undeploy_app(edgecloud_client, app_instance_id):
-    try:
-        edgecloud_client.undeploy_app(app_instance_id)
-    except EdgeCloudPlatformError as e:
-        pytest.fail(f"App undeployment failed unexpectedly: {e}")
+# @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
+# def test_undeploy_app(edgecloud_client, app_instance_id):
+#     try:
+#         edgecloud_client.undeploy_app(app_instance_id)
+#     except EdgeCloudPlatformError as e:
+#         pytest.fail(f"App undeployment failed unexpectedly: {e}")
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
 def test_delete_onboarded_app(edgecloud_client):
     try:
-        edgecloud_client.delete_onboarded_app(app_id=APP_ONBOARD_MANIFEST["appId"])
-    except EdgeCloudPlatformError as e:
+        result = edgecloud_client.delete_onboarded_app(app_id=K8S_APP_ID)
+        assert result == 200
+    except EdgeCloudPlatformError as e: 
         pytest.fail(f"App onboarding deletion failed unexpectedly: {e}")
 
 

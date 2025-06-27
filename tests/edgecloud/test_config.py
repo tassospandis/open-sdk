@@ -20,7 +20,8 @@ the EdgeCloud Platform integration across different adapters.
 # i2Edge variables
 ######################
 # EdgeCloud Zone
-ZONE_ID = "Omega"
+# ZONE_ID = "Omega"
+ZONE_ID = '999b7746-d2e2-4bb4-96e6-f1e895adef0c'
 
 # Artefact
 ARTEFACT_ID = "i2edgechart-id-2"
@@ -89,7 +90,48 @@ APP_ZONES = [
 ######################
 # kubernetes variables
 ######################
-# TODO
+
+K8S_ONBOARDED_APP_NAME = 'nginx'
+K8S_APP_ID = '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+K8S_DEPLOY_PAYLOAD = {
+    "appId": "3fa85f64-5717-4562-b3fc-2c963f66afa6", 
+    "name":"nginx-test", 
+    "edgeCloudZoneId": 
+    "zorro-solutions", 
+    "kubernetesClusterRef": ""
+    }
+K8S_APP_MANIFEST = {
+    'appId': '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+    "name": "nginx", 
+    "version": "1", 
+    "packageType": "QCOW2",
+    "appProvider": "Nginx Inc.",
+    "appRepo": {
+        "imagePath": "nginx", 
+        "type": "PRIVATEREPO"
+        }, 
+    "componentSpec": [
+        {
+            "componentName": "nginx", 
+            "networkInterfaces": [
+                {
+                    "protocol": "TCP", 
+                    "port": 80, 
+                    "interfaceId": "Uj6qThvzkegxa3L4b88", 
+                    "visibilityType": "VISIBILITY_EXTERNAL"
+                }, 
+                {
+                    "protocol": "TCP", 
+                    "port": 443, 
+                    "interfaceId": "Uj6qThvzkegxa3L4b88", 
+                    "visibilityType": "VISIBILITY_EXTERNAL"
+                }
+            ]
+        }
+    ]
+}
+
+
 
 ######################
 # aerOS variables
