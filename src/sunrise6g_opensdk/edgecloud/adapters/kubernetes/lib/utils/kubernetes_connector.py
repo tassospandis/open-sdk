@@ -22,15 +22,14 @@ configuration = client.Configuration()
 
 class KubernetesConnector:
     def __init__(self, ip, port, token, username):
-        if ip is None or port is None:
-            raise ValueError("master_node_ip and master_node_port must not be None")
-
-        self.master_node_ip = ip
-        self.master_node_port = port
-        self.username = username
+        master_node_ip = ip
+        master_node_port = port
+        username = username
         self.token_k8s = token
-
-        self.host = "https://" + self.master_node_ip + ":" + self.master_node_port
+        if port is None:
+            self.host = master_node_ip
+        else:
+            self.host = "https://" + master_node_ip + ":" + master_node_port
         configuration.api_key["authorization"] = self.token_k8s
         configuration.api_key_prefix["authorization"] = "Bearer"
 
@@ -50,12 +49,12 @@ class KubernetesConnector:
             self.api_instance_appsv1 = client.AppsV1Api(api_client)
             self.api_instance_apiregv1 = client.ApiregistrationV1Api(api_client)
             self.api_instance_v1autoscale = client.AutoscalingV1Api(api_client)
-            self.api_instance_v2beta1autoscale = client.AutoscalingV2beta1Api(
-                api_client
-            )
-            self.api_instance_v2beta2autoscale = client.AutoscalingV2beta2Api(
-                api_client
-            )
+            # self.api_instance_v2beta1autoscale = client.AutoscalingV2beta1Api(
+            #     api_client
+            # )
+            # self.api_instance_v2beta2autoscale = client.AutoscalingV2beta1Api(
+            #     api_client
+            # )
             self.api_instance_corev1api = client.CoreV1Api(api_client)
             self.api_instance_storagev1api = client.StorageV1Api(api_client)
             self.api_instance_batchv1 = client.BatchV1Api(api_client)
@@ -69,9 +68,9 @@ class KubernetesConnector:
                     % e
                 )
 
-    def get_node_details(self, nodeName):
+    def get_node_details(self):
         try:
-            url = self.host + "/api/v1/nodes/" + nodeName
+            url = self.host + "/api/v1/nodes"
             headers = {"Authorization": "Bearer " + self.token_k8s}
             x = requests.get(url, headers=headers, verify=False)
             node_details = x.json()
@@ -98,6 +97,10 @@ class KubernetesConnector:
         k8s_nodes = self.api_custom.list_cluster_custom_object(
             "metrics.k8s.io", "v1beta1", "nodes"
         )
+
+        # client.models.v1_node_list.V1NodeList
+        # kubernetes.client.models.v1_node_list.V1NodeList\
+
         pop_output = {}
         for pop in x1["items"]:
 
@@ -114,9 +117,9 @@ class KubernetesConnector:
                 node_addresses["nodeExternalIP"] = pop["status"]["addresses"][0][
                     "address"
                 ]
-                node_addresses["nodeInternalIP"] = pop["metadata"]["annotations"][
+                node_addresses["nodeInternalIP"] = pop["metadata"]["annotations"].get(
                     "projectcalico.org/IPv4VXLANTunnelAddr"
-                ]
+                )
                 pop_output["nodeAddresses"] = node_addresses
 
                 node_conditions = {}
@@ -195,8 +198,40 @@ class KubernetesConnector:
 
         return pop_output
 
-    def delete_service_function(self, connector_db: ConnectorDB, service_function_name):
+    def get_PoPs(self):
 
+        try:
+            pops_ = []
+            x1 = self.v1.list_node()
+            for node in x1.items:
+                pop_ = {}
+                pop_["name"] = node.metadata.name
+                pop_["uid"] = node.metadata.uid
+                pop_["location"] = node.metadata.labels.get("location")
+                pop_["serial"] = node.status.addresses[0].address
+                pop_["node_type"] = node.metadata.labels.get("node_type")
+                pop_["status"] = (
+                    "active"
+                    if node.status.conditions[-1].status == "True"
+                    else "inactive"
+                )
+                # pop_= NodesResponse(id=uid,name=name,location=location,serial=address, node_type=node_type, status=ready_status)
+                pops_.append(pop_)
+            return pops_
+        # url = host + "/api/v1/nodes"
+        # headers = {"Authorization": "Bearer " + token_k8s}
+        # x=requests.get(url, headers=headers, verify=False)
+        # x1 = x.json()
+        except requests.exceptions.HTTPError as e:
+            # logging.error(traceback.format_exc())
+            return (
+                "Exception when calling CoreV1Api->/api/v1/namespaces/sunrise6g/persistentvolumeclaims: %s\n"
+                % e
+            )
+
+    #
+
+    def delete_service_function(self, connector_db: ConnectorDB, service_function_name):
         self.api_instance_appsv1.delete_namespaced_deployment(
             name=service_function_name, namespace="sunrise6g"
         )
@@ -236,12 +271,12 @@ class KubernetesConnector:
 
     def deploy_service_function(self, descriptor_service_function):
         # deploys a Deployment yaml file, a service, a pvc and a hpa
-        # logging.info('DESCRIPTOR: '+descriptor_service_function)
-        # logging.info(descriptor_service_function)
+
         if "volumes" in descriptor_service_function:
             for volume in descriptor_service_function["volumes"]:
-                # first solution (python k8s client raises error without reason!)
+                # first solution (python k8s client arises error without reason!)
                 # body_volume = create_pvc(descriptor_service_function["name"], volume)
+                # api_response_pvc = v1.create_namespaced_persistent_volume_claim("sunrise6g", body_volume)
 
                 # #deploy pv
                 # print("deploy pv")
@@ -279,6 +314,7 @@ class KubernetesConnector:
                             % e
                         )
 
+                # api_response_pvc = api_instance_corev1api.create_namespaced_persistent_volume_claim
         body_deployment = self.create_deployment(descriptor_service_function)
         body_service = self.create_service(descriptor_service_function)
 
@@ -296,14 +332,10 @@ class KubernetesConnector:
                 self.api_instance_v1autoscale.create_namespaced_horizontal_pod_autoscaler(
                     "sunrise6g", body_hpa
                 )
-            # V2beta1 AUTOSCALER
-            # body_hpa = create_hpa(descriptor_paas)
-            # api_instance_v2beta1autoscale.create_namespaced_horizontal_pod_autoscaler("sunrise6g",body_hpa)
-            # body_r = (
-            #     "Service "
-            #     + descriptor_service_function["name"]
-            #     + " deployed successfully"
-            # )
+                # V2beta1 AUTOSCALER
+                # body_hpa = create_hpa(descriptor_paas)
+                # api_instance_v2beta1autoscale.create_namespaced_horizontal_pod_autoscaler("sunrise6g",body_hpa)
+
             return api_response_deployment
         except ApiException as e:
             # logging.error(traceback.format_exc())
@@ -311,6 +343,7 @@ class KubernetesConnector:
                 "Exception when calling AppsV1Api->create_namespaced_deployment or ApiregistrationV1Api->create_api_service: %s\n"
                 % e
             )
+        # Exception("An exception occurred : ", e)
 
     def create_deployment(self, descriptor_service_function):
 
@@ -534,7 +567,7 @@ class KubernetesConnector:
 
         node_selector_dict = {}
         if "location" in descriptor_service_function:
-            node_selector_dict["location"] = descriptor_service_function["location"]
+            node_selector_dict["nodeName"] = descriptor_service_function["location"]
 
             template_spec_ = client.V1PodSpec(
                 containers=containers,
@@ -564,9 +597,327 @@ class KubernetesConnector:
         )
         return body
 
+    def create_service(self, descriptor_service_function):
+        dict_label = {}
+        dict_label["sunrise6g"] = descriptor_service_function["name"]
+        metadata = client.V1ObjectMeta(
+            name=descriptor_service_function["name"], labels=dict_label
+        )
+
+        #  spec
+
+        if (
+            "exposed_ports" in descriptor_service_function["containers"][0]
+        ):  # create NodePort svc object
+            ports = []
+            hepler = 0
+            for port_id in descriptor_service_function["containers"][0][
+                "exposed_ports"
+            ]:
+
+                # if "grafana" in descriptor_service_function["name"]:
+                #     ports_=client.V1ServicePort(port=port_id,
+                #                                 node_port=31000,
+                #                                 target_port=port_id, name=str(port_id))
+                # else:
+                #     ports_ = client.V1ServicePort(port=port_id,
+                #                                   # node_port=descriptor_paas["containers"][0]["exposed_ports"][hepler],
+                #                                   target_port=port_id, name=str(port_id))
+                ports_ = client.V1ServicePort(
+                    port=port_id, target_port=port_id, name=str(port_id)
+                )
+                ports.append(ports_)
+                hepler = hepler + 1
+            spec = client.V1ServiceSpec(
+                selector=dict_label, ports=ports, type="NodePort"
+            )
+            # body = client.V1Service(api_version="v1", kind="Service", metadata=metadata, spec=spec)
+        else:  # create ClusterIP svc object
+            ports = []
+            for port_id in descriptor_service_function["containers"][0][
+                "application_ports"
+            ]:
+                ports_ = client.V1ServicePort(
+                    port=port_id, target_port=port_id, name=str(port_id)
+                )
+                ports.append(ports_)
+            spec = client.V1ServiceSpec(
+                selector=dict_label, ports=ports, type="ClusterIP"
+            )
+        body = client.V1Service(
+            api_version="v1", kind="Service", metadata=metadata, spec=spec
+        )
+
+        return body
+
+    def create_pvc(name, volumes):
+        dict_label = {}
+        name_vol = name + str("-") + volumes["name"]
+        dict_label["sunrise6g"] = name_vol
+        # metadata = client.V1ObjectMeta(name=name_vol)
+        metadata = client.V1ObjectMeta(name=name_vol, labels=dict_label)
+        # api_version = ("v1",)
+        kind = ("PersistentVolumeClaim",)
+        spec = client.V1PersistentVolumeClaimSpec(
+            access_modes=["ReadWriteMany"],
+            resources=client.V1ResourceRequirements(
+                requests={"storage": volumes["storage"]}
+            ),
+        )
+        body = client.V1PersistentVolumeClaim(
+            api_version="v1", kind=kind, metadata=metadata, spec=spec
+        )
+
+        return body
+
+    def create_pvc_dict(
+        name, volumes, storage_class="microk8s-hostpath", volume_name=None
+    ):
+        name_vol = name + str("-") + volumes["name"]
+        # body={}
+        # body["api_version"]="v1"
+        # body["kind"]="PersistentVolumeClaim"
+        # metadata={}
+        # labels={}
+        body = {
+            "api_version": "v1",
+            "kind": "PersistentVolumeClaim",
+            "metadata": {"labels": {"sunrise6g": name_vol}, "name": name_vol},
+            "spec": {
+                "accessModes": ["ReadWriteOnce"],
+                "resources": {"requests": {"storage": volumes["storage"]}},
+                "storageClassName": storage_class,
+            },
+        }
+
+        if volume_name is not None:
+            body["spec"]["volume_name"] = volume_name
+
+        return body
+
+    def create_pv_dict(name, volumes, storage_class, node=None):
+        name_vol = name + "-" + volumes["name"]
+
+        body = {
+            "apiVersion": "v1",
+            "kind": "PersistentVolume",
+            "metadata": {
+                "name": name_vol,
+                "labels": {
+                    "sunrise6g": name_vol,
+                },
+            },
+            "spec": {
+                "capacity": {"storage": volumes["storage"]},
+                "volumeMode": "Filesystem",
+                "accessModes": ["ReadWriteOnce"],
+                "persistentVolumeReclaimPolicy": "Delete",
+                "storageClassName": storage_class,
+                "hostPath": {"path": "/mnt/" + name_vol, "type": "DirectoryOrCreate"},
+            },
+        }
+
+        if node is not None:
+            body["spec"]["nodeAffinity"] = {
+                "required": {
+                    "nodeSelectorTerms": [
+                        {
+                            "matchExpressions": [
+                                {
+                                    "key": "kubernetes.io/hostname",
+                                    "operator": "In",
+                                    "values": [node],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+
+        return body
+
+    def check_for_update_hpas(self, deployed_hpas):
+
+        for hpa in deployed_hpas:
+            for catalogue_policy in hpa["catalogue_policy"]:
+                if catalogue_policy["policy"] == hpa["deployed_scaling_type"]:
+                    for metrics in catalogue_policy["monitoring_metrics"]:
+
+                        if metrics["metric_name"] == hpa["deployed_metric"]:
+
+                            if (
+                                metrics["catalogue_util"] != hpa["deployed_util"]
+                            ):  # need to update hpa
+                                desc_paas = {}
+                                desc_paas["name"] = hpa["name"]
+                                desc_paas["count-max"] = hpa["max"]
+                                desc_paas["count-min"] = hpa["min"]
+                                policy = {}
+                                policy["limit"] = metrics["catalogue_limit"]
+                                policy["request"] = metrics["catalogue_request"]
+                                policy["util_percent"] = metrics["catalogue_util"]
+                                policy["metric_name"] = metrics["metric_name"]
+                                policies = []
+                                policies.append(policy)
+                                desc_paas["autoscaling_policies"] = policies
+                                body_hpa = self.create_hpa(desc_paas)
+                                self.api_instance_v1autoscale.patch_namespaced_horizontal_pod_autoscaler(
+                                    namespace="sunrise6g",
+                                    name=desc_paas["name"],
+                                    body=body_hpa,
+                                )
+                            break
+                    break
+
+    def create_hpa(descriptor_service_function):
+
+        # V1!!!!!!!
+
+        dict_label = {}
+        dict_label["name"] = descriptor_service_function["name"]
+        metadata = client.V1ObjectMeta(
+            name=descriptor_service_function["name"], labels=dict_label
+        )
+
+        #  spec
+
+        scale_target = client.V1CrossVersionObjectReference(
+            api_version="apps/v1",
+            kind="Deployment",
+            name=descriptor_service_function["name"],
+        )
+
+        # todo!!!! check 0 gt an exoume kai cpu k ram auto dn tha einai auto to version!
+        spec = client.V1HorizontalPodAutoscalerSpec(
+            max_replicas=descriptor_service_function["count-max"],
+            min_replicas=descriptor_service_function["count-min"],
+            target_cpu_utilization_percentage=int(
+                descriptor_service_function["autoscaling_policies"][0]["util_percent"]
+            ),
+            scale_target_ref=scale_target,
+        )
+        body = client.V1HorizontalPodAutoscaler(
+            api_version="autoscaling/v1",
+            kind="HorizontalPodAutoscaler",
+            metadata=metadata,
+            spec=spec,
+        )
+
+        # V2BETA1 K8S API IMPLEMENTATION!!!!
+
+        # dict_label = {}
+        # dict_label['name'] = descriptor_paas["name"]
+        # metadata = client.V1ObjectMeta(name=descriptor_paas["name"], labels=dict_label)
+        #
+        # #  spec
+        #
+        # scale_target = client.V2beta1CrossVersionObjectReference(api_version="extensions/v1beta1", kind="Deployment",
+        #                                                     name=descriptor_paas["name"])
+        #
+        # metrics=[]
+        #
+        # for metric in descriptor_paas["autoscaling_policies"]:
+
+        #     resource_=client.V2beta1ResourceMetricSource(name=metric["metric"],target_average_utilization=int(metric["util_percent"]))
+        #     metric_=client.V2beta1MetricSpec(type="Resource", resource=resource_)
+        #     metrics.append(metric_)
+        #
+        #
+        # spec = client.V2beta1HorizontalPodAutoscalerSpec(max_replicas=descriptor_paas["count-max"],
+        #                                             min_replicas=descriptor_paas["count-min"],
+        #                                             metrics=metrics,
+        #                                             scale_target_ref=scale_target)
+        # body = client.V2beta1HorizontalPodAutoscaler(api_version="autoscaling/v2beta1", kind="HorizontalPodAutoscaler",
+        #                                         metadata=metadata, spec=spec)
+
+        # V2BETA2 K8S API IMPLEMENTATION!!!!
+
+        # dict_label = {}
+        # dict_label['name'] = descriptor_paas["name"]
+        # metadata = client.V1ObjectMeta(name=descriptor_paas["name"], labels=dict_label)
+        #
+        # #  spec
+        #
+        # scale_target = client.V2beta2CrossVersionObjectReference(api_version="apps/v1", kind="Deployment",
+        #                                                          name=descriptor_paas["name"])
+        #
+        # metrics = []
+        #
+        # for metric in descriptor_paas["autoscaling_policies"]:
+        #
+        #     target=client.V2beta2MetricTarget(average_utilization=int(metric["util_percent"]),type="Utilization")
+        #     resource_ = client.V2beta2ResourceMetricSource(name=metric["metric"],
+        #                                                   target=target)
+        #     metric_ = client.V2beta2MetricSpec(type="Resource", resource=resource_)
+        #     metrics.append(metric_)
+        #
+        # spec = client.V2beta2HorizontalPodAutoscalerSpec(max_replicas=descriptor_paas["count-max"],
+        #                                                  min_replicas=descriptor_paas["count-min"],
+        #                                                  metrics=metrics,
+        #                                                  scale_target_ref=scale_target)
+        # body = client.V2beta2HorizontalPodAutoscaler(api_version="autoscaling/v2beta2", kind="HorizontalPodAutoscaler",
+        #                                              metadata=metadata, spec=spec)
+
+        return body
+
+    def get_deployed_dataspace_connector(self, instance_name):
+        api_response = self.api_instance_appsv1.list_namespaced_deployment("sunrise6g")
+
+        api_response_service = self.v1.list_namespaced_service("sunrise6g")
+        app_ = {}
+        for app in api_response.items:
+            metadata = app.metadata
+            app.spec
+            status = app.status
+
+            dataspace_name = instance_name + "-dataspace-connector"
+
+            if dataspace_name == metadata.name:
+
+                app_["dataspace_connector_name"] = metadata.name
+
+            if app_:  # if app_ is not empty
+
+                if (status.available_replicas is not None) and (
+                    status.ready_replicas is not None
+                ):
+                    if status.available_replicas >= 1 and status.ready_replicas >= 1:
+                        app_["status"] = "running"
+                        app_["replicas"] = status.ready_replicas
+                    else:
+                        app_["status"] = "not_running"
+                        app_["replicas"] = 0
+                else:
+                    app_["status"] = "not_running"
+                    app_["replicas"] = 0
+
+                for app_service in api_response_service.items:
+
+                    metadata_svc = app_service.metadata
+
+                    spec_svc = app_service.spec
+                    svc_ports = []
+                    if metadata_svc.name == app_["dataspace_connector_name"]:
+                        app_["internal_ip"] = spec_svc.cluster_ip
+                        for port in spec_svc.ports:
+                            port_ = {}
+                            if port.node_port is not None:
+
+                                port_["exposed_port"] = port.node_port
+                                port_["protocol"] = port.protocol
+                                port_["application_port"] = port.port
+                                svc_ports.append(port_)
+                            else:
+                                port_["protocol"] = port.protocol
+                                port_["application_port"] = port.port
+                                svc_ports.append(port_)
+                        app_["ports"] = svc_ports
+                        break
+                return app_
+        return app_
+
     def get_deployed_service_functions(self, connector_db: ConnectorDB):
-        # label_selector = {}
-        # deployed_hpas=get_deployed_hpas()
+        self.get_deployed_hpas(connector_db)
         #
 
         # SHOULD UNCOMMENT IT IF WE WOULD LIKE LIVE UPDATE OF A RUNNING PAAS SERVICE
@@ -576,6 +927,7 @@ class KubernetesConnector:
         api_response = self.api_instance_appsv1.list_namespaced_deployment("sunrise6g")
 
         api_response_service = self.v1.list_namespaced_service("sunrise6g")
+        api_response_pvc = self.v1.list_namespaced_persistent_volume_claim("sunrise6g")
 
         #
         # hpa_list = api_instance_v1autoscale.list_namespaced_horizontal_pod_autoscaler("sunrise6g")
@@ -597,19 +949,36 @@ class KubernetesConnector:
             for app_col in deployed_apps_col:
                 if metadata.name == app_col["instance_name"]:
                     app_["service_function_instance_name"] = app_col["instance_name"]
-                    app_["uid"] = metadata.uid
                     actual_name = app_col["name"]
-                    # app_["appid"] = app_col["_id"]
-
+                    app_["appInstanceId"] = app_col["_id"]
+                    if "monitoring_service_URL" in app_col:
+                        app_["monitoring_service_URL"] = app_col[
+                            "monitoring_service_URL"
+                        ]
+                    if "paas_name" in app_col:
+                        app_["paas_name"] = app_col["paas_name"]
                     break
             for app_col in apps_col:
                 if actual_name == app_col["name"]:
                     app_["service_function_catalogue_name"] = app_col["name"]
-                    app_["id"] = app_col.get("_id")
-                    app_["appProvider"] = app_col.get("appProvider")
                     # app_["appid"] = app_col["_id"]
                     break
 
+            # find volumes!
+            for app_col in apps_col:
+                if app_col.get("required_volumes") is not None:
+                    volumes_ = []
+                    for volume in app_col["required_volumes"]:
+                        for item in api_response_pvc.items:
+                            name_v = str("-") + volume["name"]
+                            if (
+                                name_v in item.metadata.name
+                                and metadata.name in item.metadata.name
+                            ):
+                                volumes_.append(item.metadata.name)
+                                app_["volumes"] = volumes_
+                                break
+                    break
             if app_:  # if app_ is not empty
 
                 if (status.available_replicas is not None) and (
@@ -666,198 +1035,125 @@ class KubernetesConnector:
 
         return apps
 
-    def create_service(self, descriptor_service_function):
-        dict_label = {}
-        dict_label["sunrise6g"] = descriptor_service_function["name"]
-        metadata = client.V1ObjectMeta(
-            name=descriptor_service_function["name"], labels=dict_label
+    def get_deployed_hpas(self, connector_db: ConnectorDB):
+        # APPV1 Implementation!
+        api_response = (
+            self.api_instance_v1autoscale.list_namespaced_horizontal_pod_autoscaler(
+                "sunrise6g"
+            )
         )
 
-        #  spec
+        hpas = []
+        for hpa in api_response.items:
+            metadata = hpa.metadata
+            spec = hpa.spec
+            hpa_ = {}
 
-        if (
-            "exposed_ports" in descriptor_service_function["containers"][0]
-        ):  # create NodePort svc object
-            ports = []
-            hepler = 0
-            for port_id in descriptor_service_function["containers"][0][
-                "exposed_ports"
-            ]:
+            deployed_hpas_col = connector_db.get_documents_from_collection(
+                collection_input="deployed_apps"
+            )
+            apps_col = connector_db.get_documents_from_collection(
+                collection_input="paas_services"
+            )
 
-                ports_ = client.V1ServicePort(
-                    port=port_id, target_port=port_id, name=str(port_id)
-                )
-                ports.append(ports_)
-                hepler = hepler + 1
-            spec = client.V1ServiceSpec(
-                selector=dict_label, ports=ports, type="NodePort"
-            )
-        # body = client.V1Service(api_version="v1", kind="Service", metadata=metadata, spec=spec)
-        else:  # create ClusterIP svc object
-            ports = []
-            for port_id in descriptor_service_function["containers"][0][
-                "application_ports"
-            ]:
-                ports_ = client.V1ServicePort(
-                    port=port_id, target_port=port_id, name=str(port_id)
-                )
-                ports.append(ports_)
-            spec = client.V1ServiceSpec(
-                selector=dict_label, ports=ports, type="ClusterIP"
-            )
-        body = client.V1Service(
-            api_version="v1", kind="Service", metadata=metadata, spec=spec
+            actual_name = None
+            for hpa_col in deployed_hpas_col:
+                if metadata.name == hpa_col["deployed_name"]:
+                    hpa_["name"] = metadata.name
+                    if "scaling_type" in hpa_col:
+                        hpa_["deployed_scaling_type"] = hpa_col["scaling_type"]
+
+                    actual_name = hpa_col["name"]
+                    break
+            for app_col in apps_col:
+                if actual_name == app_col["name"]:
+                    hpa_["paascataloguename"] = app_col["name"]
+                    hpa_["appid"] = app_col["_id"]
+                    if "autoscaling_policies" in app_col:
+                        pol = []
+                        for autoscaling_ in app_col["autoscaling_policies"]:
+
+                            metric_ = []
+                            for auto_metric in autoscaling_["monitoring_metrics"]:
+                                hpa__ = {}
+                                # if auto_metric["metric_name"]=="cpu": #TODO!! CHANGE IT FOR v1beta2 etc.....!!!!! (only cpu wokrs now)
+                                hpa__["catalogue_util"] = auto_metric["util_percent"]
+                                hpa__["metric_name"] = auto_metric["metric_name"]
+                                hpa__["catalogue_limit"] = auto_metric["limit"]
+                                hpa__["catalogue_request"] = auto_metric["request"]
+                                metric_.append(hpa__)
+                                # pol["monitoring_metrics"]=  metric_
+
+                            polic = {}
+                            polic["policy"] = autoscaling_["policy"]
+                            polic["monitoring_metrics"] = metric_
+                            pol.append(polic)
+
+                        hpa_["catalogue_policy"] = pol
+                    break
+
+            if hpa_:  # if hpa_ is empty
+                hpa_["min"] = spec.min_replicas
+                hpa_["max"] = spec.max_replicas
+                hpa_["deployed_util"] = spec.target_cpu_utilization_percentage
+                hpa_["deployed_metric"] = "cpu"
+
+                hpas.append(hpa_)
+
+        return hpas
+
+    def is_job_completed(self, job_name):
+        job = self.api_instance_batchv1.read_namespaced_job(
+            name=job_name, namespace="sunrise6g"
         )
+        if job.status.succeeded is not None and job.status.succeeded > 0:
+            return True
+        return False
 
-        return body
+    # Create storageClass resource for a node - useless for now
+    def create_immediate_storageclass(self, node=None):
+        api_version = "storage.k8s.io/v1"
+        kind = "StorageClass"
+        name = "immediate-storageclass"
+        provisioner = "microk8s.io/hostpath"
+        reclaim_policy = "Delete"
+        volume_binding_mode = "Immediate"
 
-    def get_PoPs(self):
+        metadata = client.V1ObjectMeta(name=name)
+
+        # match_label_expressions = client.V1TopologySelectorLabelRequirement(key='kubernetes.io/hostname', values=[node.name])
+        #
+        # topology_selector_term = client.V1TopologySelectorTerm([match_label_expressions])
+
+        # storage_class = client.V1StorageClass(api_version=api_version, kind=kind, metadata=metadata, provisioner=provisioner
+        #                                       , volume_binding_mode=volume_binding_mode, reclaim_policy=reclaim_policy
+        #                                       , allowed_topologies=[topology_selector_term])
+
+        storage_class = client.V1StorageClass(
+            api_version=api_version,
+            kind=kind,
+            metadata=metadata,
+            provisioner=provisioner,
+            volume_binding_mode=volume_binding_mode,
+            reclaim_policy=reclaim_policy,
+        )
 
         try:
-            pops_ = []
-            x1 = self.v1.list_node()
-            for node in x1.items:
-                pop_ = {}
-                pop_["name"] = node.metadata.name
-                pop_["uid"] = node.metadata.uid
-                pop_["location"] = node.metadata.labels.get("location")
-                pop_["serial"] = node.status.addresses[0].address
-                pop_["node_type"] = node.metadata.labels.get("node_type")
-                pop_["status"] = (
-                    "active"
-                    if node.status.conditions[-1].status == "True"
-                    else "inactive"
-                )
-                # pop_= NodesResponse(id=uid,name=name,location=location,serial=address, node_type=node_type, status=ready_status)
-                pops_.append(pop_)
-            return pops_
-        # url = host + "/api/v1/nodes"
-        # headers = {"Authorization": "Bearer " + token_k8s}
-        # x=requests.get(url, headers=headers, verify=False)
-        # x1 = x.json()
-        except requests.exceptions.HTTPError as e:
-            # logging.error(traceback.format_exc())
-            return (
-                "Exception when calling CoreV1Api->/api/v1/namespaces/sunrise6g/persistentvolumeclaims: %s\n"
-                % e
+            self.api_instance_storagev1api.create_storage_class(body=storage_class)
+        except ApiException as e:
+            print("Exception when calling StorageV1Api->create_storage_class: %s\n" % e)
+
+    def immediate_storage_class_exists(self):
+        try:
+            storage_classes = (
+                self.api_instance_storagev1api.list_storage_class().items()
             )
 
+            for sc in storage_classes:
+                if sc.metadata.name == "immediate-storageclass":
+                    return True
 
-def create_pvc(name, volumes):
-    dict_label = {}
-    name_vol = name + str("-") + volumes["name"]
-    dict_label["sunrise6g"] = name_vol
-    # metadata = client.V1ObjectMeta(name=name_vol)
-    metadata = client.V1ObjectMeta(name=name_vol, labels=dict_label)
-    # api_version = ("v1",)
-    kind = ("PersistentVolumeClaim",)
-    spec = client.V1PersistentVolumeClaimSpec(
-        access_modes=["ReadWriteMany"],
-        resources=client.V1ResourceRequirements(
-            requests={"storage": volumes["storage"]}
-        ),
-    )
-    body = client.V1PersistentVolumeClaim(
-        api_version="v1", kind=kind, metadata=metadata, spec=spec
-    )
+            return False
 
-    return body
-
-
-def create_pvc_dict(name, volumes, storage_class="microk8s-hostpath", volume_name=None):
-    name_vol = name + str("-") + volumes["name"]
-    # body={}
-    # body["api_version"]="v1"
-    # body["kind"]="PersistentVolumeClaim"
-    # metadata={}
-    # labels={}
-    body = {
-        "api_version": "v1",
-        "kind": "PersistentVolumeClaim",
-        "metadata": {"labels": {"sunrise6g": name_vol}, "name": name_vol},
-        "spec": {
-            "accessModes": ["ReadWriteOnce"],
-            "resources": {"requests": {"storage": volumes["storage"]}},
-            "storageClassName": storage_class,
-        },
-    }
-
-    if volume_name is not None:
-        body["spec"]["volume_name"] = volume_name
-
-    return body
-
-
-def create_pv_dict(name, volumes, storage_class, node=None):
-    name_vol = name + "-" + volumes["name"]
-
-    body = {
-        "apiVersion": "v1",
-        "kind": "PersistentVolume",
-        "metadata": {
-            "name": name_vol,
-            "labels": {
-                "sunrise6g": name_vol,
-            },
-        },
-        "spec": {
-            "capacity": {"storage": volumes["storage"]},
-            "volumeMode": "Filesystem",
-            "accessModes": ["ReadWriteOnce"],
-            "persistentVolumeReclaimPolicy": "Delete",
-            "storageClassName": storage_class,
-            "hostPath": {"path": "/mnt/" + name_vol, "type": "DirectoryOrCreate"},
-        },
-    }
-
-    if node is not None:
-        body["spec"]["nodeAffinity"] = {
-            "required": {
-                "nodeSelectorTerms": [
-                    {
-                        "matchExpressions": [
-                            {
-                                "key": "kubernetes.io/hostname",
-                                "operator": "In",
-                                "values": [node],
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
-
-    return body
-
-
-def create_hpa(descriptor_service_function):
-
-    # V1!!!!!!!
-
-    dict_label = {}
-    dict_label["name"] = descriptor_service_function["name"]
-    client.V1ObjectMeta(name=descriptor_service_function["name"], labels=dict_label)
-
-    #  spec
-
-    scale_target = client.V1CrossVersionObjectReference(
-        api_version="apps/v1",
-        kind="Deployment",
-        name=descriptor_service_function["name"],
-    )
-
-    # todo!!!! check 0 gt an exoume kai cpu k ram auto dn tha einai auto to version!
-    client.V1HorizontalPodAutoscalerSpec(
-        max_replicas=descriptor_service_function["count-max"],
-        min_replicas=descriptor_service_function["count-min"],
-        target_cpu_utilization_percentage=int(
-            descriptor_service_function["autoscaling_policies"][0]["util_percent"]
-        ),
-        scale_target_ref=scale_target,
-    )
-    # body = client.V1HorizontalPodAutoscaler(
-    #     api_version="autoscaling/v1",
-    #     kind="HorizontalPodAutoscaler",
-    #     metadata=metadata,
-    #     spec=spec,
-    # )
+        except ApiException as e:
+            return f"Exception when calling StorageV1Api->list_storage_class: {e}"

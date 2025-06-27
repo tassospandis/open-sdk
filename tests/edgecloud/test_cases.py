@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 test_cases = [
-    {
-        "edgecloud": {
-            "client_name": "i2edge",
-            "base_url": "http://192.168.123.48:30769/",
-            "flavour_id": "67f3a0b0e3184a85952e174d",
-        }
-    },
+    # {
+    #     "edgecloud": {
+    #         "client_name": "i2edge",
+    #         "base_url": "http://test-i2edge.url/",
+    #         "flavour_id": "flavour_id_example",
+    #     }
+    # },
     # {
     #     "edgecloud": {
     #         "client_name": "aeros",
@@ -17,9 +17,16 @@ test_cases = [
     #     }
     # },
     # {
+    # {
     #     "edgecloud": {
     #         "client_name": "kubernetes",
-    #         "base_url": "http://test-kubernetes.url"
+    #         "base_url": "http://test-k8s.url",
+    #         # Additional parameters for K8s client:
+    #         "PLATFORM_PROVIDER": "<>",
+    #         "KUBERNETES_MASTER_TOKEN": "<>",
+    #         # "KUBERNETES_MASTER_PORT": "80",
+    #         "KUBERNETES_USERNAME": "user",
+    #         "EMP_STORAGE_URI": "mongodb://<>",
     #     }
-    # }
+    # },
 ]

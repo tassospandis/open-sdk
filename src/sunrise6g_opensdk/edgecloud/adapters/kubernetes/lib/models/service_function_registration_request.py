@@ -16,6 +16,7 @@ class ServiceFunctionRegistrationRequest(Model):
 
     def __init__(
         self,
+        service_function_id: str = None,
         service_function_name: str = None,
         service_function_image: str = None,
         service_function_type: str = None,
@@ -41,6 +42,7 @@ class ServiceFunctionRegistrationRequest(Model):
         :type privileged: bool
         """
         self.swagger_types = {
+            "service_function_id": str,
             "service_function_name": str,
             "service_function_image": str,
             "service_function_type": str,
@@ -48,11 +50,13 @@ class ServiceFunctionRegistrationRequest(Model):
         }
 
         self.attribute_map = {
+            "service_function_id": "service_function_id",
             "service_function_name": "service_function_name",
             "service_function_image": "service_function_image",
             "service_function_type": "service_function_type",
             "application_ports": "application_ports",
         }
+        self._service_function_id = service_function_id
         self._service_function_name = service_function_name
         self._service_function_image = service_function_image
         self._service_function_type = service_function_type
@@ -68,6 +72,27 @@ class ServiceFunctionRegistrationRequest(Model):
         :rtype: ServiceFunctionRegistrationRequest
         """
         return deserialize_model(dikt, cls)
+
+    @property
+    def service_function_id(self) -> str:
+        """Gets the service_function_name of this ServiceFunctionRegistrationRequest.
+
+
+        :return: The service_function_name of this ServiceFunctionRegistrationRequest.
+        :rtype: str
+        """
+        return self._service_function_id
+
+    @service_function_id.setter
+    def service_function_id(self, service_function_id: str):
+        """Sets the service_function_name of this ServiceFunctionRegistrationRequest.
+
+
+        :param service_function_name: The service_function_name of this ServiceFunctionRegistrationRequest.
+        :type service_function_name: str
+        """
+
+        self._service_function_id = service_function_id
 
     @property
     def service_function_name(self) -> str:

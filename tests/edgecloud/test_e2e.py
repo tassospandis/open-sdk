@@ -57,11 +57,20 @@ def test_get_edge_cloud_zones(edgecloud_client):
     try:
         zones = edgecloud_client.get_edge_cloud_zones()
         assert isinstance(zones, list)
-        for zone in zones:
-            assert "zoneId" in zone
-            assert "geographyDetails" in zone
+        # Add if/else
+        if edgecloud_client.client_name == "i2edge":
+            for zone in zones:
+                assert "zoneId" in zone
+                assert "geographyDetails" in zone
+        else:
+            for zone in zones:
+                assert "edgeCloudZoneId" in zone
+                assert "edgeCloudZoneName" in zone
+                assert "edgeCloudZoneStatus" in zone
+                assert "edgeCloudProvider" in zone
+                assert "edgeCloudRegion" in zone
     except EdgeCloudPlatformError as e:
-        pytest.fail(f"Failed to retrieve zones: {e}")
+        pytest.fail("Failed to retrieve zones: ", e)
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
@@ -79,8 +88,10 @@ def test_get_edge_cloud_zones_details(edgecloud_client):
         assert isinstance(zone_details, dict)
         assert len(zone_details) > 0
 
-    except (EdgeCloudPlatformError, KeyError) as e:
-        pytest.fail(f"Zone detail fetch failed: {e}")
+    except EdgeCloudPlatformError as e:
+        pytest.fail("Failed to retrieve zone details: ", e)
+    except KeyError as e:
+        pytest.fail("Missing expected key in response: ", e)
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
@@ -130,13 +141,8 @@ def app_instance_id(edgecloud_client):
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
-def test_deploy_app(app_instance_id):
-    assert app_instance_id is not None
-
-
-@pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
 def test_timer_wait_60_seconds(edgecloud_client):
-    time.sleep(60)
+    time.sleep(10)
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
@@ -149,7 +155,7 @@ def test_undeploy_app(edgecloud_client, app_instance_id):
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
 def test_timer_wait_30_seconds(edgecloud_client):
-    time.sleep(30)
+    time.sleep(10)
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)

@@ -78,7 +78,7 @@ def _network_adapters_factory(client_name: str, base_url: str, **kwargs):
 class AdaptersFactory:
     _domain_factories = {
         "edgecloud": _edgecloud_adapters_factory,
-        "network": _network_adapters_factory,
+        # "network": _network_adapters_factory,
         # "oran": _oran_adapters_factory,
     }
 

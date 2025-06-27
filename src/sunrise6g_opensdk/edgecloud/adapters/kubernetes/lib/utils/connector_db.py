@@ -1,7 +1,6 @@
 from typing import List
 
 import pymongo
-from bson.objectid import ObjectId
 
 storage_url = None
 
@@ -11,48 +10,48 @@ class ConnectorDB:
         self._storage_url = host
         self.mydb_mongo = "pi-edge"
 
-    def insert_document_k8s_platform(self, document=None, _id=None):
-        collection = "kubernetes_platforms"
-        myclient = pymongo.MongoClient(self._storage_url)
-        mydbmongo = myclient[self.mydb_mongo]
-        mycol = mydbmongo[collection]
+    # def insert_document_k8s_platform(self, document=None, _id=None):
+    #     collection = "kubernetes_platforms"
+    #     myclient = pymongo.MongoClient(self._storage_url)
+    #     mydbmongo = myclient[self.mydb_mongo]
+    #     mycol = mydbmongo[collection]
 
-        myquery = {"name": document["kubernetes_platform_name"]}
-        mydoc = mycol.find_one(myquery)
-        # keeps the last record (contains registrationStatus)
-        if mydoc is not None:
-            raise Exception(
-                "Already Registered: Platform name",
-                document["kubernetes_platform_name"],
-            )
-        try:
-            insert_doc = {}
-            insert_doc["name"] = document["kubernetes_platform_name"]
-            insert_doc["auth_credentials"] = document["kubernetes_auth_credentials"]
-            mycol.insert_one(insert_doc)
-        except Exception as ce_:
-            raise Exception("An exception occurred :", ce_)
+    #     myquery = {"name": document["kubernetes_platform_name"]}
+    #     mydoc = mycol.find_one(myquery)
+    #     # keeps the last record (contains registrationStatus)
+    #     if mydoc is not None:
+    #         raise Exception(
+    #             "Already Registered: Platform name",
+    #             document["kubernetes_platform_name"],
+    #         )
+    #     try:
+    #         insert_doc = {}
+    #         insert_doc["name"] = document["kubernetes_platform_name"]
+    #         insert_doc["auth_credentials"] = document["kubernetes_auth_credentials"]
+    #         mycol.insert_one(insert_doc)
+    #     except Exception as ce_:
+    #         raise Exception("An exception occurred :", ce_)
 
-    def delete_document_k8s_platform(self, document=None, _id=None):
-        collection = "kubernetes_platforms"
-        myclient = pymongo.MongoClient(self._storage_url)
-        mydbmongo = myclient[self.mydb_mongo]
-        mycol = mydbmongo[collection]
+    # def delete_document_k8s_platform(self, document=None, _id=None):
+    #     collection = "kubernetes_platforms"
+    #     myclient = pymongo.MongoClient(self._storage_url)
+    #     mydbmongo = myclient[self.mydb_mongo]
+    #     mycol = mydbmongo[collection]
 
-        myquery = {"name": document["kubernetes_platform_name"]}
-        mydoc = mycol.find_one(myquery)
+    #     myquery = {"name": document["kubernetes_platform_name"]}
+    #     mydoc = mycol.find_one(myquery)
 
-        # keeps the last record (contains registrationStatus)
-        if mydoc is None:
-            raise Exception(
-                "Not found: Platform name", document["kubernetes_platform_name"]
-            )
-        try:
-            delete_doc = {}
-            delete_doc["name"] = document["kubernetes_platform_name"]
-            mycol.delete_one(delete_doc)
-        except Exception as ce_:
-            raise Exception("An exception occurred :", ce_)
+    #     # keeps the last record (contains registrationStatus)
+    #     if mydoc is None:
+    #         raise Exception(
+    #             "Not found: Platform name", document["kubernetes_platform_name"]
+    #         )
+    #     try:
+    #         delete_doc = {}
+    #         delete_doc["name"] = document["kubernetes_platform_name"]
+    #         mycol.delete_one(delete_doc)
+    #     except Exception as ce_:
+    #         raise Exception("An exception occurred :", ce_)
 
     def insert_document_deployed_service_function(self, document=None, _id=None):
 
@@ -73,7 +72,7 @@ class ConnectorDB:
         # raise Exception("Already Registered: PaaS name", document["paas_name"])
         try:
             insert_doc = {}
-
+            insert_doc["_id"] = document["id"]
             insert_doc["name"] = document["service_function_name"]
             # insert_doc["type"] = document["paas_type"]
             insert_doc["location"] = document["location"]
@@ -137,6 +136,7 @@ class ConnectorDB:
             return "Service function already exists in the catalogue"
 
         insert_doc = {}
+        insert_doc["_id"] = document["service_function_id"]
         insert_doc["name"] = document["service_function_name"]
         insert_doc["type"] = document["service_function_type"]
         insert_doc["image"] = document["service_function_image"]
@@ -179,7 +179,7 @@ class ConnectorDB:
         self, service_function_input_name=None, _id: str = None
     ):
 
-        _id = ObjectId(_id)
+        # _id = ObjectId(_id)
         collection = "service_functions"
         myclient = pymongo.MongoClient(self._storage_url)
         mydbmongo = myclient[self.mydb_mongo]

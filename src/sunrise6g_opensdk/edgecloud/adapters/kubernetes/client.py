@@ -2,6 +2,8 @@
 import logging
 from typing import Dict, List, Optional
 
+from kubernetes.client import V1Deployment
+
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.core.piedge_encoder import (
     deploy_service_function,
 )
@@ -47,6 +49,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
     def onboard_app(self, app_manifest: AppManifest) -> Dict:
         print(f"Submitting application: {app_manifest}")
         logging.info("Extracting variables from payload...")
+        app_id = app_manifest.get("appId")
         app_name = app_manifest.get("name")
         image = app_manifest.get("appRepo").get("imagePath")
         package_type = app_manifest.get("packageType")
@@ -57,6 +60,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         for ni in network_interfaces:
             ports.append(ni.get("port"))
         insert_doc = ServiceFunctionRegistrationRequest(
+            service_function_id=app_id,
             service_function_image=image,
             service_function_name=app_name,
             service_function_type=package_type,
@@ -93,39 +97,48 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
             return []
 
     def delete_onboarded_app(self, app_id: str) -> None:
-        logging.info("Deleting registered app with ID: " + app_id + " from database...")
         result, code = self.connector_db.delete_document_service_function(_id=app_id)
         print(f"Removing application metadata: {app_id}")
-        # return result, code
+        return code
 
-    def deploy_app(self, app_id: str, app_zones: List[Dict]) -> Dict:
+    def deploy_app(self, body: dict) -> Dict:
         logging.info(
-            "Searching for registered app with ID: " + app_id + " in database..."
+            "Searching for registered app with ID: "
+            + body.get("appId")
+            + " in database..."
         )
         app = self.connector_db.get_documents_from_collection(
-            "service_functions", input_type="_id", input_value=app_id
+            "service_functions", input_type="_id", input_value=body.get("appId")
         )
         # success_response = []
         result = None
+        response = None
         if len(app) < 1:
-            return "Application with ID: " + app_id + " not found", 404
+            return "Application with ID: " + body.get("appId") + " not found", 404
         if app is not None:
-            for zone in app_zones:
-                sf = DeployServiceFunction(
-                    service_function_name=app[0].get("name"),
-                    service_function_instance_name=app[0].get("name")
-                    + "-"
-                    + zone.get("EdgeCloudZone").get("edgeCloudZoneName"),
-                    location=zone.get("edgeCloudZoneName"),
-                )
-                result = deploy_service_function(
-                    service_function=sf,
-                    connector_db=self.connector_db,
-                    kubernetes_connector=self.k8s_connector,
-                )
-                logging.info(result)
-                # success_response.append(result)
-        return {"appInstanceId": result}
+            sf = DeployServiceFunction(
+                service_function_name=app[0].get("name"),
+                service_function_instance_name=body.get("name"),
+                # location=body.get('edgeCloudZoneId'),
+            )
+            result = deploy_service_function(
+                service_function=sf,
+                connector_db=self.connector_db,
+                kubernetes_connector=self.k8s_connector,
+            )
+        if type(result) is V1Deployment:
+            response = {}
+            response["name"] = body.get("name")
+            response["appId"] = app[0].get("_id")
+            response["appInstanceId"] = result.metadata.uid
+            response["appProvider"] = app[0].get("appProvider")
+            response["status"] = "unknown"
+            response["componentEndpointInfo"] = {}
+            response["kubernetesClusterRef"] = ""
+            response["edgeCloudZoneId"] = body.get("edgeCloudZoneId")
+        else:
+            response = {"Error": result}
+        return response
 
     def get_all_deployed_apps(
         self,
@@ -164,7 +177,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         sfs = self.k8s_connector.get_deployed_service_functions(self.connector_db)
         response = "App instance with ID [" + app_instance_id + "] not found"
         for service_fun in sfs:
-            if service_fun["uid"] == app_instance_id:
+            if service_fun["appInstanceId"] == app_instance_id:
                 self.k8s_connector.delete_service_function(
                     self.connector_db, service_fun["service_function_instance_name"]
                 )
@@ -196,8 +209,12 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
     def get_edge_cloud_zones_details(
         self, zone_id: str, flavour_id: Optional[str] = None
     ) -> Dict:
-        node_details = self.k8s_connector.get_node_details(zone_id)
-        node_details = {}
+        nodes = self.k8s_connector.get_node_details()
+        node_details = None
+        for item in nodes.get("items"):
+            if item.get("metadata").get("uid") == zone_id:
+                node_details = item
+                break
         labels = node_details.get("metadata").get("labels")
         status = node_details.get("status")
         arch_type = labels.get("beta.kubernetes.io/arch")
@@ -205,14 +222,16 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
             {
                 "cpuArchType": arch_type,
                 "numCPU": status.get("capacity").get("cpu"),
-                "memory": int(status.get("capacity").get("memory")) / (1024 * 1024),
+                "memory": status.get("capacity").get("memory"),
+                # "memory": int(status.get("capacity").get("memory")) / (1024 * 1024),
             }
         ]
         reservedComputeResources = [
             {
                 "cpuArchType": arch_type,
                 "numCPU": status.get("allocatable").get("cpu"),
-                "memory": int(status.get("allocatable").get("memory")) / (1024 * 1024),
+                "memory": status.get("allocatable").get("memory"),
+                # "memory": int(status.get("allocatable").get("memory")) / (1024 * 1024),
             }
         ]
         flavoursSupported = []
