@@ -26,7 +26,7 @@ test_cases = [
             "KUBERNETES_MASTER_TOKEN": "T3FRNnNVK25FY3I5ZHlNYmxrSEFpd2VPcW5WTlliTnRVNVo3bitNY1B3az0K",
             # "KUBERNETES_MASTER_PORT": "80",
             "KUBERNETES_USERNAME": "user",
-            'EMP_STORAGE_URI': 'mongodb://146.124.106.200:32411'
+            "EMP_STORAGE_URI": "mongodb://146.124.106.200:32411",
         }
     },
 ]

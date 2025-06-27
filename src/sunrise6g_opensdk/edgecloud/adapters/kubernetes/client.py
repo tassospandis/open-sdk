@@ -1,7 +1,7 @@
 # Mocked API for testing purposes
 import logging
-import os
 from typing import Dict, List, Optional
+
 from kubernetes.client import V1Deployment
 
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.core.piedge_encoder import (
@@ -60,7 +60,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         for ni in network_interfaces:
             ports.append(ni.get("port"))
         insert_doc = ServiceFunctionRegistrationRequest(
-            service_function_id = app_id,
+            service_function_id=app_id,
             service_function_image=image,
             service_function_name=app_name,
             service_function_type=package_type,
@@ -103,39 +103,41 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
 
     def deploy_app(self, body: dict) -> Dict:
         logging.info(
-            "Searching for registered app with ID: " + body.get('appId') + " in database..."
+            "Searching for registered app with ID: "
+            + body.get("appId")
+            + " in database..."
         )
         app = self.connector_db.get_documents_from_collection(
-            "service_functions", input_type="_id", input_value=body.get('appId')
+            "service_functions", input_type="_id", input_value=body.get("appId")
         )
         # success_response = []
         result = None
         response = None
         if len(app) < 1:
-            return "Application with ID: " + body.get('appId') + " not found", 404
+            return "Application with ID: " + body.get("appId") + " not found", 404
         if app is not None:
             sf = DeployServiceFunction(
-                    service_function_name=app[0].get("name"),
-                    service_function_instance_name=body.get('name'),
-                    # location=body.get('edgeCloudZoneId'),
-                )
+                service_function_name=app[0].get("name"),
+                service_function_instance_name=body.get("name"),
+                # location=body.get('edgeCloudZoneId'),
+            )
             result = deploy_service_function(
-                    service_function=sf,
-                    connector_db=self.connector_db,
-                    kubernetes_connector=self.k8s_connector,
-                )
+                service_function=sf,
+                connector_db=self.connector_db,
+                kubernetes_connector=self.k8s_connector,
+            )
         if type(result) is V1Deployment:
             response = {}
-            response['name'] = body.get('name')
-            response['appId']= app[0].get('_id')
-            response['appInstanceId'] = result.metadata.uid
-            response['appProvider'] = app[0].get('appProvider')
-            response['status'] = 'unknown'
-            response['componentEndpointInfo']= {}
-            response['kubernetesClusterRef'] = ''
-            response['edgeCloudZoneId'] = body.get('edgeCloudZoneId')
+            response["name"] = body.get("name")
+            response["appId"] = app[0].get("_id")
+            response["appInstanceId"] = result.metadata.uid
+            response["appProvider"] = app[0].get("appProvider")
+            response["status"] = "unknown"
+            response["componentEndpointInfo"] = {}
+            response["kubernetesClusterRef"] = ""
+            response["edgeCloudZoneId"] = body.get("edgeCloudZoneId")
         else:
-            response = {'Error': result}
+            response = {"Error": result}
         return response
 
     def get_all_deployed_apps(
@@ -151,15 +153,15 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         response = []
         for deployment in deployments:
             item = {}
-            item['name'] = deployment.get('service_function_catalogue_name')
-            item['appId'] = deployment.get('id')
-            item['appProvider'] = deployment.get('appProvider')
+            item["name"] = deployment.get("service_function_catalogue_name")
+            item["appId"] = deployment.get("id")
+            item["appProvider"] = deployment.get("appProvider")
             item["appInstanceId"] = deployment.get("uid")
             item["status"] = deployment.get("status")
             interfaces = []
-            for port in deployment.get('ports'):
-                access_point = {'port': port}
-                interfaces.append({'interfaceId' : '','accessPoints': access_point})
+            for port in deployment.get("ports"):
+                access_point = {"port": port}
+                interfaces.append({"interfaceId": "", "accessPoints": access_point})
             item["componentEndpointInfo"] = interfaces
             item["kubernetesClusterRef"] = ""
             item["edgeCloudZoneId"] = {}
@@ -209,8 +211,8 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
     ) -> Dict:
         nodes = self.k8s_connector.get_node_details()
         node_details = None
-        for item in nodes.get('items'):
-            if item.get('metadata').get('uid')==zone_id:
+        for item in nodes.get("items"):
+            if item.get("metadata").get("uid") == zone_id:
                 node_details = item
                 break
         labels = node_details.get("metadata").get("labels")
@@ -220,7 +222,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
             {
                 "cpuArchType": arch_type,
                 "numCPU": status.get("capacity").get("cpu"),
-                "memory": status.get("capacity").get("memory")
+                "memory": status.get("capacity").get("memory"),
                 # "memory": int(status.get("capacity").get("memory")) / (1024 * 1024),
             }
         ]
@@ -228,7 +230,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
             {
                 "cpuArchType": arch_type,
                 "numCPU": status.get("allocatable").get("cpu"),
-                "memory": status.get("allocatable").get("memory")
+                "memory": status.get("allocatable").get("memory"),
                 # "memory": int(status.get("allocatable").get("memory")) / (1024 * 1024),
             }
         ]

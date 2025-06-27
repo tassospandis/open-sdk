@@ -3,14 +3,18 @@
 # flake8: noqa
 from __future__ import absolute_import
 
-from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.app_delete import AppDelete
+from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.app_delete import (
+    AppDelete,
+)
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.apps_response import (
     AppsResponse,
 )
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.apps_response_apps import (
     AppsResponseApps,
 )
-from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.appupdate import Appupdate
+from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.appupdate import (
+    Appupdate,
+)
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.deploy_service_function import (
     DeployServiceFunction,
 )

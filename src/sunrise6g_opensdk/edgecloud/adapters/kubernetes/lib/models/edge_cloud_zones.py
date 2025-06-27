@@ -1,15 +1,9 @@
 # coding: utf-8
 
-from __future__ import (
-    absolute_import
-)
+from __future__ import absolute_import
 
-from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib import (
-    util
-)
-from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.base_model_ import (
-    Model
-)
+from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib import util
+from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.base_model_ import Model
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.edge_cloud_zone import (  # noqa: F401,E501
     EdgeCloudZone,
 )

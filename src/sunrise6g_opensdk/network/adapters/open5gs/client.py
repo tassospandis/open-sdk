@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+
+# Contributors:
+#   - Ferran Cañellas (ferran.canellas@i2cat.net)
+#   - Panagiotis Pavlidis (p.pavlidis@iit.demokritos.gr)
+##
 from pydantic import ValidationError
 
 from sunrise6g_opensdk import logger
@@ -55,6 +60,32 @@ class NetworkManager(BaseNetworkClient):
         subscription.supportedFeatures = schemas.SupportedFeatures("003C")
         flow_id = flow_id_mapping[session_info.qosProfile.root]
         subscription.flowInfo = build_flows(flow_id, session_info)
+
+    def core_specific_monitoring_event_validation(
+        self, retrieve_location_request: schemas.RetrievalLocationRequest
+    ) -> None:
+        """Check core specific elements that required for location retrieval in NEF."""
+        if retrieve_location_request.device is None:
+            raise ValidationError(
+                "Open5GS requires a device to be specified for location retrieval in NEF."
+            )
+
+    def add_core_specific_location_parameters(
+        self, retrieve_location_request: schemas.RetrievalLocationRequest
+    ) -> schemas.MonitoringEventSubscriptionRequest:
+        """Add core specific location parameters to support location retrieval scenario in NEF."""
+        return schemas.MonitoringEventSubscriptionRequest(
+            msisdn=retrieve_location_request.device.phoneNumber.root.lstrip("+"),
+            notificationDestination="http://127.0.0.1:8001",
+            monitoringType=schemas.MonitoringType.LOCATION_REPORTING,
+            locationType=schemas.LocationType.LAST_KNOWN,
+        )
+        # subscription.msisdn = retrieve_location_request.device.phoneNumber.root.lstrip('+')
+        # monitoringType = schemas.MonitoringType.LOCATION_REPORTING
+        # locationType = schemas.LocationType.LAST_KNOWN
+        # locationType = schemas.LocationType.CURRENT_LOCATION
+        # maximumNumberOfReports = 1
+        # repPeriod = schemas.DurationSec(root=20)
 
 
 # Note:

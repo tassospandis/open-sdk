@@ -1,7 +1,6 @@
 from typing import List
 
 import pymongo
-from bson.objectid import ObjectId
 
 storage_url = None
 
@@ -73,7 +72,7 @@ class ConnectorDB:
         # raise Exception("Already Registered: PaaS name", document["paas_name"])
         try:
             insert_doc = {}
-            insert_doc['_id'] = document['id']
+            insert_doc["_id"] = document["id"]
             insert_doc["name"] = document["service_function_name"]
             # insert_doc["type"] = document["paas_type"]
             insert_doc["location"] = document["location"]
@@ -137,7 +136,7 @@ class ConnectorDB:
             return "Service function already exists in the catalogue"
 
         insert_doc = {}
-        insert_doc["_id"] = document['service_function_id']
+        insert_doc["_id"] = document["service_function_id"]
         insert_doc["name"] = document["service_function_name"]
         insert_doc["type"] = document["service_function_type"]
         insert_doc["image"] = document["service_function_image"]
@@ -275,4 +274,3 @@ class ConnectorDB:
             return mydoc_
         except Exception as ce_:
             raise Exception("An exception occurred :", ce_)
-        

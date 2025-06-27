@@ -42,7 +42,7 @@ class ServiceFunctionRegistrationRequest(Model):
         :type privileged: bool
         """
         self.swagger_types = {
-            'service_function_id': str,
+            "service_function_id": str,
             "service_function_name": str,
             "service_function_image": str,
             "service_function_type": str,

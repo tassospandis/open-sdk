@@ -16,8 +16,9 @@ from sunrise6g_opensdk.edgecloud.adapters.i2edge.client import (
     EdgeApplicationManager as I2EdgeClient,
 )
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.client import (
-    EdgeApplicationManager as kubernetesClient
+    EdgeApplicationManager as kubernetesClient,
 )
+
 # from sunrise6g_opensdk.network.adapters.oai.client import (
 #     NetworkManager as OaiCoreClient,
 # )
@@ -28,7 +29,7 @@ from sunrise6g_opensdk.edgecloud.adapters.kubernetes.client import (
 #     NetworkManager as Open5GSClient,
 # )
 
-# 
+#
 
 
 def _edgecloud_adapters_factory(client_name: str, base_url: str, **kwargs):
