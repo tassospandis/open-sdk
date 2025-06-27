@@ -1,7 +1,9 @@
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.models.deploy_service_function import (  # noqa: E501
     DeployServiceFunction,
 )
-from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils import auxiliary_functions
+from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils import (
+    auxiliary_functions,
+)
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils.connector_db import (
     ConnectorDB,
 )
@@ -10,6 +12,7 @@ from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils.kubernetes_connec
 )
 
 driver = None
+
 
 def deploy_service_function(
     service_function: DeployServiceFunction,
@@ -31,12 +34,11 @@ def deploy_service_function(
     if not ser_function_:
         return "The given service function does not exist in the catalogue"
 
-    final_deploy_descriptor = {}   
+    final_deploy_descriptor = {}
     deployed_name = service_function.service_function_instance_name
     deployed_name = auxiliary_functions.prepare_name(deployed_name, driver)
     final_deploy_descriptor["name"] = deployed_name
-    
-    
+
     final_deploy_descriptor["location"] = service_function.location
 
     containers = []
@@ -47,15 +49,15 @@ def deploy_service_function(
 
     if service_function.node_ports is not None:
         exposed_ports = auxiliary_functions.return_equal_ignore_order(
-                application_ports, service_function.node_ports
-            )
+            application_ports, service_function.node_ports
+        )
         if exposed_ports:
 
             con_["exposed_ports"] = exposed_ports
     containers.append(con_)
 
     final_deploy_descriptor["containers"] = containers
-    
+
     response = kubernetes_connector.deploy_service_function(final_deploy_descriptor)
     # insert it to mongo db
     deployed_service_function_db = {}

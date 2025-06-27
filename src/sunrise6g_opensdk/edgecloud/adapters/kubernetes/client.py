@@ -140,15 +140,15 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         response = []
         for deployment in deployments:
             item = {}
-            item['name'] = deployment.get('service_function_catalogue_name')
-            item['appId'] = deployment.get('id')
-            item['appProvider'] = deployment.get('appProvider')
+            item["name"] = deployment.get("service_function_catalogue_name")
+            item["appId"] = deployment.get("id")
+            item["appProvider"] = deployment.get("appProvider")
             item["appInstanceId"] = deployment.get("uid")
             item["status"] = deployment.get("status")
             interfaces = []
-            for port in deployment.get('ports'):
-                access_point = {'port': port}
-                interfaces.append({'interfaceId' : '','accessPoints': access_point})
+            for port in deployment.get("ports"):
+                access_point = {"port": port}
+                interfaces.append({"interfaceId": "", "accessPoints": access_point})
             item["componentEndpointInfo"] = interfaces
             item["kubernetesClusterRef"] = ""
             item["edgeCloudZoneId"] = {}

@@ -1,14 +1,15 @@
 from __future__ import (
     print_function,
 )
-import requests
 
+import requests
 from kubernetes import (
     client,
 )
 from kubernetes.client.rest import (
     ApiException,
 )
+
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils import (
     auxiliary_functions,
 )
@@ -21,11 +22,15 @@ configuration = client.Configuration()
 
 class KubernetesConnector:
     def __init__(self, ip, port, token, username):
-        master_node_ip = ip
-        master_node_port = port
-        username = username
+        if ip is None or port is None:
+            raise ValueError("master_node_ip and master_node_port must not be None")
+
+        self.master_node_ip = ip
+        self.master_node_port = port
+        self.username = username
         self.token_k8s = token
-        self.host = "https://" + master_node_ip + ":" + master_node_port
+
+        self.host = "https://" + self.master_node_ip + ":" + self.master_node_port
         configuration.api_key["authorization"] = self.token_k8s
         configuration.api_key_prefix["authorization"] = "Bearer"
 
@@ -219,9 +224,7 @@ class KubernetesConnector:
         for volume in volume_list.items:
             name_v = service_function_name + str("-")
             if name_v in volume.metadata.name:
-                self.v1.delete_persistent_volume(
-                    name=volume.spec.volume_name
-                )
+                self.v1.delete_persistent_volume(name=volume.spec.volume_name)
 
                 self.v1.delete_namespaced_persistent_volume_claim(
                     name=volume.metadata.name, namespace="sunrise6g"
@@ -239,7 +242,6 @@ class KubernetesConnector:
             for volume in descriptor_service_function["volumes"]:
                 # first solution (python k8s client raises error without reason!)
                 # body_volume = create_pvc(descriptor_service_function["name"], volume)
-                # api_response_pvc = v1.create_namespaced_persistent_volume_claim("sunrise6g", body_volume)
 
                 # #deploy pv
                 # print("deploy pv")
@@ -277,7 +279,6 @@ class KubernetesConnector:
                             % e
                         )
 
-            # api_response_pvc = api_instance_corev1api.create_namespaced_persistent_volume_claim
         body_deployment = self.create_deployment(descriptor_service_function)
         body_service = self.create_service(descriptor_service_function)
 
@@ -288,9 +289,7 @@ class KubernetesConnector:
                 )
             )
             # api_response_service = api_instance_apiregv1.create_api_service(body_service)
-            self.v1.create_namespaced_service(
-                "sunrise6g", body_service
-            )
+            self.v1.create_namespaced_service("sunrise6g", body_service)
             if "autoscaling_policies" in descriptor_service_function:
                 # V1 AUTOSCALER
                 body_hpa = self.create_hpa(descriptor_service_function)
@@ -312,7 +311,7 @@ class KubernetesConnector:
                 "Exception when calling AppsV1Api->create_namespaced_deployment or ApiregistrationV1Api->create_api_service: %s\n"
                 % e
             )
-   
+
     def create_deployment(self, descriptor_service_function):
 
         metadata = client.V1ObjectMeta(name=descriptor_service_function["name"])
@@ -564,8 +563,7 @@ class KubernetesConnector:
             api_version="apps/v1", kind="Deployment", metadata=metadata, spec=spec
         )
         return body
- 
-    
+
     def get_deployed_service_functions(self, connector_db: ConnectorDB):
         # label_selector = {}
         # deployed_hpas=get_deployed_hpas()
@@ -578,7 +576,6 @@ class KubernetesConnector:
         api_response = self.api_instance_appsv1.list_namespaced_deployment("sunrise6g")
 
         api_response_service = self.v1.list_namespaced_service("sunrise6g")
-        api_response_pvc = self.v1.list_namespaced_persistent_volume_claim("sunrise6g")
 
         #
         # hpa_list = api_instance_v1autoscale.list_namespaced_horizontal_pod_autoscaler("sunrise6g")
@@ -603,16 +600,16 @@ class KubernetesConnector:
                     app_["uid"] = metadata.uid
                     actual_name = app_col["name"]
                     # app_["appid"] = app_col["_id"]
-                    
+
                     break
             for app_col in apps_col:
                 if actual_name == app_col["name"]:
                     app_["service_function_catalogue_name"] = app_col["name"]
-                    app_['id'] = app_col.get('_id')
-                    app_['appProvider'] = app_col.get('appProvider')
+                    app_["id"] = app_col.get("_id")
+                    app_["appProvider"] = app_col.get("appProvider")
                     # app_["appid"] = app_col["_id"]
                     break
-            
+
             if app_:  # if app_ is not empty
 
                 if (status.available_replicas is not None) and (
@@ -832,15 +829,14 @@ def create_pv_dict(name, volumes, storage_class, node=None):
 
     return body
 
+
 def create_hpa(descriptor_service_function):
 
     # V1!!!!!!!
 
     dict_label = {}
     dict_label["name"] = descriptor_service_function["name"]
-    client.V1ObjectMeta(
-        name=descriptor_service_function["name"], labels=dict_label
-    )
+    client.V1ObjectMeta(name=descriptor_service_function["name"], labels=dict_label)
 
     #  spec
 

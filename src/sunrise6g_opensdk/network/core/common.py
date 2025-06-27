@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Common utilities (errors, HTTP helpers) used by the core network interface (network_interface.py).
 
 import requests
 from pydantic import BaseModel
@@ -29,6 +28,23 @@ def _make_request(method: str, url: str, data=None):
         raise CoreHttpError(e) from e
     except requests.exceptions.ConnectionError as e:
         raise CoreHttpError("connection error") from e
+
+
+# Monitoring Event Methods
+def monitoring_event_post(
+    base_url: str, scs_as_id: str, model_payload: BaseModel
+) -> dict:
+    data = model_payload.model_dump_json(exclude_none=True, by_alias=True)
+    url = monitoring_event_build_url(base_url, scs_as_id)
+    return _make_request("POST", url, data=data)
+
+
+def monitoring_event_build_url(base_url: str, scs_as_id: str, session_id: str = None):
+    url = f"{base_url}/3gpp-monitoring-event/v1/{scs_as_id}/subscriptions"
+    if session_id is not None and len(session_id) > 0:
+        return f"{url}/{session_id}"
+    else:
+        return url
 
 
 # QoD methods
