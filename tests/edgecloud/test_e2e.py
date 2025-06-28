@@ -57,14 +57,20 @@ def test_get_edge_cloud_zones(edgecloud_client):
     try:
         zones = edgecloud_client.get_edge_cloud_zones()
         assert isinstance(zones, list)
-        for zone in zones:
-            assert "edgeCloudZoneId" in zone
-            assert "edgeCloudZoneName" in zone
-            assert "edgeCloudZoneStatus" in zone
-            assert "edgeCloudProvider" in zone
-            assert "edgeCloudRegion" in zone
+        # TODO: Harmonise zone schema to match CAMARA schemas across all clients
+        if edgecloud_client.client_name == "i2edge":
+            for zone in zones:
+                assert "zoneId" in zone
+                assert "geographyDetails" in zone
+        else:
+            for zone in zones:
+                assert "edgeCloudZoneId" in zone
+                assert "edgeCloudZoneName" in zone
+                assert "edgeCloudZoneStatus" in zone
+                assert "edgeCloudProvider" in zone
+                assert "edgeCloudRegion" in zone
     except EdgeCloudPlatformError as e:
-        pytest.fail("Failed to retrieve zones: ", e)
+        pytest.fail(f"Failed to retrieve zones: {e}")
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
@@ -132,9 +138,9 @@ def app_instance_id(edgecloud_client):
         pass
 
 
-# @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
-# def test_deploy_app(app_instance_id):
-#     assert app_instance_id is not None
+@pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
+def test_deploy_app(app_instance_id):
+    assert app_instance_id is not None
 
 
 @pytest.mark.parametrize("edgecloud_client", test_cases, ids=id_func, indirect=True)
