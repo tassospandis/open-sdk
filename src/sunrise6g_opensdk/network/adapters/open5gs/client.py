@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-
+##
+#
+# This file is part of the Open SDK
+#
 # Contributors:
 #   - Ferran Cañellas (ferran.canellas@i2cat.net)
 #   - Panagiotis Pavlidis (p.pavlidis@iit.demokritos.gr)

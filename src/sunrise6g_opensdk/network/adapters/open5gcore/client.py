@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+##
+#
+# This file is part of the Open SDK
+#
+# Contributors:
+#   - Manar Zaboub (manar.zaboub@fokus.fraunhofer.de)
+##
 from pydantic import ValidationError
 
 from sunrise6g_opensdk import logger
