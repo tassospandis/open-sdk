@@ -25,13 +25,14 @@ supportedQos = ["qos-e", "qos-s", "qos-m", "qos-l"]
 
 
 class NetworkManager(BaseNetworkClient):
+    """
+    This client implements the BaseNetworkClient and translates the
+    CAMARA APIs into specific HTTP requests understandable by the OAI NEF API.
+    """
+
+    capabilities = {"qod", "traffic_influence"}
+
     def __init__(self, base_url: str, scs_as_id: str = None):
-        """
-        Initialize Network Client for OAI Core Network
-        The currently supported features are:
-         - QoD
-         - Traffic Influence
-        """
         try:
             super().__init__()
             self.base_url = base_url
