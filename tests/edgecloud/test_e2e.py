@@ -122,7 +122,10 @@ def test_onboard_app(edgecloud_client):
 def app_instance_id(edgecloud_client):
     config = CONFIG[edgecloud_client.client_name]
     try:
-        output = edgecloud_client.deploy_app(config["APP_ID"], config["APP_ZONES"])
+        if edgecloud_client.client_name == "kubernetes":
+            output = edgecloud_client.deploy_app(config["K8S_DEPLOY_PAYLOAD"])
+        else:
+            output = edgecloud_client.deploy_app(config["APP_ID"], config["APP_ZONES"])
 
         if edgecloud_client.client_name == "i2edge":
             app_instance_id = output.get("deploy_name")

@@ -72,7 +72,7 @@ class ConnectorDB:
         # raise Exception("Already Registered: PaaS name", document["paas_name"])
         try:
             insert_doc = {}
-            insert_doc["_id"] = document["id"]
+            insert_doc["_id"] = document["_id"]
             insert_doc["name"] = document["service_function_name"]
             # insert_doc["type"] = document["paas_type"]
             insert_doc["location"] = document["location"]

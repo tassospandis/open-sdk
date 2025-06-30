@@ -15,15 +15,15 @@ from sunrise6g_opensdk.edgecloud.adapters.i2edge.client import (
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.client import (
     EdgeApplicationManager as kubernetesClient,
 )
-from sunrise6g_opensdk.network.adapters.oai.client import (
-    NetworkManager as OaiCoreClient,
-)
-from sunrise6g_opensdk.network.adapters.open5gcore.client import (
-    NetworkManager as Open5GCoreClient,
-)
-from sunrise6g_opensdk.network.adapters.open5gs.client import (
-    NetworkManager as Open5GSClient,
-)
+# from sunrise6g_opensdk.network.adapters.oai.client import (
+#     NetworkManager as OaiCoreClient,
+# )
+# from sunrise6g_opensdk.network.adapters.open5gcore.client import (
+#     NetworkManager as Open5GCoreClient,
+# )
+# from sunrise6g_opensdk.network.adapters.open5gs.client import (
+#     NetworkManager as Open5GSClient,
+# )
 
 
 def _edgecloud_adapters_factory(client_name: str, base_url: str, **kwargs):
@@ -44,28 +44,28 @@ def _edgecloud_adapters_factory(client_name: str, base_url: str, **kwargs):
         )
 
 
-def _network_adapters_factory(client_name: str, base_url: str, **kwargs):
-    if "scs_as_id" not in kwargs:
-        raise ValueError("Missing required 'scs_as_id' for network adapters.")
-    scs_as_id = kwargs.pop("scs_as_id")
+# def _network_adapters_factory(client_name: str, base_url: str, **kwargs):
+#     if "scs_as_id" not in kwargs:
+#         raise ValueError("Missing required 'scs_as_id' for network adapters.")
+#     scs_as_id = kwargs.pop("scs_as_id")
 
-    network_factory = {
-        "open5gs": lambda url, scs_id, **kw: Open5GSClient(
-            base_url=url, scs_as_id=scs_id, **kw
-        ),
-        "oai": lambda url, scs_id, **kw: OaiCoreClient(
-            base_url=url, scs_as_id=scs_id, **kw
-        ),
-        "open5gcore": lambda url, scs_id, **kw: Open5GCoreClient(
-            base_url=url, scs_as_id=scs_id, **kw
-        ),
-    }
-    try:
-        return network_factory[client_name](base_url, scs_as_id, **kwargs)
-    except KeyError:
-        raise ValueError(
-            f"Invalid network client '{client_name}'. Available: {list(network_factory)}"
-        )
+#     network_factory = {
+#         "open5gs": lambda url, scs_id, **kw: Open5GSClient(
+#             base_url=url, scs_as_id=scs_id, **kw
+#         ),
+#         "oai": lambda url, scs_id, **kw: OaiCoreClient(
+#             base_url=url, scs_as_id=scs_id, **kw
+#         ),
+#         "open5gcore": lambda url, scs_id, **kw: Open5GCoreClient(
+#             base_url=url, scs_as_id=scs_id, **kw
+#         ),
+#     }
+#     try:
+#         return network_factory[client_name](base_url, scs_as_id, **kwargs)
+#     except KeyError:
+#         raise ValueError(
+#             f"Invalid network client '{client_name}'. Available: {list(network_factory)}"
+#         )
 
 
 # def _oran_adapters_factory(client_name: str, base_url: str):
@@ -75,7 +75,7 @@ def _network_adapters_factory(client_name: str, base_url: str, **kwargs):
 class AdaptersFactory:
     _domain_factories = {
         "edgecloud": _edgecloud_adapters_factory,
-        "network": _network_adapters_factory,
+        # "network": _network_adapters_factory,
         # "oran": _oran_adapters_factory,
     }
 

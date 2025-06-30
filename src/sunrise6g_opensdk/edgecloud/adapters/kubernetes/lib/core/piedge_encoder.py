@@ -220,7 +220,7 @@ def deploy_service_function(
             "Node is selected by the K8s scheduler"
         )
     if type(response) is V1Deployment:
-        deployed_service_function_db["uid"] = response.metadata.uid
+        deployed_service_function_db["_id"] = response.metadata.uid
         connector_db.insert_document_deployed_service_function(
             document=deployed_service_function_db
         )
