@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ##
 #
@@ -14,8 +13,6 @@ from sunrise6g_opensdk.network.core.schemas import (
     CreateSession,
     CreateTrafficInfluence,
     FlowInfo,
-    MonitoringEventSubscriptionRequest,
-    RetrievalLocationRequest,
     Snssai,
     TrafficInfluSub,
 )
@@ -25,13 +22,14 @@ supportedQos = ["qos-e", "qos-s", "qos-m", "qos-l"]
 
 
 class NetworkManager(BaseNetworkClient):
+    """
+    This client implements the BaseNetworkClient and translates the
+    CAMARA APIs into specific HTTP requests understandable by the OAI NEF API.
+    """
+
+    capabilities = {"qod", "traffic_influence"}
+
     def __init__(self, base_url: str, scs_as_id: str = None):
-        """
-        Initialize Network Client for OAI Core Network
-        The currently supported features are:
-         - QoD
-         - Traffic Influence
-        """
         try:
             super().__init__()
             self.base_url = base_url
@@ -112,20 +110,6 @@ class NetworkManager(BaseNetworkClient):
             raise OaiValidationError(
                 "OAI requires UE IPv4 Address to activate Traffic Influence"
             )
-
-    def core_specific_monitoring_event_validation(
-        self, retrieve_location_request: RetrievalLocationRequest
-    ) -> None:
-        raise NotImplementedError(
-            "core_specific_monitoring_event_validation not implemented for OAI"
-        )
-
-    def add_core_specific_location_parameters(
-        self, retrieve_location_request: RetrievalLocationRequest
-    ) -> MonitoringEventSubscriptionRequest:
-        raise NotImplementedError(
-            "add_core_specific_location_parameters not implemented for OAI"
-        )
 
 
 def _retrieve_ue_ipv4(session_info: CreateSession):
