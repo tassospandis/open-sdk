@@ -17,6 +17,7 @@ from typing import Dict
 from sunrise6g_opensdk import logger
 from sunrise6g_opensdk.network.adapters.errors import NetworkPlatformError
 from sunrise6g_opensdk.network.core import common, schemas
+from sunrise6g_opensdk.network.core.common import requires_capability
 
 log = logger.get_logger(__name__)
 
@@ -85,6 +86,7 @@ class BaseNetworkClient:
     base_url: str
     scs_as_id: str
 
+    @requires_capability("qod")
     def add_core_specific_qod_parameters(
         self,
         session_info: schemas.CreateSession,
@@ -96,6 +98,7 @@ class BaseNetworkClient:
         """
         pass
 
+    @requires_capability("traffic_influence")
     def add_core_specific_ti_parameters(
         self,
         traffic_influence_info: schemas.CreateTrafficInfluence,
@@ -107,6 +110,7 @@ class BaseNetworkClient:
         """
         pass
 
+    @requires_capability("location_retrieval")
     def add_core_specific_location_parameters(
         self, retrieve_location_request: schemas.RetrievalLocationRequest
     ) -> schemas.MonitoringEventSubscriptionRequest:
@@ -116,6 +120,7 @@ class BaseNetworkClient:
         """
         pass
 
+    @requires_capability("qod")
     def core_specific_qod_validation(self, session_info: schemas.CreateSession) -> None:
         """
         Validates core-specific parameters for the session creation.
@@ -130,6 +135,7 @@ class BaseNetworkClient:
         # This method should be overridden by subclasses if needed
         pass
 
+    @requires_capability("traffic_influence")
     def core_specific_traffic_influence_validation(
         self, traffic_influence_info: schemas.CreateTrafficInfluence
     ) -> None:
@@ -146,6 +152,7 @@ class BaseNetworkClient:
         # This method should be overridden by subclasses if needed
         pass
 
+    @requires_capability("location_retrieval")
     def core_specific_monitoring_event_validation(
         self, retrieve_location_request: schemas.RetrievalLocationRequest
     ) -> None:
@@ -162,6 +169,7 @@ class BaseNetworkClient:
         # This method should be overwritten by subclasses if needed
         pass
 
+    @requires_capability("qod")
     def _build_qod_subscription(
         self, session_info: Dict
     ) -> schemas.AsSessionWithQoSSubscription:
@@ -181,6 +189,7 @@ class BaseNetworkClient:
         self.add_core_specific_qod_parameters(valid_session_info, subscription)
         return subscription
 
+    @requires_capability("traffic_influence")
     def _build_ti_subscription(self, traffic_influence_info: Dict):
         traffic_influence_data = schemas.CreateTrafficInfluence.model_validate(
             traffic_influence_info
@@ -208,6 +217,7 @@ class BaseNetworkClient:
         self.add_core_specific_ti_parameters(traffic_influence_data, subscription)
         return subscription
 
+    @requires_capability("traffic_influence")
     def _build_camara_ti(self, trafficInflSub: Dict):
         traffic_influence_data = schemas.TrafficInfluSub.model_validate(trafficInflSub)
 
@@ -229,6 +239,7 @@ class BaseNetworkClient:
         )
         return camara_ti
 
+    @requires_capability("location_retrieval")
     def _build_monitoring_event_subscription(
         self, retrieve_location_request: schemas.RetrievalLocationRequest
     ) -> schemas.MonitoringEventSubscriptionRequest:
@@ -245,6 +256,7 @@ class BaseNetworkClient:
 
         return subscription_3gpp
 
+    @requires_capability("location_retrieval")
     def _compute_camara_last_location_time(
         self, event_time: datetime, age_of_location_info_min: int = None
     ) -> datetime:
@@ -266,6 +278,7 @@ class BaseNetworkClient:
         else:
             return event_time.replace(tzinfo=timezone.utc)
 
+    @requires_capability("location_retrieval")
     def create_monitoring_event_subscription(
         self, retrieve_location_request: schemas.RetrievalLocationRequest
     ) -> schemas.Location:
@@ -321,6 +334,7 @@ class BaseNetworkClient:
 
         return camara_location
 
+    @requires_capability("qod")
     def create_qod_session(self, session_info: Dict) -> Dict:
         """
         Creates a QoS session based on CAMARA QoD API input.
@@ -347,6 +361,7 @@ class BaseNetworkClient:
         )
         return session_info.model_dump()
 
+    @requires_capability("qod")
     def get_qod_session(self, session_id: str) -> Dict:
         """
         Retrieves details of a specific Quality on Demand (QoS) session.
@@ -380,6 +395,7 @@ class BaseNetworkClient:
         )
         return session_info.model_dump()
 
+    @requires_capability("qod")
     def delete_qod_session(self, session_id: str) -> None:
         """
         Deletes a specific Quality on Demand (QoS) session.
@@ -395,6 +411,7 @@ class BaseNetworkClient:
         )
         log.info(f"QoD session deleted successfully [id={session_id}]")
 
+    @requires_capability("traffic_influence")
     def create_traffic_influence_resource(self, traffic_influence_info: Dict) -> Dict:
         """
         Creates a Traffic Influence resource based on CAMARA TI API input.
@@ -421,6 +438,7 @@ class BaseNetworkClient:
         traffic_influence_info["trafficInfluenceID"] = subscription_id
         return traffic_influence_info
 
+    @requires_capability("traffic_influence")
     def put_traffic_influence_resource(
         self, resource_id: str, traffic_influence_info: Dict
     ) -> Dict:
@@ -441,6 +459,7 @@ class BaseNetworkClient:
         traffic_influence_info["trafficInfluenceID"] = resource_id
         return traffic_influence_info
 
+    @requires_capability("traffic_influence")
     def delete_traffic_influence_resource(self, resource_id: str) -> None:
         """
         Deletes a specific Traffic Influence resource.
@@ -454,6 +473,7 @@ class BaseNetworkClient:
         common.traffic_influence_delete(self.base_url, self.scs_as_id, resource_id)
         return
 
+    @requires_capability("traffic_influence")
     def get_individual_traffic_influence_resource(self, resource_id: str) -> Dict:
         nef_response = common.traffic_influence_get(
             self.base_url, self.scs_as_id, resource_id
@@ -461,9 +481,9 @@ class BaseNetworkClient:
         camara_ti = self._build_camara_ti(nef_response)
         return camara_ti
 
+    @requires_capability("traffic_influence")
     def get_all_traffic_influence_resource(self) -> list[Dict]:
         r = common.traffic_influence_get(self.base_url, self.scs_as_id)
         return [self._build_camara_ti(item) for item in r]
 
-
-# Placeholder for other CAMARA APIs
+    # Placeholder for additional CAMARA APIs

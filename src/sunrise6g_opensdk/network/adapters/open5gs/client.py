@@ -23,13 +23,9 @@ class NetworkManager(BaseNetworkClient):
     """
     This client implements the BaseNetworkClient and translates the
     CAMARA APIs into specific HTTP requests understandable by the Open5GS NEF API.
-
-    Invloved partners and their roles in this implementation:
-    - I2CAT: Responsible for the CAMARA QoD API and its mapping to the
-             3GPP AsSessionWithQoS API exposed by Open5GS NEF.
-    - NCSRD: Responsible for the CAMARA Location API and its mapping to the
-             3GPP Monitoring Event API exposed Open5GS NEF.
     """
+
+    capabilities = {"qod", "location_retrieval"}
 
     def __init__(self, base_url: str, scs_as_id):
         """
@@ -86,11 +82,3 @@ class NetworkManager(BaseNetworkClient):
         # locationType = schemas.LocationType.CURRENT_LOCATION
         # maximumNumberOfReports = 1
         # repPeriod = schemas.DurationSec(root=20)
-
-
-# Note:
-# As this class is inheriting from BaseNetworkClient, it is
-# expected to implement all the abstract methods defined in that interface.
-#
-# In case this network adapter doesn't support a specific method, it should
-# be marked as NotImplementedError.

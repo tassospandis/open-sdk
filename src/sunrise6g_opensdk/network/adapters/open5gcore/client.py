@@ -20,6 +20,13 @@ qos_support_map = {
 
 
 class NetworkManager(BaseNetworkClient):
+    """
+    This client implements the BaseNetworkClient and translates the
+    CAMARA APIs into specific HTTP requests understandable by the Open5GCore NEF API.
+    """
+
+    capabilities = {"qod"}
+
     def __init__(self, base_url: str, scs_as_id: str):
         if not base_url:
             raise ValueError("base_url is required and cannot be empty.")
@@ -47,33 +54,3 @@ class NetworkManager(BaseNetworkClient):
         flow_id = qos_support_map[session_info.qosProfile.root]
         subscription.flowInfo = build_flows(flow_id, session_info)
         subscription.ueIpv4Addr = "192.168.6.1"  # ToDo
-
-    def add_core_specific_ti_parameters(
-        self,
-        traffic_influence_info: schemas.CreateTrafficInfluence,
-        subscription: schemas.TrafficInfluSub,
-    ):
-        raise NotImplementedError(
-            "add_core_specific_ti_parameters not implemented for Open5GCore"
-        )
-
-    def core_specific_traffic_influence_validation(
-        self, traffic_influence_info: schemas.CreateTrafficInfluence
-    ) -> None:
-        raise NotImplementedError(
-            "core_specific_traffic_influence_validation not implemented for Open5GCore"
-        )
-
-    def core_specific_monitoring_event_validation(
-        self, retrieve_location_request: schemas.RetrievalLocationRequest
-    ) -> None:
-        raise NotImplementedError(
-            "core_specific_monitoring_event_validation not implemented for Open5GCore"
-        )
-
-    def add_core_specific_location_parameters(
-        self, retrieve_location_request: schemas.RetrievalLocationRequest
-    ) -> schemas.MonitoringEventSubscriptionRequest:
-        raise NotImplementedError(
-            "add_core_specific_location_parameters not implemented for Open5GCore"
-        )

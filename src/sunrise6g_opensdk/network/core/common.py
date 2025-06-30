@@ -30,6 +30,37 @@ def _make_request(method: str, url: str, data=None):
         raise CoreHttpError("connection error") from e
 
 
+class CapabilityNotSupported(Exception):
+    """Raised when a requested capability is not supported by the core."""
+
+    pass
+
+
+def requires_capability(feature: str):
+    def decorator(func):
+        def wrapper(self, *args, **kwargs):
+            if feature not in self.capabilities:
+                # Client name is derived from the module
+                module_path = self.__module__.split(".")
+                try:
+                    client_name = module_path[module_path.index("adapters") + 1]
+                except (ValueError, IndexError):
+                    client_name = self.__class__.__name__
+
+                raise CapabilityNotSupported(
+                    f"Functionality '{feature}' is nos supported by {client_name}"
+                )
+            return func(self, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+class CoreHttpError(Exception):
+    pass
+
+
 # Monitoring Event Methods
 def monitoring_event_post(
     base_url: str, scs_as_id: str, model_payload: BaseModel
@@ -116,7 +147,3 @@ def traffic_influence_build_url(base_url: str, scs_as_id: str, session_id: str =
         return f"{url}/{session_id}"
     else:
         return url
-
-
-class CoreHttpError(Exception):
-    pass
