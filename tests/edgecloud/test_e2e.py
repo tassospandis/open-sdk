@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 ##
-# Copyright 2025-present by Software Networks Area, i2CAT.
-# All rights reserved.
-#
 # This file is part of the Open SDK
 #
 # Contributors:
@@ -57,9 +54,18 @@ def test_get_edge_cloud_zones(edgecloud_client):
     try:
         zones = edgecloud_client.get_edge_cloud_zones()
         assert isinstance(zones, list)
-        for zone in zones:
-            assert "zoneId" in zone
-            assert "geographyDetails" in zone
+        # TODO: Harmonise zone schema to match CAMARA schemas across all clients
+        if edgecloud_client.client_name == "i2edge":
+            for zone in zones:
+                assert "zoneId" in zone
+                assert "geographyDetails" in zone
+        else:
+            for zone in zones:
+                assert "edgeCloudZoneId" in zone
+                assert "edgeCloudZoneName" in zone
+                assert "edgeCloudZoneStatus" in zone
+                assert "edgeCloudProvider" in zone
+                assert "edgeCloudRegion" in zone
     except EdgeCloudPlatformError as e:
         pytest.fail(f"Failed to retrieve zones: {e}")
 
@@ -116,7 +122,10 @@ def test_onboard_app(edgecloud_client):
 def app_instance_id(edgecloud_client):
     config = CONFIG[edgecloud_client.client_name]
     try:
-        output = edgecloud_client.deploy_app(config["APP_ID"], config["APP_ZONES"])
+        if edgecloud_client.client_name == "kubernetes":
+            output = edgecloud_client.deploy_app(config["K8S_DEPLOY_PAYLOAD"])
+        else:
+            output = edgecloud_client.deploy_app(config["APP_ID"], config["APP_ZONES"])
 
         if edgecloud_client.client_name == "i2edge":
             app_instance_id = output.get("deploy_name")
