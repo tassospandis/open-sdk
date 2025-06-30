@@ -27,7 +27,7 @@ test_cases = [
             # "KUBERNETES_MASTER_PORT": "80",
             "KUBERNETES_USERNAME": "user",
             "EMP_STORAGE_URI": "mongodb://146.124.106.200:32411",
-            "K8S_NAMESPACE": "sunrise6g"
+            "K8S_NAMESPACE": "sunrise6g",
         }
     },
 ]

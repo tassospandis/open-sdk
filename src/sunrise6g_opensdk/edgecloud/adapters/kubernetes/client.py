@@ -36,14 +36,14 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         kubernetes_port = kwargs.get("KUBERNETES_MASTER_PORT")
         storage_uri = kwargs.get("EMP_STORAGE_URI")
         username = kwargs.get("KUBERNETES_USERNAME")
-        namespace = kwargs.get('K8S_NAMESPACE')
+        namespace = kwargs.get("K8S_NAMESPACE")
         if base_url is not None and base_url != "":
             self.k8s_connector = KubernetesConnector(
                 ip=self.kubernetes_host,
                 port=kubernetes_port,
                 token=kubernetes_token,
                 username=username,
-                namespace=namespace
+                namespace=namespace,
             )
         if storage_uri is not None:
             self.connector_db = ConnectorDB(storage_uri)
@@ -128,7 +128,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
                 connector_db=self.connector_db,
                 kubernetes_connector=self.k8s_connector,
             )
-           
+
         if type(result) is V1Deployment:
             response = {}
             response["name"] = body.get("name")

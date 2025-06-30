@@ -124,7 +124,7 @@ CONFIG = {
     "kubernetes": {
         "K8S_ONBOARDED_APP_NAME": "nginx",
         "K8S_APP_ID": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-        'ZONE_ID': '999b7746-d2e2-4bb4-96e6-f1e895adef0c',
+        "ZONE_ID": "999b7746-d2e2-4bb4-96e6-f1e895adef0c",
         "K8S_DEPLOY_PAYLOAD": {
             "appId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             "name": "nginx-test",

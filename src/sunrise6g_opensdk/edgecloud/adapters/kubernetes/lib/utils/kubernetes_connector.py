@@ -19,7 +19,7 @@ class KubernetesConnector:
         master_node_ip = ip
         master_node_port = port
         username = username
-        self.namespace = 'default' if namespace is None else namespace
+        self.namespace = "default" if namespace is None else namespace
         self.token_k8s = token
         if port is None:
             self.host = master_node_ip
@@ -293,7 +293,9 @@ class KubernetesConnector:
                     try:
                         url = (
                             self.host
-                            + "/api/v1/namespaces/"+self.namespace+"/persistentvolumeclaims"
+                            + "/api/v1/namespaces/"
+                            + self.namespace
+                            + "/persistentvolumeclaims"
                         )
                         body_volume = self.create_pvc_dict(
                             descriptor_service_function["name"], volume
@@ -305,8 +307,9 @@ class KubernetesConnector:
                     except requests.exceptions.HTTPError as e:
                         # logging.error(traceback.format_exc())
                         return (
-                            "Exception when calling CoreV1Api->/api/v1/namespaces/"+self.namespace+"/persistentvolumeclaims: %s\n"
-                            % e
+                            "Exception when calling CoreV1Api->/api/v1/namespaces/"
+                            + self.namespace
+                            + "/persistentvolumeclaims: %s\n" % e
                         )
 
                 # api_response_pvc = api_instance_corev1api.create_namespaced_persistent_volume_claim
@@ -579,8 +582,8 @@ class KubernetesConnector:
 
         return body
 
-    def create_pvc_dict(self,
-        name, volumes, storage_class="microk8s-hostpath", volume_name=None
+    def create_pvc_dict(
+        self, name, volumes, storage_class="microk8s-hostpath", volume_name=None
     ):
         name_vol = name + str("-") + volumes["name"]
         # body={}
@@ -715,7 +718,9 @@ class KubernetesConnector:
         return body
 
     def get_deployed_dataspace_connector(self, instance_name):
-        api_response = self.api_instance_appsv1.list_namespaced_deployment(self.namespace)
+        api_response = self.api_instance_appsv1.list_namespaced_deployment(
+            self.namespace
+        )
 
         api_response_service = self.v1.list_namespaced_service(self.namespace)
         app_ = {}
@@ -772,9 +777,13 @@ class KubernetesConnector:
 
     def get_deployed_service_functions(self, connector_db: ConnectorDB):
         self.get_deployed_hpas(connector_db)
-        api_response = self.api_instance_appsv1.list_namespaced_deployment(self.namespace)
+        api_response = self.api_instance_appsv1.list_namespaced_deployment(
+            self.namespace
+        )
         api_response_service = self.v1.list_namespaced_service(self.namespace)
-        api_response_pvc = self.v1.list_namespaced_persistent_volume_claim(self.namespace)
+        api_response_pvc = self.v1.list_namespaced_persistent_volume_claim(
+            self.namespace
+        )
 
         apps_col = connector_db.get_documents_from_collection(
             collection_input="service_functions"
@@ -817,8 +826,8 @@ class KubernetesConnector:
         for app_col in apps_col:
             if actual_name == app_col["name"]:
                 app_["service_function_catalogue_name"] = app_col["name"]
-                app_['appId'] = app_col['_id']
-                app_['appProvider'] = app_col.get('appProvider')
+                app_["appId"] = app_col["_id"]
+                app_["appProvider"] = app_col.get("appProvider")
                 break
 
         # find volumes!
