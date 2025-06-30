@@ -30,7 +30,7 @@ def main():
     # print(zones)
 
     # Network
-    # print("Testing network client function: EXAMPLE_FUNCTION:")
+    # print("Testing network client function: 'get_qod_session'")
     # network_client.get_qod_session(session_id="example_session_id")
 
 
