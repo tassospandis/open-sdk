@@ -1,6 +1,9 @@
 from __future__ import print_function
 
+from urllib.parse import urlparse
+
 import requests
+import urllib3
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
@@ -11,20 +14,23 @@ from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils.connector_db impo
     ConnectorDB,
 )
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 configuration = client.Configuration()
 
 
 class KubernetesConnector:
     def __init__(self, ip, port, token, username, namespace):
-        master_node_ip = ip
-        master_node_port = port
-        username = username
-        self.namespace = "default" if namespace is None else namespace
+        parsed_url = urlparse(ip)  # ip can be full URL or just IP
+
+        scheme = parsed_url.scheme or "https"
+        host = parsed_url.hostname or ip
+        port = port or parsed_url.port or "6443"
+
+        self.host = f"{scheme}://{host}:{port}"
+        self.namespace = namespace if namespace else "default"
         self.token_k8s = token
-        if port is None:
-            self.host = master_node_ip
-        else:
-            self.host = "https://" + master_node_ip + ":" + master_node_port
+
         configuration.api_key["authorization"] = self.token_k8s
         configuration.api_key_prefix["authorization"] = "Bearer"
 

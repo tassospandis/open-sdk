@@ -215,6 +215,7 @@ class EdgeApplicationManager(EdgeCloudManagementInterface):
         nodes = self.k8s_connector.get_node_details()
         node_details = None
         for item in nodes.get("items"):
+            # TODO: Fix uid stuff
             if item.get("metadata").get("uid") == zone_id:
                 node_details = item
                 break
