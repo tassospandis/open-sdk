@@ -185,6 +185,7 @@ class AsSessionWithQoSSubscription(BaseModel):
         if not subscription_id:
             log.error("Failed to retrieve QoS session ID from response")
             raise NetworkPlatformError("QoS session ID not found in response")
+        return subscription_id
 
 
 class SourceTrafficFilters(BaseModel):

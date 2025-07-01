@@ -31,7 +31,10 @@ def test_valid_input_open5gs(network_client: BaseNetworkClient):
     camara_session = {
         "duration": 3600,
         "device": {
-            "ipv4Address": {"publicAddress": "10.45.0.3", "privateAddress": "10.45.0.3"}
+            "ipv4Address": {
+                "publicAddress": "10.45.0.10",
+                "privateAddress": "10.45.0.10",
+            }
         },
         "applicationServer": {"ipv4Address": "10.45.0.1"},
         "devicePorts": {"ranges": [{"from": 0, "to": 65535}]},
@@ -48,8 +51,8 @@ def qod_session_id(network_client: BaseNetworkClient):
         "duration": 3600,
         "device": {
             "ipv4Address": {
-                "publicAddress": "10.45.0.3",
-                "privateAddress": "10.45.0.3",
+                "publicAddress": "10.45.0.10",
+                "privateAddress": "10.45.0.10",
             }
         },
         "applicationServer": {"ipv4Address": "10.45.0.1"},
@@ -79,8 +82,8 @@ def test_create_qod_session(qod_session_id):
 
 
 @pytest.mark.parametrize("network_client", test_cases, ids=id_func, indirect=True)
-def test_timer_wait_5_seconds(network_client):
-    time.sleep(5)
+def test_timer_wait_60_seconds(network_client):
+    time.sleep(60)
 
 
 @pytest.mark.parametrize("network_client", test_cases, ids=id_func, indirect=True)
