@@ -3,6 +3,7 @@ from __future__ import print_function
 from urllib.parse import urlparse
 
 import requests
+import urllib3
 from kubernetes import client
 from kubernetes.client.rest import ApiException
 
@@ -12,6 +13,8 @@ from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils import (
 from sunrise6g_opensdk.edgecloud.adapters.kubernetes.lib.utils.connector_db import (
     ConnectorDB,
 )
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 configuration = client.Configuration()
 
