@@ -380,8 +380,8 @@ class BaseNetworkClient:
         serverIp = flowDesc.split("to ")[1].split("/")[0]
         session_info = schemas.SessionInfo(
             sessionId=schemas.SessionId(uuid.UUID(subscription_info.subscription_id)),
-            duration=subscription_info.usageThreshold.duration,
-            sink=subscription_info.notificationDestination,
+            duration=subscription_info.usageThreshold.duration.root,
+            sink=subscription_info.notificationDestination.root,
             qosProfile=subscription_info.qosReference,
             device=schemas.Device(
                 ipv4Address=schemas.DeviceIpv4Addr1(
@@ -392,6 +392,7 @@ class BaseNetworkClient:
             applicationServer=schemas.ApplicationServer(
                 ipv4Address=schemas.ApplicationServerIpv4Address(serverIp)
             ),
+            qosStatus=schemas.QosStatus.AVAILABLE,
         )
         return session_info.model_dump()
 
